@@ -1,47 +1,53 @@
 import { fromEvent, Observable } from 'rxjs';
-import { tap, map, take } from 'rxjs/operators';
+import { tap, map, take, scan, share } from 'rxjs/operators';
 
 export class App {
-    //  clickCount: number;
     button1: HTMLButtonElement;
     button2: HTMLButtonElement;
-    button: HTMLButtonElement;
-    paragraph: HTMLParagraphElement;
+    button3: HTMLButtonElement;
     observableB1: any;
     observableB2: any;
-    observableB: any
-    constructor(button1: HTMLButtonElement, button2: HTMLButtonElement, button: HTMLButtonElement, paragraph: HTMLParagraphElement) {
-        this.button = button;
+    observableB3: any
+    input1: HTMLInputElement;
+    input2: HTMLInputElement;
+    constructor(button1: HTMLButtonElement, button2: HTMLButtonElement, button3: HTMLButtonElement,
+        input1: HTMLInputElement, input2: HTMLInputElement, paragraph: HTMLParagraphElement) {
+        this.button3 = button3;
         this.button1 = button1;
         this.button2 = button2;
-        this.paragraph = paragraph;
-        //  this.clickCount = 0;
-        this.paragraph.innerText = "0"//this.clickCount.toString()
-
+        this.input1 = input1;
+        this.input2 = input2;
     }
 
-    public Init(): void {
-
-
-        this.observableB1 = fromEvent(this.button1, "click")
-            .subscribe(() => {
-                this.observableB = fromEvent(this.button, 'click')
+    public clickerFunction (input:HTMLInputElement){
+        return fromEvent(this.button1, "click")
                     .pipe(
-                        take(5)
-                    ).subscribe(() => {
-                        //this.clickCount++;
-                        let clickCount = parseInt(this.paragraph.innerText)
-                        clickCount++
-                        this.paragraph.innerText = clickCount.toString()
+                        map(click => 1),
+                        scan((acc, click) => acc + 1, 0),
+                        share()
+                    ).subscribe(x => {
+                        input.value = x.toString();
                     });
-            });
+    }
+
+    public Init(): void {        
         this.observableB2 = fromEvent(this.button2, "click")
             .subscribe(() => {
-                this.observableB.unsubscribe();
+                if (this.observableB1 == null) {
+                    this.observableB1 = this.clickerFunction(this.input1);
+                }
+                else {
+                   // this.observableB1.unsubscribe(); 
+                    this.observableB1 = this.clickerFunction(this.input2);
+                }
+            });
+        this.observableB3 = fromEvent(this.button3, "click")
+            .subscribe(x => {
+                this.observableB1.unsubscribe();
             });
     }
     public Destroy() {
-        this.observableB.unsubscribe();
+        this.observableB3.unsubscribe();
         this.observableB1.unsubscribe();
         this.observableB2.unsubscribe();
     }

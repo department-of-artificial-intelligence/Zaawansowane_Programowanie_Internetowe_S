@@ -1,3 +1,4 @@
+import { App } from './App';
 let tab = [1, 2, 3, 4];
 // ZAD 1
 let sum = (acc, value) => acc + value;
@@ -17,20 +18,37 @@ let sumGreatherEven4 = (acc, value, threshold) => value % 2 === 0 && greatherFun
 let zad4Result = tab.reduce((acc, value) => sumGreatherEven4(acc, value, 3), 0);
 console.log(zad4Result);
 // zad 5
-function sumEven5(acc, value) {
-    return (threshold) => value % 2 === 0 && value > threshold ? acc + value : acc;
+function greatherFunc2(l, x) {
+    return x > l && x % 2 == 0;
 }
-let zad5Result = tab.reduce((acc, value) => sumEven5(acc, value)(1), 0);
-console.log(zad5Result);
+function curry2(fn) {
+    return (a1) => (a2) => fn(a1, a2);
+}
+let zad5 = tab.filter(curry2(greatherFunc2)(2)).reduce((a, x) => a + x);
+console.log(zad5);
 // zad6 
-let arrayOfStrings = ["13", "posterunek2", "odc2"];
-let sumIfIsNotNaN = (acc, value) => !isNaN(value) ? acc + parseFloat(value) : 0;
-let zad6Result = arrayOfStrings.reduce((acc, str) => {
-    let sum = 0;
-    sum = Array.from(str).reduce(sumIfIsNotNaN, sum);
-    // for (var i = 0; i < str.length; ++i) {
-    //     sum += sumIfIsNotNaN(acc, str[i])
-    // }    
-    return sum;
-}, 0);
-console.log(zad6Result);
+let arrayOfStrings = ["13", "posterunek", "odc", "5"];
+let zad6 = arrayOfStrings.map(e => parseInt(e)).filter(e => !isNaN(e)).reduce((a, x) => a + x);
+console.log(zad6);
+//rx.js
+// zad7
+let p = document.createElement("p");
+let button3 = document.createElement("button");
+button3.innerText = "3";
+let button1 = document.createElement("button");
+button1.innerText = "Zlicz";
+let button2 = document.createElement("button");
+let input1 = document.createElement("input");
+let input2 = document.createElement("input");
+button2.innerText = "+";
+button3.innerText = "-";
+document.body.append(p);
+document.body.append(button1);
+document.body.append(button2);
+document.body.append(button3);
+document.body.append(document.createElement("br"));
+document.body.append(input1);
+document.body.append(input2);
+let app = new App(button1, button2, button3, input1, input2, p);
+app.Init();
+window.addEventListener('beforeunload', () => app.Destroy());

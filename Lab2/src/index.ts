@@ -47,17 +47,24 @@ console.log(zad6);
 
 // zad7
 let p = document.createElement("p");
-let button = document.createElement("button");
-button.innerText = "clicker";
+let button3 = document.createElement("button");
+button3.innerText = "3";
 let button1 = document.createElement("button");
+button1.innerText = "Zlicz"
+
 let button2 = document.createElement("button");
-button1.innerText = "1";
-button2.innerText = "2";
+let input1 = document.createElement("input");
+let input2 = document.createElement("input");
+button2.innerText = "+";
+button3.innerText = "-";
 document.body.append(p);
 document.body.append(button1);
 document.body.append(button2);
-document.body.append(button);
-let app: App = new App(button1, button2, button, p);
+document.body.append(button3);
+document.body.append(document.createElement("br"))
+document.body.append(input1);
+document.body.append(input2);
+let app: App = new App(button1, button2, button3, input1, input2, p);
 app.Init();
 
 
