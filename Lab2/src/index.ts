@@ -47,9 +47,18 @@ console.log(zad6);
 
 // zad7
 let p = document.createElement("p");
-let button = document.createElement("button"); 
+let button = document.createElement("button");
 button.innerText = "clicker";
+let button1 = document.createElement("button");
+let button2 = document.createElement("button");
+button1.innerText = "1";
+button2.innerText = "2";
 document.body.append(p);
-document.body.append(button);   
-let app: App = new App(button, p);
+document.body.append(button1);
+document.body.append(button2);
+document.body.append(button);
+let app: App = new App(button1, button2, button, p);
 app.Init();
+
+
+window.addEventListener('beforeunload', () => app.Destroy())
