@@ -3,6 +3,8 @@
         "rootDir":"src",
         "outDir": "build",
         "target": "es6",
-        "moduleResolution": "node"
+        "moduleResolution": "node",
+        "allowSyntheticDefaultImports": true,
+        "jsx": "react"
     }
 }

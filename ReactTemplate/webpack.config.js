@@ -5,18 +5,18 @@ var bodyParser = require('body-parser');
 module.exports = {
     mode: "development",
     devtool: "source-map",
-    entry: {app:"./src/index.ts"},
+    entry: {app:"./src/index.tsx"},
     output: {
         path: path.join(__dirname,"./build/"),
         filename: "bundle.js"
     },
     watch:true,
     resolve:{
-        extensions: [".js",".ts"]
+        extensions: [".js",".ts", ".tsx", ".jsx"]
     },
     module:{
         rules:[
-            {test:/\.ts$/, loader:"ts-loader"}
+            {test:/\.ts(x?)$/, loader:"ts-loader"}
         ]
     },
     devServer: {
