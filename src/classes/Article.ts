@@ -21,8 +21,8 @@ export class Article {
     private static _objectCounter:number;
 
 
-    constructor(id:number,title:string,content:string,creationDate:Date,comments:Comment[]){
-        this._id = id;
+    constructor(title:string,content:string,creationDate:Date,comments:Comment[]){
+        this._id = Article._objectCounter++;
         this._title = title;
         this._content = content;
         this._creationDate = new Date();

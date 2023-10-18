@@ -4,6 +4,7 @@
         "outDir": "build",
         "target": "ES2020",
         "moduleResolution": "node",
-        "strictNullChecks": true
+        "strictNullChecks": true,
+        "experimentalDecorators": true
     }
 }

@@ -21,12 +21,11 @@ export class Blog {
     private static _objectCounter:number;
 
 
-    constructor(id:number,name:string,author:Author,articles:Article[]){
-        this._id = id;
+    constructor(name:string,author:Author,articles:Article[]){
+        this._id = Blog._objectCounter++;
         this._name = name;
         this._author = author;
         this._articles = articles;
-        Blog._objectCounter++;
     }
 
     public addArticle(article:Article):void {

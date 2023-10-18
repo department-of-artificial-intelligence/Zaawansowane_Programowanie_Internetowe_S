@@ -1,11 +1,11 @@
-import { required,validateEmail } from "../Validators";
+import { validateEmail,required } from "../Validators";
 
 export class Author {
 
     
 
     private _id:number;
-    @required 
+    @required
     private _firstname:string;
     @required
     private _lastname:string;
@@ -13,15 +13,14 @@ export class Author {
     private _email:string;
     private static _objectCounter:number = 0;
 
-    constructor(id:number,firstname:string,lastname:string,email:string){
-        this._id = id;
+    constructor(firstname:string,lastname:string,email:string){
+        this._id = Author._objectCounter++;
         this._firstname = firstname;
         this._lastname = lastname;
         if(!validateEmail(email)){
             throw new Error('That email is incorrect');
         }
         this._email = email;
-        Author._objectCounter++;
     }
 
     get firstName():string {return this._firstname}

@@ -1,5 +1,11 @@
-let article1: Article = new Article(1,'Szklana pulapka','Szklana pulapka w Nowym Jorku','',comments:Comments[])
+import { Buttons } from "./Zad4/Buttons";
+import { AuthorList } from "./Zad5/AuthorsList";
 
-let firstArticles: Article[] = []
+function initialize() {
+    const app = new Buttons();
+}
 
-let blog1: Blog = new Blog(1,'Enginering','Jan Kowalski',articles:Article[])
+window.addEventListener('load',initialize);
+
+const app = new AuthorList();
+app.showAuthors();

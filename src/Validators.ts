@@ -1,13 +1,15 @@
 export function required(target: object, name: string) {
     Object.defineProperty(target, name, {
-    get: function () { return this[`__${name}`]; },
-    set: function (value?: string) {
-    if (value === null || value === undefined || value.length === 0)
-    throw new Error('${name} nie może być puste');
-    this[`__${name}`] = value;
-    }
-    })
+        get: function () { return this[`__${name}`]; },
+        set: function (value?: string) {
+            if (value === null || value === undefined || value.length === 0) {
+                throw new Error(`${name} nie może być puste`);
+            }
+            this[`__${name}`] = value;
+        }
+    });
 }
+
 
 export function validateEmail(email:string):boolean {
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
@@ -20,15 +22,15 @@ export function validate<T>(
     ) : PropertyDecorator
     {
     return function (target: object, name: string | symbol) {
-    Object.defineProperty(target, name, {
-    get: function () { return this['__${name.toString()}']; },
-    set: function (value: T) {
-    for (let condition of conditions) {
-    if (!condition.validator(value))
-    throw new Error(condition.message);
-    }
-    this['__${name.toString()}'] = value;
-    }
-    })
+        Object.defineProperty(target, name, {
+        get: function () { return this['__${name.toString()}']; },
+        set: function (value: T) {
+            for (let condition of conditions) {
+                if (!condition.validator(value))
+                    throw new Error(condition.message);
+                }
+            this['__${name.toString()}'] = value;
+            }
+        })
     }
 }
