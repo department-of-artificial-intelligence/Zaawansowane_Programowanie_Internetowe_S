@@ -34,6 +34,7 @@ export class Buttons {
         this.input.value = this.inputValue.toString();
         this.resultElement.textContent = `Wartość: ${this.inputValue}`;
     }
+
     
 }
 
