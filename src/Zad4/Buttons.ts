@@ -35,7 +35,6 @@ export class Buttons {
         this.resultElement.textContent = `Wartość: ${this.inputValue}`;
     }
 
-    
 }
 
 const app = new Buttons();
