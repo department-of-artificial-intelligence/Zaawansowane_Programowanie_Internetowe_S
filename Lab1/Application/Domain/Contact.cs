@@ -18,15 +18,24 @@ public class Contact
     private Contact() {}     
     public Contact(int id, string firstName, string lastName,
                 Sex sex, ICollection<Email> emails, Age age){
-        Id = id;
-        FirstName = 
-            string.IsNullOrWhiteSpace(firstName) 
-            ? throw new ArgumentException(nameof(FirstName), nameof(firstName)) : firstName;
-        LastName =
-            string.IsNullOrWhiteSpace(lastName) 
-            ? throw new ArgumentException(nameof(LastName), nameof(lastName)) : lastName;
-        Sex = sex;
-        Emails = emails ?? throw new ArgumentNullException(nameof(emails));
-        Age = age ?? throw new ArgumentNullException(nameof(age));
-        }   
+            Id = id;
+            FirstName = 
+                string.IsNullOrWhiteSpace(firstName) 
+                ? throw new ArgumentException(nameof(FirstName), nameof(firstName)) : firstName;
+            LastName =
+                string.IsNullOrWhiteSpace(lastName) 
+                ? throw new ArgumentException(nameof(LastName), nameof(lastName)) : lastName;
+            Sex = sex;
+            Emails = emails ?? throw new ArgumentNullException(nameof(emails));
+            Age = age ?? throw new ArgumentNullException(nameof(age));
+        }
+            public bool HasEmail(Email email) {
+                return Emails.Any(e => e.Adress == email.Adress);
+            }
+
+            public void AddEmail(Email email) {
+                if(!HasEmail(email)){
+                    Emails.Add(email);
+                }
+            }
 }

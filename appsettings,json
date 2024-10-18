@@ -1,0 +1,5 @@
+{
+    "ConnectionStrings":{
+        "default":"Data_Source=LocalDatabase.db"
+    }
+}
