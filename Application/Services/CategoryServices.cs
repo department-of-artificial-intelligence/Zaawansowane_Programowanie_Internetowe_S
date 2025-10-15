@@ -4,7 +4,7 @@ using Contacts.Application.Repositories;
 
 namespace Contacts.Application.Services;
 
-public class CategoryServices(ICategoryRepository categoryRepository, IUnitOfWork unitOfWork) : ICategoryUseCase
+public class CategoryServices(ICategoryRepository categoryRepository, IUnitOfWork unitOfWork) : ICategoryUseCases
 {
     public void AddCategory(AddCategoryDTO categoryDTO)
     {
@@ -14,7 +14,7 @@ public class CategoryServices(ICategoryRepository categoryRepository, IUnitOfWor
         }
         else
         {
-            throw new ServiceException("Kategoria o tej nazwie ju! istnieje");
+            throw new ServiceException("Kategoria o tej nazwie już istnieje");
         }
     }
 
