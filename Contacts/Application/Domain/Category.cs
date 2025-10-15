@@ -7,4 +7,5 @@ public class Category(string name, int id)
 
     public int Id { get; private set; } = id;
     public string Name { get; private set; } = name;
+    
 }
