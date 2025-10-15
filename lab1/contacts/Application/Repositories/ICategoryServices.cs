@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Application.Domain;
-namespace Application.Repositories
-{
+namespace Application.Repositories;
+
     public interface ICategoryRepository
     {
         IEnumerable<Category> GetCategories();
@@ -13,4 +13,3 @@ namespace Application.Repositories
         void Add(Category category);
         void RemoveCategory(Category category);
     }
-}

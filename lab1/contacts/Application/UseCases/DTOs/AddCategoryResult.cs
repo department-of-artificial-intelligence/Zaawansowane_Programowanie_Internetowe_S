@@ -4,8 +4,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using Application.Domain;
 
-namespace Application.UseCases.DTOs
-{
+namespace Application.UseCases.DTOs;
+
     public class AddCategoryResult
     {
         public int Id { get; init; }
@@ -13,4 +13,3 @@ namespace Application.UseCases.DTOs
 
         public static implicit operator AddCategoryResult(Category category) => new AddCategoryResult { Id = category.Id, Name = category.Name };
     }
-}

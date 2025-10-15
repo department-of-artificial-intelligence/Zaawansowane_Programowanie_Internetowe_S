@@ -4,11 +4,10 @@ using System.Linq;
 using System.Threading.Tasks;
 using Application.Domain;
 
-namespace Application.UseCases.DTOs
-{
-    public class AddCategoryDTOs
+namespace Application.UseCases.DTOs;
+
+    public class AddCategoryDTO
     {
         public string Name { get; set; } = string.Empty;
-        public static implicit operator Category(AddCategoryDTOs dto) => new(dto.Name);
+        public static implicit operator Category(AddCategoryDTO dto) => new(dto.Name);
     }
-}
