@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Contacts.Application.Domain;
 
-namespace Application.UseCases.DTOs;
+namespace Contacts.Application.UseCases.DTOs;
 public class AddCategoryResult
 {
     public int Id { get; init; }
