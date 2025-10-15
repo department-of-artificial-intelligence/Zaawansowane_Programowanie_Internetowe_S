@@ -1,6 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Configuration.json;
+
 using Contacts.Data;
 internal class ApplicationDbContextFactory
 : IDesignTimeDbContextFactory<AppDbContext>
