@@ -11,6 +11,6 @@ public class CategoriesQueries(AppDbContext context) : ICategoryQueries
     }
     public CategoryDTO? GetCategory(int categoryId)
     {
-        return context.Categories.Find(categoryId);
+        return (CategoryDTO?)context.Categories.Find(categoryId);
     }
 }

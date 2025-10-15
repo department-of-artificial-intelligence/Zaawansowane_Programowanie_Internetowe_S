@@ -25,7 +25,7 @@ var categoryRepository = new CategoryRepository(context);
 var unitOfWork = new UnitOfWork(context);
 var categoryServices = new CategoryServices(categoryRepository, unitOfWork);
 categoryServices.RemoveCategory(1);
-foreach(var category in context.Categories)
+foreach (var category in context.Categories)
 {
-Console.WriteLine(category.Name);
+    Console.WriteLine(category.Name);
 }
