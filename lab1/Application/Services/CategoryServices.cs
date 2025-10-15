@@ -14,10 +14,11 @@ public class CategoryServices(
         {
             categoryRepository.Add(categoryDTO);
             unitOfWork.Save();
+            
         }
         else
         {
-            throw new ServiceException("Kategoria o tej nazwie ju! istnieje");
+            throw new ServiceException("Kategoria o tej nazwie już istnieje");
         }
     }
     public void RemoveCategory(int categoryID)
