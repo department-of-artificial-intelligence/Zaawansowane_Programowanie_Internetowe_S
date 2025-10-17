@@ -10,8 +10,7 @@ public record Age
             throw new ArgumentOutOfRangeException(nameof(value));
 
         }
-        Value = value;
-    }
+        Value = value;      }//komentarz
     public static implicit operator int(Age age) => age.Value;
     public static implicit operator Age(int value) => new(value);
 }
