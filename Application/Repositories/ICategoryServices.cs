@@ -8,4 +8,6 @@ public interface ICategoryRepository
     Category? GetCategoryByName(string categoryName);
     void Add(Category category);
     void RemoveCategory(Category category);
+
+    bool IsCategoryUsed(int categoryId);
 }
