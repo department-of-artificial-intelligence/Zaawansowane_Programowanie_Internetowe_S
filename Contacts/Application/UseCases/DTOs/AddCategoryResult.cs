@@ -9,4 +9,7 @@ public class AddCategoryResult
 
     public static implicit operator AddCategoryResult(Category category) =>
         new AddCategoryResult { Id = category.Id, Name = category.Name };
+
+    public static implicit operator AddCategoryResult(AddCategoryDTO category) =>
+        new AddCategoryResult { Name = category.Name };
 }

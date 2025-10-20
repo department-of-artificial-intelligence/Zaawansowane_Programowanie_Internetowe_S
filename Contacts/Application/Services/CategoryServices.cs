@@ -7,12 +7,13 @@ namespace Contacts.Application.Services;
 public class CategoryServices(ICategoryRepository categoryRepository, IUnitOfWork unitOfWork)
     : ICategoryUseCases
 {
-    public void AddCategory(AddCategoryDTO categoryDTO)
+    public AddCategoryResult AddCategory(AddCategoryDTO categoryDTO)
     {
         if (categoryRepository.GetCategoryByName(categoryDTO.Name) == null)
         {
             categoryRepository.Add(categoryDTO);
             unitOfWork.Save();
+            return categoryRepository.GetCategoryByName(categoryDTO.Name);
         }
         else
         {

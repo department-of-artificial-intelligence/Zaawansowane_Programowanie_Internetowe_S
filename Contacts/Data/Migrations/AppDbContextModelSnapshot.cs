@@ -28,7 +28,7 @@ namespace Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Categories");
+                    b.ToTable("Categories", (string)null);
                 });
 
             modelBuilder.Entity("Contacts.Application.Domain.Contact", b =>
@@ -50,7 +50,7 @@ namespace Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Contacts");
+                    b.ToTable("Contacts", (string)null);
                 });
 
             modelBuilder.Entity("Contacts.Application.Domain.Email", b =>
@@ -71,7 +71,7 @@ namespace Data.Migrations
 
                     b.HasIndex("ContactId");
 
-                    b.ToTable("Emails");
+                    b.ToTable("Emails", (string)null);
                 });
 
             modelBuilder.Entity("Contacts.Application.Domain.Contact", b =>
@@ -86,7 +86,7 @@ namespace Data.Migrations
 
                             b1.HasKey("ContactId");
 
-                            b1.ToTable("Contacts");
+                            b1.ToTable("Contacts", (string)null);
 
                             b1.WithOwner()
                                 .HasForeignKey("ContactId");
@@ -121,7 +121,7 @@ namespace Data.Migrations
 
                             b1.HasKey("EmailId");
 
-                            b1.ToTable("Emails");
+                            b1.ToTable("Emails", (string)null);
 
                             b1.WithOwner()
                                 .HasForeignKey("EmailId");
