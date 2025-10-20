@@ -2,17 +2,16 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Contacts.Application.Repositories;
 using Contacts.Application.UseCases;
 using Contacts.Application.UseCases.DTOs;
-using Contacts.Application.Repositories;
 
 namespace Contacts.Application.Services;
 
-public class CategoryServices(
-    ICategoryRepository categoryRepository,
-    IUnitOfWork unitOfWork) : ICategoryUseCases
+public class CategoryServices(ICategoryRepository categoryRepository, IUnitOfWork unitOfWork)
+    : ICategoryUseCases
 {
-    public void AddCategory(AddCategoryDTO categoryDTO)
+    public AddCategoryResult AddCategory(AddCategoryDTO categoryDTO)
     {
         if (categoryRepository.GetCategoryByName(categoryDTO.Name) == null)
         {
@@ -21,9 +20,11 @@ public class CategoryServices(
         }
         else
         {
-            throw new ServiceException("Kategoria o tej nazwie ju! istnieje");
+            throw new ServiceException("Kategoria o tej nazwie juz istnieje");
         }
+        return categoryRepository.GetCategoryByName(categoryDTO.Name);
     }
+
     public void RemoveCategory(int categoryID)
     {
         var category = categoryRepository.GetCategory(categoryID);
@@ -34,8 +35,7 @@ public class CategoryServices(
         }
         else
         {
-            throw new ServiceException(
-            $"Kategoria o id: {categoryID} nie istnieje");
+            throw new ServiceException($"Kategoria o id: {categoryID} nie istnieje");
         }
     }
 }
