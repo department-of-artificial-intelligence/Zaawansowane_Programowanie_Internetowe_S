@@ -21,6 +21,20 @@ public class CategoryServices(ICategoryRepository categoryRepository, IUnitOfWor
         }
     }
 
+    public EditCategoryResult EditCategory(EditCategoryDTO categoryDTO)
+    {
+        if (categoryRepository.GetCategoryByName(categoryDTO.Name) != null)
+        {
+            categoryRepository.Edit(categoryDTO);
+            unitOfWork.Save();
+            return categoryRepository.GetCategoryByName(categoryDTO.Name);
+        }
+        else
+        {
+            throw new ServiceException("Kategoria o tej nazwie nie istnieje");
+        }
+    }
+
     public void RemoveCategory(int categoryID)
     {
         var category = categoryRepository.GetCategory(categoryID);

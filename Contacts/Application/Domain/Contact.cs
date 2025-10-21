@@ -1,9 +1,17 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace Contacts.Application.Domain;
 
 public class Contact
 {
     public int Id { get; private set; }
+
+    [Required(ErrorMessage = "First name is required.")]
+    [StringLength(50, ErrorMessage = "First name cannot exceed 50 characters.")]
     public string FirstName { get; private set; } = string.Empty;
+
+    [Required(ErrorMessage = "Last name is required.")]
+    [StringLength(50, ErrorMessage = "Last name cannot exceed 50 characters.")]
     public string LastName { get; private set; } = string.Empty;
     public Sex Sex { get; private set; }
     public ICollection<Email> Emails { get; private set; } = null!;

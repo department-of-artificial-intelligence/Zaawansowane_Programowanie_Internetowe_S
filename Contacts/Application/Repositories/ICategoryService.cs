@@ -9,4 +9,6 @@ public interface ICategoryRepository
     Category? GetCategoryByName(string categoryName);
     void Add(Category category);
     void RemoveCategory(Category category);
+    void Edit(Category category);
+    void Delete(Category category);
 }
