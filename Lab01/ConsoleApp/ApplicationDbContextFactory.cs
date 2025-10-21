@@ -13,7 +13,9 @@ internal class ApplicationDbContextFactory : IDesignTimeDbContextFactory<AppDbCo
             .Build();
         var builder = new DbContextOptionsBuilder<AppDbContext>();
         var connectionString = configuration.GetConnectionString("DefaultConnection");
+
         builder.UseSqlite(connectionString);
+
         return new AppDbContext(builder.Options);
     }
 }

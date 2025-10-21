@@ -14,6 +14,8 @@ public class AppDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        base.OnModelCreating(modelBuilder);
+
         modelBuilder.Entity<Contact>(contactBuilder =>
         {
             contactBuilder.HasKey(contact => contact.Id);
@@ -38,5 +40,18 @@ public class AppDbContext : DbContext
         modelBuilder
             .Entity<Contact>()
             .OwnsOne(contact => contact.Age, ageBuilder => ageBuilder.Property(age => age.Value));
+        modelBuilder.Entity<Contact>()
+            .Property(c => c.FirstName)
+            .HasConversion(
+                fn => fn.Value,
+                value => new FirstName(value))
+            .HasColumnName("FirstName");
+
+        modelBuilder.Entity<Contact>()
+            .Property(c => c.LastName)
+            .HasConversion(
+                ln => ln.Value,
+                value => new LastName(value))
+            .HasColumnName("LastName");
     }
 }

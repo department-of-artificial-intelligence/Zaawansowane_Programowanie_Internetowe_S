@@ -27,7 +27,13 @@ var categoryRepository = new CategoryRepository(context);
 var unitOfWork = new UnitOfWork(context);
 var categoryServices = new CategoryServices(categoryRepository, unitOfWork);
 
-//categoryServices.RemoveCategory(1);
+// categoryServices.RemoveCategory(1);
+
+
+// categoryServices.AddCategory(new AddCategoryDTO { Name = "Cat1" });
+// categoryServices.AddCategory(new AddCategoryDTO { Name = "Cat2" });
+// categoryServices.AddCategory(new AddCategoryDTO { Name = "Cat3" });
+
 
 foreach (var category in context.Categories)
 {

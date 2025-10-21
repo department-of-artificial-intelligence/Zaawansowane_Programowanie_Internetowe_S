@@ -2,6 +2,7 @@
 using Contacts.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -9,9 +10,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251021214241_AddFirstNameLastNameValue")]
+    partial class AddFirstNameLastNameValue
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.10");
@@ -37,9 +40,6 @@ namespace Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<int?>("CategoryId")
-                        .HasColumnType("INTEGER");
-
                     b.Property<string>("FirstName")
                         .IsRequired()
                         .HasColumnType("TEXT")
@@ -54,8 +54,6 @@ namespace Data.Migrations
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("CategoryId");
 
                     b.ToTable("Contacts");
                 });
@@ -83,10 +81,6 @@ namespace Data.Migrations
 
             modelBuilder.Entity("Contacts.Application.Domain.Contact", b =>
                 {
-                    b.HasOne("Contacts.Application.Domain.Category", null)
-                        .WithMany("Contacts")
-                        .HasForeignKey("CategoryId");
-
                     b.OwnsOne("Contacts.Application.Domain.Age", "Age", b1 =>
                         {
                             b1.Property<int>("ContactId")
@@ -144,11 +138,6 @@ namespace Data.Migrations
                     b.Navigation("Category");
 
                     b.Navigation("Contact");
-                });
-
-            modelBuilder.Entity("Contacts.Application.Domain.Category", b =>
-                {
-                    b.Navigation("Contacts");
                 });
 
             modelBuilder.Entity("Contacts.Application.Domain.Contact", b =>

@@ -1,17 +1,17 @@
-// using Contacts.Application.Queries;
-// using Contacts.Application.Queries.DTOs;
+using Contacts.Application.Queries;
+using Contacts.Application.Queries.DTOs;
 
-// namespace Contacts.Data;
+namespace Contacts.Data;
 
-// public class CategoriesQueries(AppDbContext context) : ICategoryQueries
-// {
-//     public IEnumerable<CategoryDTO> GetCategories()
-//     {
-//         return context.Categories.ToList().Select(category => (CategoryDTO)category);
-//     }
+public class CategoriesQueries(AppDbContext context) : ICategoryQueries
+{
+    public IEnumerable<CategoryDTO> GetCategories()
+    {
+        return context.Categories.ToList().Select(category => (CategoryDTO)category);
+    }
 
-//     public CategoryDTO? GetCategory(int categoryId)
-//     {
-//         return context.Categories.Find(categoryId);
-//     }
-// }
+    public CategoryDTO? GetCategory(int categoryId)
+    {
+        return (CategoryDTO?)context.Categories.Find(categoryId);
+    }
+}
