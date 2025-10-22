@@ -1,19 +1,17 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿﻿using Contacts.Application.Domain;
+using Contacts.Application.Services;
+using Contacts.Application.UseCases.DTOs;
+using Contacts.Data;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using Application.Domain;
-using Application.Services;
-using Application.UseCases.DTOs;
-using Data;
 
 // Wczytanie pliku konfiguracyjnego
 var builder = new ConfigurationBuilder();
-builder.SetBasePath(AppContext.BaseDirectory)
-       .AddJsonFile(
-            "appsettings.json",
-            optional: false,
-            reloadOnChange: true);
+builder
+    .SetBasePath(AppContext.BaseDirectory)
+    .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
 
-// Skonfigurowanie połączenia z bazą danych
+// Skonfigurowanie po!"czenia z baz" danych
 IConfiguration config = builder.Build();
 var dbOptionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
 dbOptionsBuilder.UseSqlite(config.GetConnectionString("default"));
@@ -24,14 +22,19 @@ context.Database.Migrate();
 context.Database.EnsureCreated();
 
 // Uruchomienie aplikacji
+
 var categoryRepository = new CategoryRepository(context);
 var unitOfWork = new UnitOfWork(context);
 var categoryServices = new CategoryServices(categoryRepository, unitOfWork);
 
-// Przykład operacji – usuwanie kategorii
-categoryServices.RemoveCategory(1);
+// categoryServices.RemoveCategory(1);
 
-// Wyświetlanie kategorii w konsoli
+
+// categoryServices.AddCategory(new AddCategoryDTO { Name = "Cat1" });
+// categoryServices.AddCategory(new AddCategoryDTO { Name = "Cat2" });
+// categoryServices.AddCategory(new AddCategoryDTO { Name = "Cat3" });
+
+
 foreach (var category in context.Categories)
 {
     Console.WriteLine(category.Name);

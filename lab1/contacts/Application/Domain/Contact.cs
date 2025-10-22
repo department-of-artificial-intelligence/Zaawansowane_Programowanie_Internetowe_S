@@ -1,47 +1,41 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+namespace Contacts.Application.Domain;
 
-namespace Application.Domain
+public class Contact
 {
-    public class Contact
+    public int Id { get; set; }
+    public FirstName FirstName { get; set; }
+    public LastName LastName { get; set; }
+    public Sex Sex { get; set; }
+
+    public ICollection<Email> Emails { get; private set; } = null!;
+
+    public Age Age { get; private set; } = null!;
+
+
+    private Contact() { }
+
+
+    public Contact(int id, FirstName firstName, LastName lastName, Sex sex, ICollection<Email> emails, Age age)
     {
-        public int Id { get; private set; }
-        public string FirstName { get; private set; } = string.Empty;
-        public string LastName { get; private set; } = string.Empty;
-        public Sex Sex { get; private set; }
-        public ICollection<Email> Emails { get; private set; } = null!;
-        public Age Age { get; private set; } = null!;
 
-        private Contact() { }
+        Id = id;
+        FirstName = firstName ?? throw new ArgumentNullException(nameof(firstName));
+        LastName = lastName ?? throw new ArgumentNullException(nameof(lastName));
+        Sex = sex;
+        Emails = emails ?? throw new ArgumentNullException(nameof(emails));
+        Age = age ?? throw new ArgumentNullException(nameof(age));
+    }
 
-        public Contact(int id, string firstName, string lastName, Sex sex, ICollection<Email> emails, Age age)
+    public bool HasEmail(Email email)
+    {
+        return Emails.Any(e => e.Address == email.Address);
+    }
+
+    public void AddEmail(Email email)
+    {
+        if (!HasEmail(email))
         {
-            Id = id;
-            FirstName = string.IsNullOrWhiteSpace(firstName)
-                ? throw new ArgumentException(nameof(firstName))
-                : firstName;
-            LastName = string.IsNullOrWhiteSpace(lastName)
-                ? throw new ArgumentException(nameof(lastName))
-                : lastName;
-            Sex = sex;
-            Emails = emails ?? throw new ArgumentNullException(nameof(emails));
-            Age = age ?? throw new ArgumentNullException(nameof(age));
-        }
-
-        public bool HasEmail(Email email)
-        {
-            return Emails.Any(e => e.Address == email.Address);
-        }
-
-        public void AddEmail(Email email)
-        {
-            if (!HasEmail(email))
-            {
-                Emails.Add(email);
-            }
-            Id++;
+            Emails.Add(email);
         }
     }
 

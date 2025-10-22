@@ -1,44 +1,37 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
+using Contacts.Application.Repositories;
+using Contacts.Application.UseCases;
+using Contacts.Application.UseCases.DTOs;
 
-using Application.UseCases;
-using Application.UseCases.DTOs;
-using Application.Repositories;
+namespace Contacts.Application.Services;
 
-namespace Application.Services;
-public class CategoryServices (
-    ICategoryRepository categoryRepository,
-    IUnitOfWork unitOfWork
-
-) : ICategoryUseCases
+public class CategoryServices(ICategoryRepository categoryRepository, IUnitOfWork unitOfWork)
+    : ICategoryUseCases
 {
     public void AddCategory(AddCategoryDTO categoryDTO)
     {
         if (categoryRepository.GetCategoryByName(categoryDTO.Name) == null)
         {
             categoryRepository.Add(categoryDTO);
-            unitofWork.Save();
+            unitOfWork.Save();
         }
         else
         {
             throw new ServiceException("Kategoria_o_tej_nazwie_już_istnieje");
         }
     }
+
     public void RemoveCategory(int categoryID)
     {
-        var category = categoryRepository.GetCategory(categoryID); 
+        var category = categoryRepository.GetCategory(categoryID);
         if (category != null)
         {
             categoryRepository.RemoveCategory(category);
-            unitofwork.Save();
+            unitOfWork.Save();
         }
         else
         {
-            throw new ServiceException(
-                $"Kategoria_o_id: {categoryID}_nie_istnieje");
+            throw new ServiceException($"Kategoria_o_id:_{categoryID}_nie_istnieje");
         }
     }
 }

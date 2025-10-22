@@ -1,9 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+namespace Contacts.Application.Domain;
 
-namespace Application.Domain
-{
-    public enum Sex {Male,Female}
-}
+public enum Sex{Male, Female}
