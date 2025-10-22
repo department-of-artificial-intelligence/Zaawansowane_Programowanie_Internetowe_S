@@ -10,5 +10,4 @@ public interface ICategoryRepository
     void Add(Category category);
     void RemoveCategory(Category category);
     void Edit(Category category);
-    void Delete(Category category);
 }

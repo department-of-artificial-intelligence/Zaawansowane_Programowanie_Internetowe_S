@@ -34,7 +34,11 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Contacts API V1");
+        c.RoutePrefix = string.Empty;
+    });
 }
 
 app.UseHttpsRedirection();
@@ -66,6 +70,64 @@ app.MapPost(
     .WithSummary("Tworzy nowa kategorie")
     .WithTags("Kategoria")
     .Produces<AddCategoryResult>(StatusCodes.Status201Created)
+    .Produces(StatusCodes.Status500InternalServerError);
+
+app.MapPost(
+        "/api/categories/edit",
+        (EditCategoryDTO dto, ICategoryUseCases useCases) =>
+        {
+            try
+            {
+                var category = useCases.EditCategory(dto);
+                return Results.Created($"/categories/category.Id", category);
+            }
+            catch
+            {
+                return Results.Problem(detail: "Wystapil blad podczas edycji");
+            }
+        }
+    )
+    .WithOpenApi(
+        (operation) =>
+        {
+            operation.Responses["201"].Description = "Kategoria zostala zedytowana";
+            operation.Responses["500"].Description = "Wystapil blad podczas edycji";
+            return operation;
+        }
+    )
+    .WithDescription("Aktualizuje nowa kategorie")
+    .WithSummary("Aktualizuje nowa kategorie")
+    .WithTags("Kategoria")
+    .Produces<AddCategoryResult>(StatusCodes.Status201Created)
+    .Produces(StatusCodes.Status500InternalServerError);
+
+app.MapPost(
+        "/api/categories/{:id}",
+        (int id, ICategoryUseCases useCases) =>
+        {
+            try
+            {
+                useCases.RemoveCategory(id);
+                return Results.Ok();
+            }
+            catch
+            {
+                return Results.Problem(detail: "Wystapil blad podczas usuwania");
+            }
+        }
+    )
+    .WithOpenApi(
+        (operation) =>
+        {
+            operation.Responses["200"].Description = "Kategoria zostala usunieta";
+            operation.Responses["500"].Description = "Wystapil blad podczas usuwania";
+            return operation;
+        }
+    )
+    .WithDescription("Aktualizuje nowa kategorie")
+    .WithSummary("Aktualizuje nowa kategorie")
+    .WithTags("Kategoria")
+    .Produces<AddCategoryResult>(StatusCodes.Status200OK)
     .Produces(StatusCodes.Status500InternalServerError);
 
 app.MapGet(

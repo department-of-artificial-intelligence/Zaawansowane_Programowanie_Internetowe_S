@@ -5,5 +5,6 @@ namespace Contacts.Application.UseCases;
 public interface ICategoryUseCases
 {
     AddCategoryResult AddCategory(AddCategoryDTO addCategoryDTO);
+    EditCategoryResult EditCategory(EditCategoryDTO addCategoryDTO);
     void RemoveCategory(int categoryID);
 }
