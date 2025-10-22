@@ -1,6 +1,6 @@
 using Contacts.Application.UseCases;
 using Contacts.Application.UseCases.DTOs;
-using Contacts.Application.Repositories; 
+using Contacts.Application.Repositories;
 namespace Contacts.Application.Services; 
 public class CategoryServices(
     ICategoryRepository categoryRepository,
