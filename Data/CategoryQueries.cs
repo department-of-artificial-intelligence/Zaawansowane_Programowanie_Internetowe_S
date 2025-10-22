@@ -10,9 +10,10 @@ public class CategoriesQueries(AppDbContext context) : ICategoryQueries
         return context.Categories.ToList().Select(
             category => (CategoryDTO)category);
     }
-
+    
     public CategoryDTO? GetCategory(int categoryId)
     {
-        return context.Categories.Find(categoryId);
+        var category = context.Categories.Find(categoryId);
+        return category == null ? null : (CategoryDTO)category;
     }
 }
