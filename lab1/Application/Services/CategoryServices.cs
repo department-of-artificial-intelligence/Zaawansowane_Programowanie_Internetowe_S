@@ -1,6 +1,7 @@
 using Contacts.Application.UseCases;
 using Contacts.Application.UseCases.DTOs;
 using Contacts.Application.Repositories;
+using Contacts.Application.Domain;
 namespace Contacts.Application.Services;
 
 public class CategoryServices(
@@ -8,13 +9,18 @@ public class CategoryServices(
   IUnitOfWork unitOfWork)
    : ICategoryUseCases
 {
-    public void AddCategory(AddCategoryDTO categoryDTO)
+    public Category AddCategory(AddCategoryDTO categoryDTO)
     {
+        // Check if category with the same name already exists
         if (categoryRepository.GetCategoryByName(categoryDTO.Name) == null)
         {
-            categoryRepository.Add(categoryDTO);
-            unitOfWork.Save();
-            
+            // Create the Category using only the name, ID will default to 0 initially
+            var category = new Category(categoryDTO.Name); // Uses the constructor (name, 0)
+
+            categoryRepository.Add(category); // Add the category to the repository
+            unitOfWork.Save(); // Save the changes
+
+            return category; // Return the created category
         }
         else
         {
