@@ -12,8 +12,11 @@ public class CategoriesQueries(AppDbContext context) : ICategoryQueries
 
     public CategoryDTO? GetCategory(int categoryId)
     {
-        return context.Categories.Find(categoryId);
-    }
+        var category = context.Categories.Find(categoryId);
 
- 
+        if (category == null)
+            return null;
+
+        return (CategoryDTO)category;
+    }
 }
