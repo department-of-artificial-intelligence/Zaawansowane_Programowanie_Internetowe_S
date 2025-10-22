@@ -10,7 +10,7 @@ public class CategoriesQueries(AppDbContext context) : ICategoryQueries
         return context.Categories.ToList().Select(
             category => (CategoryDTO)category);
     }
-    
+
     public CategoryDTO? GetCategory(int categoryId)
     {
         var category = context.Categories.Find(categoryId);
