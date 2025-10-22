@@ -1,6 +1,7 @@
 namespace Contacts.Application.Domain;
 
-public class Contact {
+public class Contact
+{
     public int Id { get; private set; }
     public string FirstName { get; private set; } = string.Empty;
     public string LastName { get; private set; } = string.Empty;
@@ -10,7 +11,8 @@ public class Contact {
 
     private Contact() { }
 
-    public Contact(int id, string firstName, string lastName, Sex sex, ICollection<Email> emails, Age age) {
+    public Contact(int id, string firstName, string lastName, Sex sex, ICollection<Email> emails, Age age)
+    {
         Id = id;
         FirstName = string.IsNullOrWhiteSpace(firstName)
     ? throw new ArgumentException(nameof(firstName))
@@ -24,7 +26,8 @@ public class Contact {
         Age = age ?? throw new ArgumentNullException(nameof(age));
     }
 
-public bool HasEmail(Email email) {
+    public bool HasEmail(Email email)
+    {
 
         return Emails.Any(e => e.Address == email.Address);
     }
@@ -33,7 +36,7 @@ public bool HasEmail(Email email) {
 
         if (!HasEmail(email))
 
-{
+        {
 
             Emails.Add(email);
 
