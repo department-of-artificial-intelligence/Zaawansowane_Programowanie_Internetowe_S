@@ -8,6 +8,8 @@ internal class ApplicationDbContextFactory : IDesignTimeDbContextFactory<AppDbCo
     {
         IConfigurationRoot configuration = new ConfigurationBuilder().SetBasePath(Directory.GetCurrentDirectory()).AddJsonFile("appsettings.json").Build();
         var builder = new DbContextOptionsBuilder<AppDbContext>(); var connectionString = configuration.GetConnectionString("DefaultConnection");
-        builder.UseSqlite(connectionString); return new AppDbContext(builder.Options);
+        
+        builder.UseSqlite(connectionString); 
+        return new AppDbContext(builder.Options);
     }
 }

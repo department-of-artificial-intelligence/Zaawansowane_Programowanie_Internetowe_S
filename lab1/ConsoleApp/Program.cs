@@ -11,15 +11,21 @@ builder.SetBasePath(AppContext.BaseDirectory)
 // Skonfigurowanie po!"czenia z baz" danych 
 IConfiguration config = builder.Build();
 var dbOptionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
-dbOptionsBuilder.UseSqlite(config.GetConnectionString("default"));
+dbOptionsBuilder.UseSqlite(config.GetConnectionString("DefaultConnection"));
 // Stworzenie kontekstu using 
 var context = new AppDbContext(dbOptionsBuilder.Options); 
 context.Database.Migrate(); context.Database.EnsureCreated();
+
+
 // Uruchomienie aplikacji 
 var categoryRepository = new CategoryRepository(context);
 var unitOfWork = new UnitOfWork(context);
+
 var categoryServices = new CategoryServices(categoryRepository, unitOfWork);
-categoryServices.RemoveCategory(1); 
-foreach(var category in context.Categories) {
+// categoryServices.AddCategory(new AddCategoryDTO { Name = "test" });
+// categoryServices.AddCategory(new AddCategoryDTO { Name = "test2" });
+// categoryServices.AddCategory(new AddCategoryDTO { Name = "test3" });
+// categoryServices.RemoveCategory(1); 
+foreach(var category in context.Categories.ToList()) {
     Console.WriteLine(category.Name); 
     }
