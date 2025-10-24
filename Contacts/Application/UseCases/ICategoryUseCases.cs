@@ -1,6 +1,6 @@
 using Contacts.Application.UseCases.DTOs;
 
-namespace Contact.Application.UseCases;
+namespace Contacts.Application.UseCases;
 
 public interface ICategoryUseCases
 {

@@ -10,4 +10,5 @@ public interface ICategoryRepository
 
     void Add(Category category);
     void RemoveCategory(Category category);
+    bool IsCategoryInUse(int categoryId);
 }
