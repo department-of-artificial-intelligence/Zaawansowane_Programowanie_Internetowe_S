@@ -1,32 +1,23 @@
-using System.ComponentModel;
-
 namespace Contacts.Application.Domain;
 
-public class Email
+public class Phone
 {
     public int Id { get; private set; }
-    public EmailAddress Address { get; private set; } = null!;
+    public PhoneNumber Number { get; private set; } = null!;
     public Contact Contact { get; private set; } = null!;
     public int ContactId { get; private set; }
-
     public int CategoryId { get; private set; }
-
     public Category Category { get; private set; } = null!;
-    private Email()
-    {
 
-    }
-    
-    public Email(int id, Contact contact, Category category, EmailAddress email)
+    private Phone() { }
+
+    public Phone(int id, Contact contact, Category category, PhoneNumber number)
     {
         Id = id;
-        CategoryId = category.Id;
         ContactId = contact.Id;
         Contact = contact;
+        CategoryId = category.Id;
         Category = category;
-        Address = email;    
+        Number = number;
     }
-    
-        
-    
 }

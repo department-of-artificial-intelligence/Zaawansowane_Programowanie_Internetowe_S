@@ -1,3 +1,3 @@
 namespace Contacts.Application.Domain;
 
-public enum Sex {Male,Female}
+public enum Sex {Male, Female};
