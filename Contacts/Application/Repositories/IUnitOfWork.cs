@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Contacts.Application.Domain
+namespace Contacts.Application;
+
+public interface IUnitOfWork
 {
-    public enum Sex { Male, Female }
+    void Save();
 }
