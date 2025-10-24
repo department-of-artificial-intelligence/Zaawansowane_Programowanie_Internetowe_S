@@ -16,4 +16,8 @@ public class Category(string name, int id)
     public int Id { get; private set; } = id;
 
     public string Name { get; private set; } = name;
+
+    public User? User { get; private set; }
+    
+    public int UserId { get; private set; }
 }

@@ -5,20 +5,29 @@ using System;
 
 namespace Application.Services;
 
-public class CategoryServices(ICategoryRepository categoryRepository, IUnitOfWork unitOfWork)
+public class CategoryServices(ICategoryRepository categoryRepository, IUnitOfWork unitOfWork, IUserRepository userRepository)
 {
     public Category? AddCategory(AddCategoryDTO categoryDTO)
     {
-        if (categoryRepository.GetCategoryByName(categoryDTO.Name) != null)
+        if (categoryRepository.GetCategoryByNameAndUser(categoryDTO.Name, categoryDTO.UserId) != null)
         {
             throw new ServiceException("Kategoria o tej nazwie już istnieje");
         }
 
-        var newCategory = new Category(categoryDTO.Name);
-        categoryRepository.Add(newCategory);
+        var user = userRepository.GetById(categoryDTO.UserId);
+
+        if (user == null)
+        {
+            throw new ServiceException(message: $"Użytkownik o Id: {categoryDTO.UserId} nie istnieje.");
+        }
+
+        // If we reach here, the category name is unique and the user exists.
+        var category = new Category(categoryDTO.Name, user);
+
+        categoryRepository.Add(category);
         unitOfWork.Save();
 
-        return newCategory;
+        return category;
     }
 
     public void RemoveCategory(int categoryID)

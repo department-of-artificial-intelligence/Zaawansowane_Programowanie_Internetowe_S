@@ -11,5 +11,7 @@ public class AddCategoryDTO
 {
     public string Name { get; set; } = string.Empty;
 
+    public int UserId {get; set; }
+
     public static implicit operator Category(AddCategoryDTO dto) => new(dto.Name);
 }

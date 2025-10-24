@@ -5,6 +5,12 @@ using Application.Repositories;
 using Application.UseCases;
 using Application.Services;
 using Application;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using Application.DomainServices;
+using Application.Helpers;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,8 +23,55 @@ builder.Services.AddTransient<IUnitOfWork, UnitOfWork>();
 builder.Services.AddTransient<ICategoryRepository, CategoryRepository>();
 builder.Services.AddTransient<CategoryServices>();
 
+builder.Services.AddTransient<IUserRepository, UserRepository>();
+builder.Services.AddTransient<IUserUseCases, UserServices>();
+
+builder.Services.AddSingleton<ITokenGenerator, TokenGenerator>();
+
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(option =>
+{
+    option.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        In = ParameterLocation.Header,
+        Description = "Please enter a valid token",
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        BearerFormat = "JWT",
+        Scheme = "Bearer"
+    });
+    option.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type=ReferenceType.SecurityScheme,
+                    Id="Bearer"
+                }
+            },
+            new string[]{}
+        }
+    });
+});
+
+builder.Services.AddAuthentication()
+.AddJwtBearer(x =>
+{
+    x.TokenValidationParameters = new TokenValidationParameters
+    {
+        IssuerSigningKey = new SymmetricSecurityKey(
+        Encoding.UTF8
+            .GetBytes(builder.Configuration["ApplicationSettings:JWT_KEY"])
+        ),
+        ValidateIssuer = false,
+        ValidateAudience = false,
+        ValidateLifetime = true
+    };
+});
+
+builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
@@ -30,6 +83,7 @@ if (app.Environment.IsDevelopment())
 }
 
 //app.UseHttpsRedirection();
+app.UseAuthorization();
 
 app.MapPost("/api/categories", (AddCategoryDTO dto, CategoryServices useCases) =>
 {
@@ -56,9 +110,11 @@ app.MapPost("/api/categories", (AddCategoryDTO dto, CategoryServices useCases) =
 .WithSummary("Tworzy nową kategorie")
 .WithTags("Kategoria")
 .Produces<AddCategoryResult>(StatusCodes.Status201Created)
-.Produces(StatusCodes.Status500InternalServerError);
+.Produces(StatusCodes.Status500InternalServerError)
+.RequireAuthorization();
 
-app.MapGet("/api/categories", (ICategoryQueries queries) => {
+app.MapGet("/api/categories", (ICategoryQueries queries) =>
+{
     try
     {
         var categories = queries.GetCategories();
@@ -73,6 +129,21 @@ app.MapGet("/api/categories", (ICategoryQueries queries) => {
     }
 });
 
+app.MapPost("/api/users", (AddUserDTO dto, IUserUseCases useCases) => {
+    try
+    {
+        var user = useCases.AddUser(dto);
+        return Results.Created($"/api/users/{user.Id}", user);
+    }
+    catch
+    {
+        return Results.Problem(
+            detail: "Wystąpił błąd podczas realizacji tego żądania",
+            title: "Błąd"
+        );
+    }
+});
+
 var summaries = new[]
 {
     "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
@@ -80,7 +151,7 @@ var summaries = new[]
 
 app.MapGet("/weatherforecast", () =>
 {
-    var forecast =  Enumerable.Range(1, 5).Select(index =>
+    var forecast = Enumerable.Range(1, 5).Select(index =>
         new WeatherForecast
         (
             DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
@@ -91,6 +162,26 @@ app.MapGet("/weatherforecast", () =>
     return forecast;
 })
 .WithName("GetWeatherForecast");
+
+app.MapPost("/api/login", (LoginUserDTO dto, IUserUseCases userUseCases) =>
+{
+    try
+    {
+        var loginResult = userUseCases.LoginUser(dto);
+        if (loginResult.Status == UserLoginStatus.UserLogged)
+        {
+            return Results.Ok(new { AccessToken = loginResult.Token });
+        }
+        else
+        {
+            return Results.Unauthorized();
+        }
+    }
+    catch
+    {
+        return Results.Problem(detail: "Wystąpił błąd podczas realizacji tego żądania", title: "Błąd");
+    }
+});
 
 app.Run();
 
