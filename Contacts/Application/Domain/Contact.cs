@@ -1,32 +1,49 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace Contacts.Application.Domain;
 
 public class Contact
 {
     public int Id { get; private set; }
-    public string FirstName { get; private set; } = string.Empty;
-    public string LastName { get; private set; } = string.Empty;
+    public FirstName FirstName { get; private set; } = null!;
+    public LastName LastName { get; private set; } = null!;
     public Sex Sex { get; private set; }
-    public ICollection<Email> Emails { get; private set; } = null!;
     public Age Age { get; private set; } = null!;
-    private Contact() { }
-    public Contact(int id, string firstName, string lastName, Sex sex, ICollection<Email> emails, Age age)
+
+    // POPRAWKA: Kolekcja musi być zainicjowana, aby uniknąć błędów
+    public ICollection<Email> Emails { get; private set; } = new List<Email>();
+
+    // Konstruktor dla EF Core
+    private Contact() { } 
+
+    // POPRAWKA: Publiczny konstruktor do tworzenia NOWEGO kontaktu
+    // Nie przyjmuje 'Id' ani 'Emails'
+    public Contact(FirstName firstName, LastName lastName, Sex sex, Age age)
     {
-        Id = id;
-        FirstName = string.IsNullOrWhiteSpace(firstName) ? throw new ArgumentException(nameof(firstName)) : firstName;
-        LastName = string.IsNullOrWhiteSpace(lastName) ? throw new ArgumentException(nameof(lastName)) : lastName;
+        FirstName = firstName ?? throw new ArgumentNullException(nameof(firstName));
+        LastName = lastName ?? throw new ArgumentNullException(nameof(lastName));
         Sex = sex;
-        Emails = emails ?? throw new ArgumentNullException(nameof(emails));
         Age = age ?? throw new ArgumentNullException(nameof(age));
     }
+
+    // NOWA METODA: Do edycji kontaktu
+    public void UpdateBasicInfo(FirstName firstName, LastName lastName, Sex sex, Age age)
+    {
+        FirstName = firstName ?? throw new ArgumentNullException(nameof(firstName));
+        LastName = lastName ?? throw new ArgumentNullException(nameof(lastName));
+        Sex = sex;
+        Age = age ?? throw new ArgumentNullException(nameof(age));
+    }
+
+    // Metody do zarządzania kolekcją
     public bool HasEmail(Email email)
     {
+        // Porównujemy obiekty wartości (VO)
         return Emails.Any(e => e.Address == email.Address);
     }
+    
     public void AddEmail(Email email)
     {
         if (!HasEmail(email))

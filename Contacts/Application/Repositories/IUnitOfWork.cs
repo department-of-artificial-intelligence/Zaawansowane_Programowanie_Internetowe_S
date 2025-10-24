@@ -1,11 +1,10 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using System.Threading.Tasks; 
 
-namespace Contacts.Application;
-
-public interface IUnitOfWork
+namespace Contacts.Application.Repositories
 {
-    void Save();
+    public interface IUnitOfWork
+    {
+        void Save();
+        Task SaveAsync(); 
+    }
 }

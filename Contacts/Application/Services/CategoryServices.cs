@@ -1,24 +1,19 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Contacts.Application.UseCases.DTOs;
 using Contacts.Application.UseCases;
+using Contacts.Application.UseCases.DTOs;
 using Contacts.Application.Repositories;
-
 namespace Contacts.Application.Services;
 
 public class CategoryServices(
-    ICategoryRepository categoryRepository,
-    IUnitOfWork unitOfWork
-
-    ) : ICategoryUseCases
+ICategoryRepository categoryRepository,
+IUnitOfWork unitOfWork
+) : ICategoryUseCases
 {
-    public void AddCategory(AddCategoryDTO categoryDTO)
-    {
+public AddCategoryResult AddCategory(AddCategoryDTO categoryDTO)    {
         if (categoryRepository.GetCategoryByName(categoryDTO.Name) == null)
         {
-            categoryRepository.Add(categoryDTO); unitOfWork.Save();
+            categoryRepository.Add(categoryDTO);
+            unitOfWork.Save();
+            return new AddCategoryResult();
         }
         else
         {
@@ -28,15 +23,37 @@ public class CategoryServices(
     public void RemoveCategory(int categoryID)
     {
         var category = categoryRepository.GetCategory(categoryID);
-        if (category != null)
+        if (category == null)
         {
-            categoryRepository.RemoveCategory(category);
-            unitOfWork.Save();
+            throw new ServiceException(
+                $"Kategoria o id: {categoryID} nie istnieje");
         }
-        else
+
+        if (categoryRepository.IsCategoryInUse(categoryID))
         {
-            throw new ServiceException($"Kategoria o id: {categoryID} nie istnieje");
+            throw new ServiceException(
+                $"Nie można usunąć kategorii '{category.Name}', ponieważ jest przypisana do co najmniej jednego adresu email.");
         }
+        categoryRepository.RemoveCategory(category);
+        unitOfWork.Save();
+    }
+
+    public void UpdateCategory(UpdateCategoryDTO categoryDTO)
+    {
+        var existingCategoryWithName = categoryRepository.GetCategoryByName(categoryDTO.Name);
+        if (existingCategoryWithName != null && existingCategoryWithName.Id != categoryDTO.Id)
+        {
+            throw new ServiceException("Kategoria o tej nazwie już istnieje.");
+        }
+
+        var categoryToUpdate = categoryRepository.GetCategory(categoryDTO.Id);
+        if (categoryToUpdate == null)
+        {
+            throw new ServiceException($"Kategoria o id: {categoryDTO.Id} nie istnieje.");
+        }
+
+        categoryToUpdate.UpdateName(categoryDTO.Name);
+
+        unitOfWork.Save();
     }
 }
-

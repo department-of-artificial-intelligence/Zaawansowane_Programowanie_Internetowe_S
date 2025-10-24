@@ -1,9 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Contacts.Application.Domain;
-
 namespace Contacts.Application.Repositories;
 
 public interface ICategoryRepository
@@ -13,4 +8,6 @@ public interface ICategoryRepository
     Category? GetCategoryByName(string categoryName);
     void Add(Category category);
     void RemoveCategory(Category category);
+
+    bool IsCategoryInUse(int categoryId);
 }

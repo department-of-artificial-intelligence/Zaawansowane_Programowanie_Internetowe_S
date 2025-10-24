@@ -13,4 +13,18 @@ public class CategoryRepository(AppDbContext context) : ICategoryRepository
     {
         context.Categories.Add(category);
     }
+    public IEnumerable<Category> GetCategories()
+    => context.Categories;
+    public Category? GetCategory(int categoryId)
+    => context.Categories.Find(categoryId);
+    public Category? GetCategoryByName(string categoryName)
+    => context.Categories.SingleOrDefault(
+    category => category.Name == categoryName);
+    public void RemoveCategory(Category category)
+    => context.Remove(category);
+
+    public bool IsCategoryInUse(int categoryId)
+    {
+        return context.Emails.Any(email => email.CategoryId == categoryId);
+    }
 }
