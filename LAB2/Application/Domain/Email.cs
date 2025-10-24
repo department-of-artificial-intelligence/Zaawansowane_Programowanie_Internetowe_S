@@ -14,11 +14,8 @@ public class Email
     public int CategoryId { get; private set; }
     public Category Category { get; private set; } = null!;
 
-    private Email()
-    {
+    private Email() { }
 
-    }
-    
     public Email(int id, Contact contact, Category category, EmailAddress email)
     {
         Id = id;

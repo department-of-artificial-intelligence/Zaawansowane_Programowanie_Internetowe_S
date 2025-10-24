@@ -1,5 +1,3 @@
 namespace Contacts.Application.Services;
-public class ServiceException(string message)
-: ApplicationException(message)
-{
-}
+
+public class ServiceException(string message) : ApplicationException(message) { }

@@ -1,4 +1,5 @@
 using Contacts.Application.Domain;
+
 namespace Contacts.Application.Queries.DTOs
 {
     public class CategoryDTO
@@ -8,13 +9,7 @@ namespace Contacts.Application.Queries.DTOs
 
         public static explicit operator CategoryDTO(Category category)
         {
-            return new CategoryDTO
-            {
-                Id = category.Id,
-                Name = category.Name
-            };
+            return new CategoryDTO { Id = category.Id, Name = category.Name };
         }
-
-
     }
 }

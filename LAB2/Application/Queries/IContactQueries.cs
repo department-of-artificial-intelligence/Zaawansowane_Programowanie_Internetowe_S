@@ -4,8 +4,8 @@ using Contacts.Application.Repositories;
 
 namespace Contacts.Application.Queries;
 
-public interface ICategoryQueries
+public interface IContactQueries
 {
-    public IEnumerable<CategoryDTO> GetCategories();
-    public CategoryDTO? GetCategory(int categoryId);
+    public IEnumerable<ContactDTO> GetContacts();
+    public ContactDTO? GetContact(int contactId);
 }

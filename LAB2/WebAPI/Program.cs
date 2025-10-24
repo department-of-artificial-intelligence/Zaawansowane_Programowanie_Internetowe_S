@@ -18,9 +18,13 @@ builder.Services.AddTransient<ICategoryQueries, CategoriesQueries>();
 builder.Services.AddTransient<IUnitOfWork, UnitOfWork>();
 builder.Services.AddTransient<ICategoryRepository, CategoryRepository>();
 builder.Services.AddTransient<ICategoryUseCases, CategoryServices>();
+builder.Services.AddTransient<IContactQueries, ContactQueries>();
+builder.Services.AddTransient<IContactRepository, ContactRepository>();
+builder.Services.AddTransient<IContactUseCases, ContactServices>();
 
 // Dodanie us!ug koniecznych dla Swagger’a
-builder.Services.AddOpenApi();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 
 // Zbudowanie aplikacji na podstawie konfiguracji
 var app = builder.Build();
@@ -28,49 +32,84 @@ var app = builder.Build();
 // Uruchomienie swagger’a (tylko w przypadku trybu deweloperskiego).
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
 
 // Uruchomienie przekierowania "#da$ z HTTP do HTTPS
 app.UseHttpsRedirection();
 
 app.MapPost(
-    "/api/categories",
-    (AddCategoryDTO dto, ICategoryUseCases useCases) =>
-    {
-        try
+        "/api/categories",
+        (AddCategoryDTO dto, ICategoryUseCases useCases) =>
         {
-            var category = useCases.AddCategory(dto);
-            return Results.Created($"/categories/category.Id", category);
+            try
+            {
+                var category = useCases.AddCategory(dto);
+                return Results.Created($"/categories/category.Id", category);
+            }
+            catch (Exception exception)
+            {
+                return Results.Problem(detail: exception.Message, title: "Błąd");
+            }
         }
-        catch
+    )
+    .WithOpenApi(
+        (operation) =>
         {
-            return Results.Problem(
-                detail: "Wystpi! błąd podczas realizacji tego żądania",
-                title: "Błąd"
-            );
+            operation.Responses["201"].Description = "Kategoria zosta!a dodana";
+            operation.Responses["500"].Description = "Wystapil błąd";
+            return operation;
         }
-    }
-);
+    )
+    .Produces<AddCategoryResult>(StatusCodes.Status201Created)
+    .Produces(StatusCodes.Status500InternalServerError);
 
 app.MapGet(
-    "/api/categories",
-    (ICategoryQueries queries) =>
-    {
-        try
+        "/api/categories",
+        (ICategoryQueries queries) =>
         {
-            var categories = queries.GetCategories();
-            return Results.Ok(categories);
+            try
+            {
+                var categories = queries.GetCategories();
+                return Results.Ok(categories);
+            }
+            catch (Exception exception)
+            {
+                return Results.Problem(detail: exception.Message, title: "Błąd");
+            }
         }
-        catch
+    )
+    .WithDescription("Tworzy nowa kategorie")
+    .WithSummary("Tworzy nowa kategorie")
+    .WithTags("Kategoria");
+;
+
+app.MapPost(
+        "/api/contacts",
+        (AddContactDTO dto, IContactUseCases useCases) =>
         {
-            return Results.Problem(
-                detail: "Wystpi! błąd podczas realizacji tego żądania",
-                title: "Błąd"
-            );
+            try
+            {
+                var contact = useCases.AddContact(dto);
+                return Results.Created($"/contacts/contact.Id", contact);
+            }
+            catch (Exception exception)
+            {
+                return Results.Problem(detail: exception.Message, title: "Błąd");
+            }
         }
-    }
-);
+    )
+    .WithOpenApi(
+        (operation) =>
+        {
+            operation.Responses["201"].Description = "Kategoria zosta!a dodana";
+            operation.Responses["500"].Description = "Wystapil błąd";
+            return operation;
+        }
+    )
+    .Produces<AddContactResult>(StatusCodes.Status201Created)
+    .Produces(StatusCodes.Status500InternalServerError);
 
 // Uruchomienie aplikacji
 app.Run();
