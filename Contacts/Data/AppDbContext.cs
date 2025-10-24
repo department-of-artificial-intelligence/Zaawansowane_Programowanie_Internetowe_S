@@ -8,6 +8,7 @@ public class AppDbContext : DbContext
     public DbSet<Contact> Contacts => Set<Contact>();
     public DbSet<Category> Categories => Set<Category>();
     public DbSet<Email> Emails => Set<Email>();
+    public DbSet<User> Users => Set<User>();
 
     public AppDbContext(DbContextOptions<AppDbContext> options)
         : base(options) { }
@@ -38,5 +39,12 @@ public class AppDbContext : DbContext
         modelBuilder
             .Entity<Contact>()
             .OwnsOne(contact => contact.Age, ageBuilder => ageBuilder.Property(age => age.Value));
+
+        modelBuilder.Entity<User>(userBuilder =>
+        {
+            userBuilder.HasKey(user => user.Id);
+            userBuilder.Property(user => user.UserName).IsRequired();
+            userBuilder.Property(user => user.Password).IsRequired();
+        });
     }
 }

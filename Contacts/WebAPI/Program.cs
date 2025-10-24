@@ -1,16 +1,70 @@
+using System.Text;
 using Contacts.Application;
+using Contacts.Application.DomainServices;
 using Contacts.Application.Queries;
 using Contacts.Application.Repositories;
 using Contacts.Application.Services;
 using Contacts.Application.UseCases;
 using Contacts.Application.UseCases.DTOs;
 using Contacts.Data;
+using Contacts.WebAPI.Helpers;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(option =>
+{
+    option.AddSecurityDefinition(
+        "Bearer",
+        new OpenApiSecurityScheme
+        {
+            In = ParameterLocation.Header,
+            Description = "Please enter a valid token",
+            Name = "Authorization",
+            Type = SecuritySchemeType.Http,
+            BearerFormat = "JWT",
+            Scheme = "Bearer",
+        }
+    );
+    option.AddSecurityRequirement(
+        new OpenApiSecurityRequirement
+        {
+            {
+                new OpenApiSecurityScheme
+                {
+                    Reference = new OpenApiReference
+                    {
+                        Type = ReferenceType.SecurityScheme,
+                        Id = "Bearer",
+                    },
+                },
+                new string[] { }
+            },
+        }
+    );
+});
+
+builder
+    .Services.AddAuthentication()
+    .AddJwtBearer(x =>
+    {
+        x.TokenValidationParameters = new TokenValidationParameters
+        {
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(builder.Configuration["ApplicationSettings:JWT_KEY"])
+            ),
+            ValidateIssuer = false,
+            ValidateAudience = false,
+            ValidateLifetime = true,
+        };
+    });
+builder.Services.AddAuthorization();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("default"))
@@ -20,6 +74,12 @@ builder.Services.AddTransient<ICategoryQueries, CategoriesQueries>();
 builder.Services.AddTransient<IUnitOfWork, UnitOfWork>();
 builder.Services.AddTransient<ICategoryRepository, CategoryRepository>();
 builder.Services.AddTransient<ICategoryUseCases, CategoryServices>();
+builder.Services.AddTransient<IContactQueries, ContactQueries>();
+builder.Services.AddTransient<IContactRepository, ContactRepository>();
+builder.Services.AddTransient<IContactUseCases, ContactServices>();
+builder.Services.AddTransient<IUserRepository, UserRepository>();
+builder.Services.AddTransient<IUserUseCases, UserServices>();
+builder.Services.AddSingleton<ITokenGenerator, TokenGenerator>();
 
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
@@ -28,7 +88,21 @@ builder.Services.AddOpenApi();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+    Console.WriteLine("EF Core używa pliku bazy:");
+    Console.WriteLine(context.Database.GetConnectionString());
+
+    var pending = context.Database.GetPendingMigrations();
+    Console.WriteLine("Pending migrations:");
+    foreach(var m in pending)
+        Console.WriteLine(m);
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -42,7 +116,51 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseAuthorization();
 
+app.MapPost(
+    "/api/users",
+    (AddUserDTO dto, IUserUseCases useCases) =>
+    {
+        try
+        {
+            var user = useCases.AddUser(dto);
+            return Results.Created($"/api/users/{user.Id}", user);
+        }
+        catch
+        {
+            return Results.Problem(detail: "Blad usera", title: "Blad");
+        }
+    }
+);
+
+app.MapPost(
+    "/api/login",
+    (LoginUserDTO dto, IUserUseCases userUseCases) =>
+    {
+        try
+        {
+            var loginResult = userUseCases.LoginUser(dto);
+            if (loginResult.Status == UserLoginStatus.UserLogged)
+            {
+                return Results.Ok(new { AccessToken = loginResult.Token });
+            }
+            else
+            {
+                return Results.Unauthorized();
+            }
+        }
+        catch (Exception e)
+        {
+            return Results.Problem(
+                detail: e.Message,
+                title: "Błąd"
+            );
+        }
+    }
+);
+
+// KATEGORIE
 app.MapPost(
         "/api/categories",
         (AddCategoryDTO dto, ICategoryUseCases useCases) =>
@@ -70,7 +188,8 @@ app.MapPost(
     .WithSummary("Tworzy nowa kategorie")
     .WithTags("Kategoria")
     .Produces<AddCategoryResult>(StatusCodes.Status201Created)
-    .Produces(StatusCodes.Status500InternalServerError);
+    .Produces(StatusCodes.Status500InternalServerError)
+    .RequireAuthorization();
 
 app.MapPost(
         "/api/categories/edit",
@@ -102,7 +221,7 @@ app.MapPost(
     .Produces(StatusCodes.Status500InternalServerError);
 
 app.MapPost(
-        "/api/categories/{:id}",
+        "/api/categories/{id}",
         (int id, ICategoryUseCases useCases) =>
         {
             try
@@ -124,60 +243,145 @@ app.MapPost(
             return operation;
         }
     )
-    .WithDescription("Aktualizuje nowa kategorie")
-    .WithSummary("Aktualizuje nowa kategorie")
+    .WithDescription("Usuwa nowa kategorie")
+    .WithSummary("Usuwa nowa kategorie")
     .WithTags("Kategoria")
     .Produces<AddCategoryResult>(StatusCodes.Status200OK)
     .Produces(StatusCodes.Status500InternalServerError);
 
 app.MapGet(
-    "/api/categories",
-    (ICategoryQueries queries) =>
-    {
-        try
+        "/api/categories",
+        (ICategoryQueries queries) =>
         {
-            var categories = queries.GetCategories();
-            return Results.Ok(categories);
+            try
+            {
+                var categories = queries.GetCategories();
+                return Results.Ok(categories);
+            }
+            catch (Exception ex)
+            {
+                return Results.Problem(detail: ex.Message, title: "Błąd serwera");
+            }
         }
-        catch (Exception ex)
+    )
+    .WithDescription("Wyświetla wszystkie")
+    .WithSummary("Wyświetla wszystkie kategorie")
+    .WithTags("Kategoria");
+
+app.MapGet(
+        "/api/categories/{id}",
+        (int id, ICategoryQueries queries) =>
         {
-            return Results.Problem(detail: ex.Message, title: "Błąd serwera");
+            try
+            {
+                var category = queries.GetCategory(id);
+                return Results.Ok(category);
+            }
+            catch (Exception ex)
+            {
+                return Results.Problem(detail: ex.Message, title: "Błąd serwera");
+            }
         }
-    }
-);
+    )
+    .WithDescription("Wyświetla wybraną kategorie po id")
+    .WithSummary("Wyświetla wybraną kategorie po id")
+    .WithTags("Kategoria");
 
-// var summaries = new[]
-// {
-//     "Freezing",
-//     "Bracing",
-//     "Chilly",
-//     "Cool",
-//     "Mild",
-//     "Warm",
-//     "Balmy",
-//     "Hot",
-//     "Sweltering",
-//     "Scorching",
-// };
+// CONTACTS
+app.MapPost(
+        "/api/contacts",
+        (AddContactDTO dto, IContactUseCases useCases) =>
+        {
+            try
+            {
+                var contact = useCases.AddContact(dto);
+                return Results.Created($"/contacts/contact.Id", contact);
+            }
+            catch
+            {
+                return Results.Problem(detail: "Blad podczas dodawania kontaktu");
+            }
+        }
+    )
+    .WithDescription("Dodaje nowy kontakt")
+    .WithSummary("Dodaje nowy kontakt")
+    .WithTags("Kontakt");
 
-// app.MapGet(
-//         "/weatherforecast",
-//         () =>
-//         {
-//             var forecast = Enumerable
-//                 .Range(1, 5)
-//                 .Select(index => new WeatherForecast(
-//                     DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-//                     Random.Shared.Next(-20, 55),
-//                     summaries[Random.Shared.Next(summaries.Length)]
-//                 ))
-//                 .ToArray();
-//             return forecast;
-//         }
-//     )
-//     .WithName("GetWeatherForecast");
+app.MapPost(
+        "/api/contacts/edit",
+        (EditContactDTO dto, IContactUseCases useCases) =>
+        {
+            try
+            {
+                var contact = useCases.EditContact(dto);
+                return Results.Created($"/contacts/contact.Id", contact);
+            }
+            catch
+            {
+                return Results.Problem(detail: "Blad podczas edycji kontaktu");
+            }
+        }
+    )
+    .WithDescription("Aktualizuje kontakt")
+    .WithSummary("Aktualizuje kontakt")
+    .WithTags("Kontakt");
 
-// builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+app.MapPost(
+        "/api/contacts/{id}",
+        (int id, IContactUseCases useCases) =>
+        {
+            try
+            {
+                useCases.RemoveContact(id);
+                return Results.Ok();
+            }
+            catch
+            {
+                return Results.Problem(detail: "Wystapil blad podczas usuwania");
+            }
+        }
+    )
+    .WithDescription("Usuwa kontakt")
+    .WithSummary("Usuwa kontakt")
+    .WithTags("Kontakt");
+
+app.MapGet(
+        "/api/contacts",
+        (IContactQueries queries) =>
+        {
+            try
+            {
+                var contacts = queries.GetContacts();
+                return Results.Ok(contacts);
+            }
+            catch (Exception ex)
+            {
+                return Results.Problem(detail: ex.Message, title: "Błąd serwera");
+            }
+        }
+    )
+    .WithDescription("Wyświetla wszystkie kontakty")
+    .WithSummary("Wyświetla wszystkie kontakty")
+    .WithTags("Kontakt");
+
+app.MapGet(
+        "/api/contacts/{id}",
+        (int id, IContactQueries queries) =>
+        {
+            try
+            {
+                var contact = queries.GetContact(id);
+                return Results.Ok(contact);
+            }
+            catch (Exception ex)
+            {
+                return Results.Problem(detail: ex.Message, title: "Błąd serwera");
+            }
+        }
+    )
+    .WithDescription("Wyświetla wybrany kontakt po id")
+    .WithSummary("Wyświetla wybrany kontakt po id")
+    .WithTags("Kontakt");
 
 app.Run();
 
@@ -185,3 +389,5 @@ app.Run();
 // {
 //     public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
 // }
+
+
