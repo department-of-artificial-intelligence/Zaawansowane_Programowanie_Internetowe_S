@@ -7,4 +7,5 @@ public interface IUserRepository
     void Add(User user);
     bool UserNotExists(string userName);
     User? GetByName(string userName);
+    User? GetById(int userId);
 }

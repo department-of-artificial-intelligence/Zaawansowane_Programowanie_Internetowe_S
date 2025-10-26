@@ -21,5 +21,9 @@ public class CategoryRepository(AppDbContext context) : ICategoryRepository
     public Category? GetCategoryByName(string categoryName) =>
         context.Categories.SingleOrDefault(category => category.Name == categoryName);
 
+
+     public Category? GetCategoryByNameAndUser(string categoryName, int userId) =>
+        context.Categories.SingleOrDefault(category => category.Name == categoryName && category.UserId == userId);
+
     public void RemoveCategory(Category category) => context.Remove(category);
 }

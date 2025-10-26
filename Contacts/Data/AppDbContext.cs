@@ -46,5 +46,7 @@ public class AppDbContext : DbContext
             userBuilder.Property(user => user.UserName).IsRequired();
             userBuilder.Property(user => user.Password).IsRequired();
         });
+
+        modelBuilder.Entity<Category>().HasOne(c => c.User).WithMany().HasForeignKey(c => c.UserId);
     }
 }

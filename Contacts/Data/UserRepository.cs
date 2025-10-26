@@ -8,6 +8,9 @@ public class UserRepository(AppDbContext context) : IUserRepository
     public User? GetByName(string userName) =>
         context.Users.SingleOrDefault(user => user.UserName == userName);
 
+     public User? GetById(int userId) =>
+        context.Users.SingleOrDefault(user => user.Id == userId);
+
     public bool UserNotExists(string userName) =>
         context.Users.SingleOrDefault(u => u.UserName == userName) is null;
 

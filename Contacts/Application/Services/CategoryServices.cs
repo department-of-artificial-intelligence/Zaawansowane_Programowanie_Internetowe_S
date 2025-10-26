@@ -1,23 +1,33 @@
 using Contacts.Application.Repositories;
 using Contacts.Application.UseCases;
 using Contacts.Application.UseCases.DTOs;
+using Contacts.Application.Domain;
 
 namespace Contacts.Application.Services;
 
-public class CategoryServices(ICategoryRepository categoryRepository, IUnitOfWork unitOfWork)
+public class CategoryServices(ICategoryRepository categoryRepository, IUserRepository userRepository, IUnitOfWork unitOfWork)
     : ICategoryUseCases
 {
     public AddCategoryResult AddCategory(AddCategoryDTO categoryDTO)
     {
-        if (categoryRepository.GetCategoryByName(categoryDTO.Name) == null)
+        if (
+            categoryRepository.GetCategoryByNameAndUser(categoryDTO.Name, categoryDTO.UserId)
+            == null
+        )
         {
-            categoryRepository.Add(categoryDTO);
-            unitOfWork.Save();
-            return categoryRepository.GetCategoryByName(categoryDTO.Name);
+            var user = userRepository.GetById(categoryDTO.UserId);
+            if (user != null)
+            {
+                var category = new Category(categoryDTO.Name, user);
+                categoryRepository.Add(category);
+                unitOfWork.Save();
+                return category;
+            }
+            throw new ServiceException(message: $"Użytkownik o Id: {user.Id} nie istnieje");
         }
         else
         {
-            throw new ServiceException("Kategoria o tej nazwie ju! istnieje");
+            throw new ServiceException("Kategoria o tej nazwie już istnieje");
         }
     }
 

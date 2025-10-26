@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using System.Text;
 using Contacts.Application;
 using Contacts.Application.DomainServices;
@@ -8,12 +9,13 @@ using Contacts.Application.UseCases;
 using Contacts.Application.UseCases.DTOs;
 using Contacts.Data;
 using Contacts.WebAPI.Helpers;
+using Contacts.WebAPI.Inputs;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-
+using Contacts.WebAPI.Inputs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -88,8 +90,23 @@ builder.Services.AddOpenApi();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+
+    try
+    {
+        var context = services.GetRequiredService<AppDbContext>();
+        context.Database.Migrate();
+    }
+    catch (Exception ex)
+    {
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "Błąd podczas migracji bazy danych");
+    }
+}
 
 using (var scope = app.Services.CreateScope())
 {
@@ -100,7 +117,7 @@ using (var scope = app.Services.CreateScope())
 
     var pending = context.Database.GetPendingMigrations();
     Console.WriteLine("Pending migrations:");
-    foreach(var m in pending)
+    foreach (var m in pending)
         Console.WriteLine(m);
 }
 
@@ -152,10 +169,7 @@ app.MapPost(
         }
         catch (Exception e)
         {
-            return Results.Problem(
-                detail: e.Message,
-                title: "Błąd"
-            );
+            return Results.Problem(detail: e.Message, title: "Błąd");
         }
     }
 );
@@ -163,12 +177,16 @@ app.MapPost(
 // KATEGORIE
 app.MapPost(
         "/api/categories",
-        (AddCategoryDTO dto, ICategoryUseCases useCases) =>
+        (AddCategory addCategory, ICategoryUseCases useCases, HttpContext httpContext) =>
         {
             try
             {
-                var category = useCases.AddCategory(dto);
-                return Results.Created($"/categories/category.Id", category);
+                var user = httpContext.User;
+                var userId = int.Parse(user.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+                var category = useCases.AddCategory(
+                    new AddCategoryDTO { Name = addCategory.Name, UserId = userId }
+                );
+                return Results.Created($"/api/categories/{category.Id}", category);
             }
             catch
             {
@@ -389,5 +407,3 @@ app.Run();
 // {
 //     public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
 // }
-
-
