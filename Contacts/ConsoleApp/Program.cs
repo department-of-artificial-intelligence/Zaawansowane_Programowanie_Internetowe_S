@@ -5,6 +5,7 @@ using Contacts.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 
+
 // Wczytanie pliku konfiguracyjnego
 var builder = new ConfigurationBuilder();
 builder
