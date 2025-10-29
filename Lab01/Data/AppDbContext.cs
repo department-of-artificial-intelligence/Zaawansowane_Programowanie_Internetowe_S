@@ -40,18 +40,16 @@ public class AppDbContext : DbContext
         modelBuilder
             .Entity<Contact>()
             .OwnsOne(contact => contact.Age, ageBuilder => ageBuilder.Property(age => age.Value));
-        modelBuilder.Entity<Contact>()
+        modelBuilder
+            .Entity<Contact>()
             .Property(c => c.FirstName)
-            .HasConversion(
-                fn => fn.Value,
-                value => new FirstName(value))
+            .HasConversion(fn => fn.Value, value => new FirstName(value))
             .HasColumnName("FirstName");
 
-        modelBuilder.Entity<Contact>()
+        modelBuilder
+            .Entity<Contact>()
             .Property(c => c.LastName)
-            .HasConversion(
-                ln => ln.Value,
-                value => new LastName(value))
+            .HasConversion(ln => ln.Value, value => new LastName(value))
             .HasColumnName("LastName");
     }
 }
