@@ -2,14 +2,23 @@
   "name": "lab1",
   "version": "1.0.0",
   "description": "Lab 1 ",
+  "homepage": "https://github.com/department-of-artificial-intelligence/Zaawansowane_Programowanie_Internetowe_S#readme",
+  "bugs": {
+    "url": "https://github.com/department-of-artificial-intelligence/Zaawansowane_Programowanie_Internetowe_S/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/department-of-artificial-intelligence/Zaawansowane_Programowanie_Internetowe_S.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "webpack serve --config ./webpack.config.js",
     "build": "webpack --config ./webpack.config.js"
   },
-  "author": "",
-  "license": "ISC",
   "devDependencies": {
     "html-webpack-plugin": "^5.6.4",
     "ts-loader": "^9.5.4",
@@ -17,13 +26,5 @@
     "webpack": "^5.102.1",
     "webpack-cli": "^4.10.0",
     "webpack-dev-server": "^4.15.2"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/department-of-artificial-intelligence/Zaawansowane_Programowanie_Internetowe_S.git"
-  },
-  "bugs": {
-    "url": "https://github.com/department-of-artificial-intelligence/Zaawansowane_Programowanie_Internetowe_S/issues"
-  },
-  "homepage": "https://github.com/department-of-artificial-intelligence/Zaawansowane_Programowanie_Internetowe_S#readme"
+  }
 }

@@ -1,10 +1,10 @@
-class Autor {
+export class Autor {
     private _id: number;
     private _imie: string;
     private _nazwisko: string;
     private _email: string;
 
-    public constructor(imie: string,nazwisko: string) {
+    constructor(imie: string,nazwisko: string) {
         this._imie = imie;
         this._nazwisko = nazwisko;
     }
@@ -30,6 +30,9 @@ class Autor {
     }
 
     set email(value: string) {
-        this._email = value;
+        const emailRegex = /^[a-zA-Z0-9]+@[a-zA-Z0-9]+\.[a-zA-Z0-9]+$/;
+        if (!emailRegex.test(value)) {
+            throw new Error("Nieprawidłowy format emaila");
+        }
     }
 }
