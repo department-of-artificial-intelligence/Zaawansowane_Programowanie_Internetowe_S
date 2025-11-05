@@ -12,6 +12,12 @@ class Blog {
   }
 
   constructor(nazwa: string, autor: Autor) {
+    if (nazwa.trim() === "") {
+      throw "Nazwa nie może być pusta.";
+    }
+    if (!autor) {
+      throw "Autor musi być podany";
+    }
     this._nazwa = nazwa;
     this._autor = autor;
   }

@@ -2,7 +2,7 @@ class Artykul {
   _id: number;
   _tytul: string;
   _tresc: string;
-  _dataUtworzenia: Date;
+  _dataUtworzenia: Date = new Date;
   _komentarze: Komentarz[];
 
   get tytul(): string {
@@ -13,6 +13,9 @@ class Artykul {
   }
 
   constructor(tytul: string, tresc: string) {
+    if (tytul.trim() === "") {
+      throw "Tytul nie może być pusta.";
+    }
     this._tytul = tytul;
     this._tresc = tresc;
   }
