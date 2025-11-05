@@ -1,3 +1,4 @@
+
 class Blog
 {
 _id: number
@@ -14,6 +15,14 @@ get autor() { return this._autor; }
 
 constructor(nazwa: string, autor: Autor)
 {
+    if(!nazwa || nazwa.trim() === "")
+        {
+        throw new Error("nazwa jest pusta") 
+        }
+    if(!autor)
+        {
+            throw new Error("nie ma autora")
+        }
     this._nazwa=nazwa;
     this._autor=autor;
 }

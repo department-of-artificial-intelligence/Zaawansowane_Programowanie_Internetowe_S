@@ -12,8 +12,10 @@ get tresc() { return this._tresc; }
 
 constructor(tytul: string,tresc: string)
 {
+    
     this._tytul=tytul;
     this._tresc=tresc;
+    this._dataUtworzenia =new Date;
 }
 dodajKomentarz(komentarz: Komentarz)
 {
