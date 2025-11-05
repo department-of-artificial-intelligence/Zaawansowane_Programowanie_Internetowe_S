@@ -1,4 +1,3 @@
-import { Autor } from './Autor';
 import { Komentarz } from './Komentarz';
 
 export class Arttykul {
@@ -8,20 +7,13 @@ export class Arttykul {
     private _dataUtworzenia: Date;
     private _komentarze: Komentarz[];
 
-    constructor(tytul: string, tresc: string, dataUtworzenia?: Date) {
-        this._tytul = tytul;
-        this._tresc = tresc;
-        this._dataUtworzenia = dataUtworzenia || new Date();
-        this._komentarze = [];
+    constructor(tytul: string, tresc: string) {
+        if (!tytul?.trim()) throw new Error("Tytuł artykułu nie może być pusty.");
+        this._tytul = tytul.trim();
+        this._tresc = tresc ?? ""; // przyjmujemy pustą treść, jeśli nie podano
+        this._dataUtworzenia = new Date(); // wymóg: aktualna data
+        this._komentarze = []; // inicjalizujemy, by móc dalej dodawać komentarze
         this._id = 0;
-    }
-
-    get id(): number {
-        return this._id;
-    }
-
-    set id(value: number) {
-        this._id = value;
     }
 
     get tytul(): string {
@@ -29,7 +21,8 @@ export class Arttykul {
     }
 
     set tytul(value: string) {
-        this._tytul = value;
+        if (!value?.trim()) throw new Error("Tytuł artykułu nie może być pusty.");
+        this._tytul = value.trim();
     }
 
     get tresc(): string {
@@ -37,21 +30,14 @@ export class Arttykul {
     }
 
     set tresc(value: string) {
-        this._tresc = value;
+        this._tresc = value ?? "";
     }
 
     get dataUtworzenia(): Date {
         return this._dataUtworzenia;
     }
 
-    set dataUtworzenia(value: Date) {
-        this._dataUtworzenia = value;
-    }
-
-    get komentarze(): Komentarz[] {
-        return [...this._komentarze];
-    }
-
+    // Metody
     dodajKomentarz(komentarz: Komentarz): void {
         this._komentarze.push(komentarz);
     }

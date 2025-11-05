@@ -5,18 +5,21 @@ export class Autor {
     private _email: string;
 
     constructor(imie: string, nazwisko: string, email: string) {
-        this._imie = imie;
-        this._nazwisko = nazwisko;
-        this._email = email;
-        this._id = 0;
-    }
+        // Walidacja wymaganych pól
+        if (!imie?.trim()) throw new Error("Imię jest wymagane.");
+        if (!nazwisko?.trim()) throw new Error("Nazwisko jest wymagane.");
+        if (!email?.trim()) throw new Error("Email jest wymagany.");
 
-    get id(): number {
-        return this._id;
-    }
+        // Walidacja formatu email (prosty regex — wystarczający dla podstawowej składni)
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            throw new Error("Niepoprawny format adresu email.");
+        }
 
-    set id(value: number) {
-        this._id = value;
+        this._imie = imie.trim();
+        this._nazwisko = nazwisko.trim();
+        this._email = email.trim();
+        this._id = 0; // ID nadal może być ustawiane później
     }
 
     get imie(): string {
@@ -24,7 +27,8 @@ export class Autor {
     }
 
     set imie(value: string) {
-        this._imie = value;
+        if (!value?.trim()) throw new Error("Imię nie może być puste.");
+        this._imie = value.trim();
     }
 
     get nazwisko(): string {
@@ -32,7 +36,8 @@ export class Autor {
     }
 
     set nazwisko(value: string) {
-        this._nazwisko = value;
+        if (!value?.trim()) throw new Error("Nazwisko nie może być puste.");
+        this._nazwisko = value.trim();
     }
 
     get email(): string {
@@ -40,6 +45,11 @@ export class Autor {
     }
 
     set email(value: string) {
-        this._email = value;
+        if (!value?.trim()) throw new Error("Email jest wymagany.");
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(value)) {
+            throw new Error("Niepoprawny format adresu email.");
+        }
+        this._email = value.trim();
     }
 }

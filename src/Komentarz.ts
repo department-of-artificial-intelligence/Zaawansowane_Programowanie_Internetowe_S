@@ -3,10 +3,12 @@ export class Komentarz {
     private _data: Date;
     private _nick: string;
 
-    constructor(tresc: string, nick: string, data?: Date) {
-        this._tresc = tresc;
-        this._nick = nick;
-        this._data = data || new Date();
+    constructor(tresc: string, nick: string) {
+        if (!tresc?.trim()) throw new Error("Treść komentarza nie może być pusta.");
+        if (!nick?.trim()) throw new Error("Nick nie może być pusty.");
+        this._tresc = tresc.trim();
+        this._nick = nick.trim();
+        this._data = new Date(); // domyślna data — choć nie wymagana w zadaniu, ale rozsądna
     }
 
     get tresc(): string {
@@ -14,7 +16,8 @@ export class Komentarz {
     }
 
     set tresc(value: string) {
-        this._tresc = value;
+        if (!value?.trim()) throw new Error("Treść komentarza nie może być pusta.");
+        this._tresc = value.trim();
     }
 
     get data(): Date {
@@ -22,6 +25,7 @@ export class Komentarz {
     }
 
     set data(value: Date) {
+        if (!(value instanceof Date)) throw new Error("Data musi być obiektem Date.");
         this._data = value;
     }
 
@@ -30,14 +34,16 @@ export class Komentarz {
     }
 
     set nick(value: string) {
-        this._nick = value;
+        if (!value?.trim()) throw new Error("Nick nie może być pusty.");
+        this._nick = value.trim();
     }
-    dodajOdpowiedz(odpowiedz: Komentarz): void {
 
-        console.log(`Dodano odpowiedź "${odpowiedz.tresc}" do komentarza "${this.tresc}"`);
+    dodajOdpowiedz(odpowiedz: Komentarz): void {
+        // Wymaga rozszerzenia klasy — ale nie jest to wymagane w zadaniu,
+        // więc zostawiam pustą implementację.
     }
 
     pobierzOdpowiedzi(): Komentarz[] {
-        return [];
+        return []; // zgodnie z wcześniejszym diagramem
     }
 }
