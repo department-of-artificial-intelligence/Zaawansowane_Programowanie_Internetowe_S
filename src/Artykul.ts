@@ -8,6 +8,7 @@ export class Artykul{
     private _komentarze:Komentarz[];
 
     constructor(tytul:string,tresc:string){
+        if (!tytul.trim()) throw new Error("Pole tytuł nie może być puste");
         this._tytul = tytul;
         this._tresc = tresc;
     }

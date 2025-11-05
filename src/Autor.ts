@@ -4,9 +4,17 @@ export class Autor {
     private _nazwisko: string;
     private _email: string;
 
-    constructor(imie: string,nazwisko: string) {
+    constructor(imie: string,nazwisko: string,email:string) {
+        const emailRegex = /^[a-zA-Z0-9]+@[a-zA-Z0-9]+\.[a-zA-Z0-9]+$/;
+        if (!emailRegex.test(email)) {
+            throw new Error("Nieprawidłowy format emaila");
+        }
+        if (!imie.trim()) throw new Error("Pole imie nie może być puste");
+        if (!nazwisko.trim()) throw new Error("Pole nazwisko nie może być puste");
+        if (!email.trim()) throw new Error("Pole nazwisko nie może być puste");
         this._imie = imie;
         this._nazwisko = nazwisko;
+        this._email = email;
     }
 
     get imie(): string {
