@@ -8,7 +8,8 @@ export class Blog{
     private _artykuly: Artykul[];
 
     constructor(nazwa:string,autor:Autor){
-        if (!nazwa.trim()) throw new Error("Pole nazwa nie może być puste");
+        if (!nazwa || !nazwa.trim()) throw new Error("Pole nazwa nie może być puste");
+        if (!autor) throw new Error("Autor musi być podany");
         this._nazwa = nazwa;
         this._autor = autor;
     }
