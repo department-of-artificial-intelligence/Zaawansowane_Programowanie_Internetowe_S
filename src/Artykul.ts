@@ -8,7 +8,15 @@ export class Artykul {
   private _komentarze: Komentarz[] = [];
 
   constructor(tytul: string, tresc: string) {
-    this._id = Date.now().valueOf();
+    if (!tytul || tytul.trim().length === 0) {
+      throw new Error("Tytuł artykułu nie może być pusty.");
+    }
+
+    if (!tresc || tresc.trim().length === 0) {
+      throw new Error("Treść artykułu nie może być pusta.");
+    }
+
+    this._id = Date.now();
     this._tytul = tytul;
     this._tresc = tresc;
     this._dataUtworzenia = new Date();
@@ -20,6 +28,10 @@ export class Artykul {
 
   get tresc(): string {
     return this._tresc;
+  }
+
+  get dataUtworzenia(): Date {
+    return this._dataUtworzenia;
   }
 
   dodajKomentarz(komentarz: Komentarz): void {

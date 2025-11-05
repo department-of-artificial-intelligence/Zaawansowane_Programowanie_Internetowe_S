@@ -8,20 +8,28 @@ export class Blog {
     private _artykul: Artykul[] = [];
 
     constructor(nazwa: string, autor: Autor){
+        if (!nazwa) {
+            throw new Error("Nazwa bloga nie może być pusta.");
+        }
+
+        if (!autor) {
+            throw new Error("Autor bloga musi zostać podany.");
+        }
+
+        this._id = Date.now();
         this._nazwa = nazwa;
         this._autor = autor;
     }
 
-
-    get nazwa(): string{
+    get nazwa(): string {
         return this._nazwa;
     }
 
-    get autor(): Autor{
+    get autor(): Autor {
         return this._autor;
     }
 
-    public dodajArtykul(artykul: Artykul): void{
+    public dodajArtykul(artykul: Artykul): void {
         this._artykul.push(artykul);
     }
     
@@ -30,6 +38,6 @@ export class Blog {
     }
 
     public pobierzArtykul(tytul: string): Artykul | undefined {
-        return this._artykul.find(a => a.tytul == tytul);
+        return this._artykul.find(a => a.tytul === tytul);
     } 
 }
