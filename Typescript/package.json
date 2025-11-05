@@ -11,11 +11,15 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@types/rx": "^4.1.4",
     "html-webpack-plugin": "^5.6.4",
     "ts-loader": "^9.5.4",
     "typescript": "^5.9.3",
     "webpack": "^5.102.1",
     "webpack-cli": "^6.0.1",
     "webpack-dev-server": "^5.2.2"
+  },
+  "dependencies": {
+    "rxjs": "^7.8.2"
   }
 }

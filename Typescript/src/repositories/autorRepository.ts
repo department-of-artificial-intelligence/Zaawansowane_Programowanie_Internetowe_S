@@ -1,5 +1,5 @@
-import * as fs from "fs";
-import { Autor } from "../classes/autor";
+//import * as fs from "fs";
+/*import { Autor } from "../classes/autor";
 
 export class AutorRepository {
     private url = "./data.json";
@@ -28,4 +28,4 @@ export class AutorRepository {
             }
         );
     }
-}
+} */
