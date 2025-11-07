@@ -1,5 +1,5 @@
 function hello() {
-    console.log("Witaj w swiecie Typescript.")
+    console.log("Witaj w swiecie Typescript");
 }
 
 hello();
