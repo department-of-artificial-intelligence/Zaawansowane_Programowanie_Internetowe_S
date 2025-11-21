@@ -8,5 +8,7 @@ namespace Contacts.Application
     public interface IUnitOfWork
     {
         void Save();
+        Task SaveAsync(); // Dodaj tę linię
+
     }
 }

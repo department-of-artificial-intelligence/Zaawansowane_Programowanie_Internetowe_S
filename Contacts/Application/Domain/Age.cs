@@ -5,13 +5,14 @@ using System.Threading.Tasks;
 
 namespace Contacts.Application.Domain;
 
-public class Age
+public record Age
 {
     public int Value { get; }
     public Age(int value)
     {
-        if (value < 18 && value < 120)
-            throw new ArgumentOutOfRangeException(nameof(value));
+        // POPRAWKA: Musi być || (LUB)
+        if (value < 18 || value > 120)
+            throw new ArgumentOutOfRangeException(nameof(value), "Wiek musi być pomiędzy 18 a 120 lat.");
         Value = value;
     }
     public static implicit operator int(Age age) => age.Value;

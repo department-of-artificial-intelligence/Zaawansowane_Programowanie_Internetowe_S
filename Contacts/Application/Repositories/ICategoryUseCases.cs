@@ -1,13 +1,13 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Contacts.Application.UseCases.DTOs;
 
-namespace Contacts.Application.UseCases;
-
-public interface ICategoryUseCases
+namespace Contacts.Application
 {
-    AddCategoryResult AddCategory(AddCategoryDTO addCategoryDTO);
-    void RemoveCategory(int categoryId);
+    public interface ICategoryUseCases
+    {
+        AddCategoryResult AddCategory(AddCategoryDTO categoryDTO);
+        void RemoveCategory(int categoryID);
+
+        // --- DODAJ TĘ LINIĘ ---
+        void UpdateCategory(UpdateCategoryDTO categoryDTO);
+    }
 }

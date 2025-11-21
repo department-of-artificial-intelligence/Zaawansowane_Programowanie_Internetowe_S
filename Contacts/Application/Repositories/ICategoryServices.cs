@@ -12,6 +12,8 @@ namespace Contacts.Application.Repositories
         Category? GetCategory(int categoryId);
         Category? GetCategoryByName(string categoryName);
         void Add(Category category);
-        void RemoveCategory(Category category);  
+        void RemoveCategory(Category category);
+        bool IsCategoryInUse(int categoryId);
+  
     }
 }
