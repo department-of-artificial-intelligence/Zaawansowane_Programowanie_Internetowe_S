@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="pl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        body {
+            font-family: sans-serif;
+            display: grid;
+            place-items: center;
+            min-height: 200px;
+        }
+
+        .counter-widget {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        #value-input {
+            font-size: 1.5rem;
+            width: 60px;
+            text-align: center;
+        }
+
+        .btn {
+            font-size: 1.5rem;
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+        }
+
+        #author-list-container {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            min-height: 50px;
+        }
+
+        #author-list-container ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+
+        .view-controls {
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h2>Licznik Obiektowy</h2>
+    <div class="counter-widget">
+        <button id="minus-btn" class="btn">-</button>
+        <input type="text" id="value-input" value="0" readonly>
+        <button id="plus-btn" class="btn">+</button>
+    </div>
+
+    <hr>
+
+    <h2>Lista Autorów (pobrana z JSON)</h2>
+
+    <div class="view-controls">
+        <label for="view-mode-select">Wybierz formę wyświetlania: </label>
+        <select id="view-mode-select">
+            <option value="list">Lista punktowana</option>
+            <option value="numbered-list">Lista numerowana</option>
+            <option value="table">Tabela</option>
+        </select>
+    </div>
+
+    <div id="author-list-container">
+        <p>Ładowanie autorów...</p>
+    </div>
+
+</body>
+
+</html>
