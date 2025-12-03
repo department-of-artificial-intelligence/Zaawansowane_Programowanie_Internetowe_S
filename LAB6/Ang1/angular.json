@@ -9,6 +9,7 @@
         "@schematics/angular:component": {
           "inlineTemplate": false,
           "inlineStyle": false,
+          "standalone": false,
           "skipTests": true
         },
         "@schematics/angular:directive": {
