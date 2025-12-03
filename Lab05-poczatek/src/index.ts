@@ -7,7 +7,7 @@ function greaterThan(limit: number, num: number): boolean {
 const tablica = [1, 2, 3, 4, 6, 8, 2, 3, 4, 5, 5, 5, 5];
 
 // użycie curryfikowanej funkcji
-const evenSum: number = tablica
+const evenSum: number = tablica   
   .filter(greaterThan)           // liczby > 2
   .filter(num => num % 2 === 0)   // liczby parzyste
   .reduce((acc, current) => acc + current, 0);
