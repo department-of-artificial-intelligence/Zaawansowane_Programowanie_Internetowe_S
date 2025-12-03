@@ -12,7 +12,7 @@ export class Arttykul {
         this._tytul = tytul.trim();
         this._tresc = tresc ?? ""; // przyjmujemy pustą treść, jeśli nie podano
         this._dataUtworzenia = new Date(); // wymóg: aktualna data
-        this._komentarze = []; // inicjalizujemy, by móc dalej dodawać komentarze
+        this._komentarze = []; 
         this._id = 0;
     }
 
