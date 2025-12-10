@@ -1,3 +1,25 @@
+console.log("Aplikacja działa!");
+
+class Counter {
+    private value: number;
+    constructor(initialValue: number = 0) {
+        this.value = initialValue;
+    }
+    increment(): number {
+        this.value += 1;
+        return this.value;
+    }
+    decrement(): number {
+        this.value -= 1;
+        return this.value;
+    }
+}
+
+
+
+
+
+
 // import { Autor } from "./Autor";
 // const autorzy: Autor[] = [
 //     new Autor("Adam", "Kowalski", "adam.kowalski@example.com"),

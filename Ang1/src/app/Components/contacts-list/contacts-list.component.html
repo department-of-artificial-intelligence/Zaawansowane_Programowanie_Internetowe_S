@@ -1,0 +1,61 @@
+<div class="row">
+<div class="col-6">
+<div class="card m-4">
+<div class="card-header d-flex
+justify-content-between align-items-center">
+<span class="card-title mb-0">Lista kontaktów</span>
+<span>
+<button class="btn btn-primary"
+[routerLink]="[’/create’]">Dodaj</button>
+<button class="btn btn-primary"
+(click)="showList()">{{title}}</button>
+</span>
+</div>
+<div class="card-body">
+<app-search></app-search>
+@if(isListShown)
+{
+@if((contacts$|async)?.length)
+{
+<ul class="list-group">
+@for(contact of (contacts$|async); track contact; let idx = $index)
+{
+<li class="list-group-item d-flex justify-content-between"
+[routerLink]="[’/contacts’,contact.id]"
+[routerLinkActive]="’active’">
+<div>
+<div>
+{{idx+1}}. {{contact.firstName}} {{contact.lastName}}
+</div>
+<ul>
+@for(email of contact.emails; track email)
+{
+<li><a href="mailto:{{email.value}}"
+[routerLinkActive]="’text-light’">
+{{email.value}}
+</a></li>
+}
+</ul>
+</div>
+<img class="icon"
+[src]="contact!.sex == Sex.Male ?
+’/images/man.png’ :
+’/images/woman.png’" />
+</li>
+}
+</ul>
+}
+@else
+{
+<div class="alert alert-warning">
+Lista kontaktów jest pusta
+</div>
+}
+}
+</div>
+</div>
+</div>
+<div class="col-6">
+<router-outlet />
+</div>
+</div>
