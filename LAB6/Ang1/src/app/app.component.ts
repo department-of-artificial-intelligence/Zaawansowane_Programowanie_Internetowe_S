@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 
 @Component({
   selector: 'app-root',
-  template: '<app-first></app-first>',
+  templateUrl: 'app.component.html',
   standalone: false,
   styles: [],
 })

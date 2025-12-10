@@ -1,13 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 
 @Component({
-  selector: 'app-first',
+  selector: 'app-second',
   templateUrl: 'second.component.html',
   standalone: false,
   styleUrl: 'second.component.css',
 })
 export class SecondComponent implements OnInit {
-  title: string = 'Pierwsza wartość przekazana z komponentu';
+  title: string = 'Komponent drugi!';
   person = {
     firstName: 'Ala',
     lastName: 'Nowak',
@@ -23,6 +23,6 @@ export class SecondComponent implements OnInit {
 
   onClick() {
     this.title = 'Po kliknieciu';
-    this.h1Class = 'Boo';
+    this.h1Class = 'Hoo';
   }
 }

@@ -7,7 +7,7 @@ import { Component, OnInit } from '@angular/core';
   styleUrl: 'first.component.css',
 })
 export class FirstComponent implements OnInit {
-  title: string = 'Pierwsza wartość przekazana z komponentu';
+  title: string = 'Komponent pierwszy!';
   person = {
     firstName: 'Ala',
     lastName: 'Nowak',
