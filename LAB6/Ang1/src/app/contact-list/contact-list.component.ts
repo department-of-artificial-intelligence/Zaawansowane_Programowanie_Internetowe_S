@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { Contact, Sex } from 'src/app/Model/contact';
-import { Email } from 'src/app/Model/Email';
+import { Contact, Sex } from '../Model/contact';
+import { Email } from '../Model/Email';
 
 @Component({
   selector: 'app-contact-list',
