@@ -6,4 +6,15 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Folder Include="Domain\" />
+    <Folder Include="DomainServices\" />
+    <Folder Include="Utilities\" />
+    <Folder Include="UseCases\" />
+    <Folder Include="Services\" />
+    <Folder Include="Repositories\" />
+    <Folder Include="Queries\" />
+    <Folder Include="OutputPorts\" />
+  </ItemGroup>
+
 </Project>
