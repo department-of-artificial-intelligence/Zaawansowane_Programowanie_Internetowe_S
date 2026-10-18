@@ -1,4 +1,4 @@
-namespace Contacts.Application;
+namespace Application.OutputPorts;
 
 public interface IUnitOfWork
 {

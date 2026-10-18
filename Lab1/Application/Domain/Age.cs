@@ -1,17 +1,15 @@
-namespace Contacts.Application.Domain;
+using Application.Utilities;
 
-public record Age
+namespace Application.Domain;
+
+public sealed record Age
 {
     public int Value {get;}
+
     public Age(int value)
     {
-        if(value < 18 && value > 120)
-        {
-            throw new ArgumentOutOfRangeException(nameof(value));
-        }
         Value = value;
     }
 
-    public static implicit operator int(Age age) => age.Value;
-    public static implicit operator Age(int value) => new(value);
+	public static Result<Age> Create(int value) => Validators.InRange(value, 18, 120, "Wiek ma niepoprawna wartosc.").Map(_ => new Age(value));
 }

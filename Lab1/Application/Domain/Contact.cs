@@ -1,36 +1,41 @@
-namespace Contacts.Application.Domain;
+using Application.Utilities;
 
-public class Contact
-{
-    public int Id {get; private set;}
-    public string FirstName {get; private set;} = string.Empty;
-    public string LastName {get; private set;} = string.Empty;
-    public Sex Sex {get; private set;}
-    public ICollection<Email> Emails {get; private set;} = null!;
-    public Age Age {get; private set;} = null!;
+namespace Application.Domain;
 
-    private Contact() {}
+public class Contact: Entity{
+	private readonly List<Email> _emails = [];
 
-    public Contact(int id, string firstName, string lastName, Sex sex, ICollection<Email> emails, Age age)
-    {
-        Id = id;
-        FirstName = string.IsNullOrWhiteSpace(firstName) ? throw new ArgumentException(nameof(firstName)) : firstName;
-        LastName = string.IsNullOrWhiteSpace(lastName) ? throw new ArgumentException(nameof(lastName)) : lastName;
-        Sex = sex;
-        Emails = emails ?? throw new ArgumentNullException(nameof(emails));
-        Age = age ?? throw new ArgumentNullException(nameof(age));
-    }
+	public string FirstName { get; private set; }
+	public string LastName { get; private set; }
+	public Sex Sex { get; private set; }
+	public Age Age { get; private set; }
+	public IReadOnlyCollection<Email> Emails => _emails;
 
-    public bool HasEmail(Email email)
-    {
-        return Emails.Any(e => e.Address == email.Address);
-    }
+	private Contact(Guid id, string firstName, string lastName, Sex sex, Age age): this(id, firstName, lastName, sex){
+		Age = age;
+	}
 
-    public void AddEmail(Email email)
-    {
-        if (!HasEmail(email))
-        {
-            Emails.Add(email);
-        }
-    }
+	private Contact(Guid id, string firstName, string lastName, Sex sex): base(id)
+	{
+		FirstName = firstName;
+		LastName = lastName;
+		Sex = sex;
+		Age = null!;
+	}
+
+	public bool HasEmail(EmailAddress address) => _emails.Any(e => e.Address == address);
+
+	public Result<Unit> AddEmail(EmailAddress address, Guid categoryId){
+		if(HasEmail(address)){
+			return Result.Failure<Unit>("Email już istnieje w kontakcie");
+		}
+
+	return Email.Create(address, categoryId).Tap(_emails.Add).Map(_ => Unit.Instance);
+	}
+
+	public static Result<Contact> Create(string firstName, string lastName, Sex sex, Age age){
+		return Result.Combine(
+				Validators.NotEmpty(firstName, "Imię jest wymagane."),
+				Validators.NotEmpty(lastName, "Nazwisko jest wymagane.")).Map(_ => new Contact(Guid.NewGuid(), firstName, lastName, sex, age));
+	}
 }

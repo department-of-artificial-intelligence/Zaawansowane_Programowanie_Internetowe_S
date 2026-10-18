@@ -1,25 +1,17 @@
-namespace Contacts.Application.Domain;
+using Application.Utilities;
 
-public class Email
+namespace Application.Domain;
+
+public sealed record Email
 {
-    public int Id {get; private set;}
-    public EmailAddress Address {get; private set;} = null!;
-    public Contact Contact {get; private set;} = null!;
-    public int ContactId {get; private set;}
-    public int CategoryId {get; private set;}
-    public Category Category {get; private set;} = null!;
+    public EmailAddress Address { get; }
+	public Guid CategoryId { get; }	
 
-    private Email()
+    private Email(EmailAddress address, Guid categoryId)
     {
+		Address = address;
+		CategoryId = categoryId;
     }
 
-    public Email(int id, Contact contact, Category category, EmailAddress email)
-    {
-        Id = id;
-        CategoryId = category.Id;
-        ContactId = contact.Id;
-        Contact = contact;
-        Category = category;
-        Address = email;
-    }
+	internal static Result<Email> Create(EmailAddress address, Guid categoryId) => Result.Success(new Email(address, categoryId));
 }
