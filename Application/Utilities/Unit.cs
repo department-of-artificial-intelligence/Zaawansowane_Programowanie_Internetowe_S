@@ -5,8 +5,9 @@ using System.Threading.Tasks;
 
 namespace Application.Utilities
 {
-    public class Unit
+    public record Unit
     {
-        
+        private Unit() {}
+        public static Unit Instance { get; } = new ();
     }
 }
