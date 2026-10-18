@@ -1,0 +1,64 @@
+Zadanie 9.
+Chciałbyś stworzyć system do obsługi biblioteki. Aplikacja powinna pozwalać na zarządzanie katalogiem
+książek, katalogiem czytelników, wypożyczeniami i rezerwacjami. Zastanów się jakie reguły biznesowe
+mogą sterować tymi operacjami.
+
+Książki - każda książka musi mieć tytuł i autora. Każdy egzemplarz posiada unikalny identyfikator. Nie można usunąć egzemplarza, który jest aktualnie wypożyczony.
+
+Czytelnicy - każdy czytelnik musi posiadać unikalny numer karty bibliotecznej. Nie można usunąć czytelnika, który ma aktywne wypożyczenia.
+
+Wypożyczenia - wypożyczyć można wyłącznie dostępny egzemplarz. Czytelnik może mieć maksymalnie 5 aktywnych wypożyczeń, a termin zwrotu wynosi 30 dni. Przekroczenie 
+terminu blokuje możliwość kolejnych wypożyczeń.
+
+Rezerwacje - czytelnik może zarezerwować niedostępną książkę. Rezerwacje realizowane są według kolejności zgłoszeń. Po udostępnieniu książki czytelnik ma 3 dni na 
+jej odbiór.
+
+
+Zadanie 10.
+Zaproponuj jakie przypadki użycia mogłyby być zdefiniowane dla tego projektu. Jak będą wyglądały
+obiekty DTO stanowiące ich dane wejściowe oraz ich rezultaty?
+
+Dodawanie książki - AddBookDto zawiera tytuł, autora i ISBN. Rezultatem jest BookDto z identyfikatorem i danymi książki.
+
+Edycja książki - UpdateBookDto zawiera ID książki oraz nowe dane. Rezultatem jest zaktualizowany BookDto.
+
+Usuwanie książki - dane wejściowe to ID książki. Rezultatem jest potwierdzenie usunięcia lub komunikat błędu.
+
+Rejestracja czytelnika - AddReaderDto zawiera imię, nazwisko i adres e-mail. Rezultatem jest ReaderDto z identyfikatorem czytelnika.
+
+Wypożyczanie książki - BorrowBookDto zawiera ID czytelnika i egzemplarza książki. Rezultatem jest LoanDto z identyfikatorem wypożyczenia i terminem zwrotu.
+
+Zwrot książki - ReturnBookDto zawiera ID wypożyczenia. Rezultatem jest potwierdzenie zwrotu.
+
+Rezerwacja książki - ReserveBookDto zawiera ID czytelnika i książki. Rezultatem jest ReservationDto z identyfikatorem i statusem rezerwacji.
+
+Anulowanie rezerwacji - CancelReservationDto zawiera ID rezerwacji. Rezultatem jest potwierdzenie anulowania.
+
+
+Zadanie 11.
+Jakie encje i obiekty wartości powinny być w tym projekcie zastosowane?
+
+Book (Książka) – przechowuje informacje o książce, takie jak tytuł, autor i ISBN.
+
+BookCopy (Egzemplarz) – reprezentuje konkretny egzemplarz książki, posiada unikalny identyfikator i status dostępności.
+
+Reader (Czytelnik) – przechowuje dane czytelnika oraz informacje o jego koncie.
+
+Loan (Wypożyczenie) – przechowuje informacje o wypożyczonym egzemplarzu, czytelniku i terminie zwrotu.
+
+Reservation (Rezerwacja) – reprezentuje rezerwację książki przez czytelnika, zawiera datę i status rezerwacji.
+
+Obiekty wartości:
+ISBN – numer ISBN książki wraz z walidacją jego poprawności.
+
+BookTitle – tytuł książki, który nie może być pusty.
+
+EmailAddress – adres e-mail czytelnika z walidacją formatu.
+
+PersonName – imię i nazwisko czytelnika.
+
+LoanPeriod – okres wypożyczenia określający datę rozpoczęcia i termin zwrotu.
+
+ReservationStatus – status rezerwacji, np. oczekująca, gotowa do odbioru, anulowana.
+
+
