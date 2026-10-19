@@ -9,3 +9,30 @@ poczytać/zagłębić się:
 
 
 implicit - operator niejawny
+
+Dependecy Injection
+
+dml - select from itp 
+dtl - create itp 
+
+na nasteone zajecia rozumiec  
+26.10
+Dependecy Injection
+wyrazenia lambda
+mechanizm reflekcji
+zaleznosci pomiedzy klasami
+zasady dobrej praktyki solid
+roznice miedzy dml a ddl
+czym jest normalizacja
+roznica miedzy where a kiedy heavy (grupowanie/agregacja)
+metody rozszerzajace
+generyki - metody/typy generyczne
+MultiLayerArchitecture
+pojecie serwisu i wstrzykiwania serwisu - DIC
+metody post i get
+mechanim sesji
+mechanizm ciasteczek
+wzorce projektowe
+referecje a objekt a klasa
+typy referencyjne a typy wartosciowe
+co robi sealed

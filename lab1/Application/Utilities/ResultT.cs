@@ -23,7 +23,37 @@ public class result<T>
     }
 }
 
-public static class Resul
+public static class Result
 {
-    
+    public static class Result<T> Success<Task>(Task value) => 
+    new Result<T>.Success(Value);
+
+    public static Result<T> Failure<T>(string message) => 
+    new Result<T>.Failure(message);
+
+    public static Result<TResult> Map<T, TResult>( this Result<T> result, Func<T,TResult> map)=> 
+    result.Match(value => Succes(map(value)),Failure<TResult>);
+
+    public static Result<TResult> Bind<T,TResult>(this Result<T> result, Func<T,Result<TResult>> bind) => 
+    result.Match(bind, Failure<TResult>);
+
+    public static Result<T> Tap<T>(this Result<T> result, Action<T> action) => 
+    result.Match(value =>
+    {
+        action(value);
+        return result;
+        }, 
+    _ => result);
+
+    public static Result<Unit> Combine(params Result<Unit>[] results)
+    {
+        var errors = results.Select(result => 
+            result.Match<string?>(_ => null, message => message))
+            .Where(message=> message is not null); 
+            var combinedMessage = string.Join(" ", errors);
+            return combinedMessage.Length == 0  
+            ? Succes(Unit.Instance) 
+            : Failure<Unit>(combinedMessage);
+    }
 }
+

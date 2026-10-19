@@ -5,7 +5,8 @@ namespace Application.Utilities;
 public class Optioon<T>
 {
     public class None() : Option<T>
-    {}
+    {
+    }
 
     public class Some(T value): Option<T>
     {
