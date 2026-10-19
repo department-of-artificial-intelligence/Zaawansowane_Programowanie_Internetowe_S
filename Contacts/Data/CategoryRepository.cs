@@ -29,6 +29,10 @@ public class CategoryRepository(AppDbContext context) : ICategoryRepository
             : Option.None<Category>();
     }
 
+    public bool IsUsed(Guid categoryId) =>
+        context.Contacts.Any(c => c.Emails.Any(e => e.CategoryId == categoryId)
+                               || c.Phones.Any(p => p.CategoryId == categoryId));
+    
     public void Remove(Category category)
     {
         context.Remove(category);
