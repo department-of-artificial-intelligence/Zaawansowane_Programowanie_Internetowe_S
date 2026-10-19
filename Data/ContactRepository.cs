@@ -22,4 +22,8 @@ public void Remove(Contact contact)
 {
 context.Remove(contact);
 }
+
+public bool AnyEmailInCategory(Guid categoryId) =>
+    context.Contacts.Any(contact =>
+        contact.Emails.Any(email => email.CategoryId == categoryId));
 }
