@@ -1,10 +1,10 @@
-using Contacts.Application.UseCases.DTOs;
+using Application.UseCases.Dtos;
+using Application.Utilities;
 
-namespace Contacts.Application.UseCases;
-
+namespace Application.UseCases;
 
 public interface ICategoryUseCases
 {
-    AddCategoryResult AddCategory(AddCategoryDTO addCategoryDTO);
-    void RemoveCategory(int categoryId);
+    Result<AddCategoryResult> AddCategory(AddCategoryDto addCategoryDto);
+    Result<Unit> RemoveCategory(Guid id);
 }

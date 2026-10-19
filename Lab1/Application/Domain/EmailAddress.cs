@@ -1,9 +1,14 @@
-namespace Contacts.Application.Domain;
+using Application.Utilities;
 
-public record EmailAddress(string Address)
+namespace Application.Domain;
+
+public sealed record EmailAddress
 {
-    public static implicit operator string(EmailAddress address)
-        => address.Address;
-    public static implicit operator EmailAddress(string text)
-        => new(text);
+	public string Value {get;}
+
+	private EmailAddress(string value){
+		Value = value;
+	}
+
+	public static Result<EmailAddress> Create(string value) => Result.Success(new EmailAddress(value));
 }

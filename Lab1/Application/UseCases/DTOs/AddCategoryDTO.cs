@@ -1,11 +1,10 @@
-using Contacts.Application.Domain;
+using Application.Domain;
+using Application.Utilities;
 
-namespace Contacts.Application.UseCases.DTOs;
+namespace Application.UseCases.Dtos;
 
-public class AddCategoryDTO
+public class AddCategoryDto(string name)
 {
-    public string Name {get; set;} = string.Empty;
-
-    public static implicit operator Category(AddCategoryDTO dto)
-        => new (dto.Name);
+    public string Name {get;} = name;
+	public Result<Category> ToDomain() => Category.Create(Name);
 }

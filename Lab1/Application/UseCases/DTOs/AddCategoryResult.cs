@@ -1,13 +1,11 @@
-using Contacts.Application.Domain;
+using Application.Domain;
 
-namespace Contacts.Application.UseCases.DTOs;
+namespace Application.UseCases.Dtos;
 
-public class AddCategoryResult
+public class AddCategoryResult(Guid id, string name)
 {
-    public int Id {get; init;}
-    public string Name {get; init;} = string.Empty;
+    public Guid Id {get;} = id;
+    public string Name {get;} = name;
 
-    public static implicit operator AddCategoryResult(Category category)
-        => new AddCategoryResult{Id = category.Id, Name = category.Name};
-
+	internal static AddCategoryResult FromDomain(Category category) => new (category.Id, category.Name);
 }

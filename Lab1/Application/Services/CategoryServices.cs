@@ -1,41 +1,16 @@
-using Contacts.Application.UseCases;
-using Contacts.Application.UseCases.DTOs;
-using Contacts.Application.Repositories;
+using Application.DomainServices;
+using Application.OutputPorts;
+using Application.Repositories;
+using Application.UseCases;
+using Application.UseCases.Dtos;
+using Application.Utilities;
 
+namespace Application.Services;
 
-namespace Contacts.Application.Services;
+public class CategoryServices(ICategoryRepository categoryRepository, IUnitOfWork unitOfWork, CategoryUniquenessChecker categoryUniquenessChecker): ICategoryUseCases{
+    public Result<AddCategoryResult> AddCategory(AddCategoryDto addCategoryDto) => 
+		addCategoryDto.ToDomain().Bind(category => categoryUniquenessChecker.EnsureUnique(category.Name).Map(_ => category)).Tap(categoryRepository.Add).Tap(_ => unitOfWork.Save()).Map(AddCategoryResult.FromDomain);
 
-public class CategoryServices(
-    ICategoryRepository categoryRepository,
-    IUnitOfWork unitOfWork
-) : ICategoryUseCases
-{
-    public void AddCategory(AddCategoryDTO categoryDTO)
-    {
-        if (categoryRepository.GetCategoryByName(categoryDTO.Name) == null)
-        {
-            categoryRepository.Add(categoryDTO);
-            unitOfWork.Save();
-        }
-        else
-        {
-            throw new ServiceException("Kategoria_o_tej_nazwie_juz_istnieje");
-        }
-    }
-
-    public void RemoveCategory(int categoryID)
-    {
-        var category = categoryRepository.GetCategory(categoryID);
-        if (category != null)
-        {
-            categoryRepository.RemoveCategory(category);
-            unitOfWork.Save();
-        }
-        else
-        {
-            throw new ServiceException(
-                $"Kategoria_o_id:_{categoryID}_nie_istnieje";
-            )
-        }
-    }
+	public Result<Unit> RemoveCategory(Guid id) => 
+		categoryRepository.GetById(id).Required($"Nie mogę odnaleźć kategorii o id = {id}").Tap(categoryRepository.Remove).Tap(_ => unitOfWork.Save()).Map(_ => Unit.Instance);
 }
