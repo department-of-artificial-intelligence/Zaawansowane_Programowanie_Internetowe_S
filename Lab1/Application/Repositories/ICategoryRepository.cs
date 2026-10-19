@@ -8,10 +8,10 @@ namespace Application.Repositories
 {
     public interface ICategoryRepository
     {
-        IEnumerable<Category> GetCategories();
-        Category? GetCategory(int categoryId);
-        Category? GetCategoryByName(string categoryName);
+        IEnumerable<Category> GetAll();
+        option<Category> GetById(Guid categoryId);
+        option<Category> GetByName(string categoryName);
         void Add(Category category);
-        void RemoveCategory (Category category);
+        void Remove (Category category);
     }
 }

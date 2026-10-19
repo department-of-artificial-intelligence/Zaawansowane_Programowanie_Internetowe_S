@@ -13,7 +13,7 @@ namespace Application.Domain
         public string LastName {get; private set;} = string.Empty;
         public Sex Sex {get; private set;}
         public ICollection<Email> Emails {get; private set;} = null!;
-        public Age Age {get, private set;} = null!;
+        public Age Age {get; private set;} = null!;
         private Contact(){}
         public Contact(int id, string firstName, string lastName, Sex sex, ICollection<Email> emails, Age age)
         {
