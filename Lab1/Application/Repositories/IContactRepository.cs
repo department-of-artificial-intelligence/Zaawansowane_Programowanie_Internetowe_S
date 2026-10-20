@@ -7,4 +7,5 @@ IEnumerable<Contact> GetAll();
 Option<Contact> GetById(Guid contactId);
 void Add(Contact contact);
 void Remove(Contact contact);
+bool IsCategoryInUse(Guid categoryId);
 }

@@ -62,4 +62,9 @@ public static class Result
             ? Success(Unit.Instance)
             : Failure<Unit>(combinedMessage);
     }
+
+    public static T GetValueOrThrow<T>(this Result<T> result) =>
+    result.Match(
+        value => value,
+        error => throw new InvalidOperationException(error));
 }

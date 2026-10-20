@@ -9,4 +9,11 @@ _ => Result.Failure<Unit>(
 $"Kategoria o nazwie '{name}' już istnieje."
 ),
 () => Result.Success(Unit.Instance));
+
+public Result<Unit> EnsureUnique(string name, Guid? exceptId = null) =>
+    categoryRepository.GetByName(name).Match(
+        existing => existing.Id == exceptId
+            ? Result.Success(Unit.Instance)
+            : Result.Failure<Unit>($"Kategoria o nazwie '{name}' już istnieje."),
+        () => Result.Success(Unit.Instance));
 }

@@ -22,4 +22,7 @@ public void Remove(Contact contact)
 {
 context.Remove(contact);
 }
+
+public bool IsCategoryInUse(Guid categoryId) =>
+    context.Contacts.Any(c => c.Emails.Any(e => e.CategoryId == categoryId));
 }

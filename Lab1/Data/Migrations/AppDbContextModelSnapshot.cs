@@ -16,7 +16,7 @@ namespace Data.Migrations
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "10.0.13");
+            modelBuilder.HasAnnotation("ProductVersion", "9.0.21");
 
             modelBuilder.Entity("Application.Domain.Category", b =>
                 {
@@ -42,16 +42,18 @@ namespace Data.Migrations
 
                     b.Property<string>("FirstName")
                         .IsRequired()
+                        .HasMaxLength(50)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("LastName")
                         .IsRequired()
+                        .HasMaxLength(50)
                         .HasColumnType("TEXT");
 
                     b.Property<int>("Sex")
                         .HasColumnType("INTEGER");
 
-                    b.ComplexProperty(typeof(Dictionary<string, object>), "Age", "Application.Domain.Contact.Age#Age", b1 =>
+                    b.ComplexProperty<Dictionary<string, object>>("Age", "Application.Domain.Contact.Age#Age", b1 =>
                         {
                             b1.IsRequired();
 
@@ -93,14 +95,72 @@ namespace Data.Migrations
                             b1.HasOne("Application.Domain.Category", null)
                                 .WithMany()
                                 .HasForeignKey("CategoryId")
-                                .OnDelete(DeleteBehavior.Cascade)
+                                .OnDelete(DeleteBehavior.Restrict)
                                 .IsRequired();
 
                             b1.WithOwner()
                                 .HasForeignKey("ContactId");
                         });
 
+                    b.OwnsMany("Application.Domain.ImportantDate", "ImportantDates", b1 =>
+                        {
+                            b1.Property<Guid>("Id")
+                                .HasColumnType("TEXT");
+
+                            b1.Property<Guid>("ContactId")
+                                .HasColumnType("TEXT");
+
+                            b1.Property<DateOnly>("Date")
+                                .HasColumnType("TEXT");
+
+                            b1.Property<string>("Label")
+                                .IsRequired()
+                                .HasMaxLength(50)
+                                .HasColumnType("TEXT");
+
+                            b1.HasKey("Id");
+
+                            b1.HasIndex("ContactId");
+
+                            b1.ToTable("ImportantDate");
+
+                            b1.WithOwner()
+                                .HasForeignKey("ContactId");
+                        });
+
+                    b.OwnsMany("Application.Domain.Phone", "Phones", b1 =>
+                        {
+                            b1.Property<int>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<Guid>("ContactId")
+                                .HasColumnType("TEXT");
+
+                            b1.Property<string>("Number")
+                                .IsRequired()
+                                .HasMaxLength(16)
+                                .HasColumnType("TEXT");
+
+                            b1.Property<string>("Type")
+                                .IsRequired()
+                                .HasColumnType("TEXT");
+
+                            b1.HasKey("Id");
+
+                            b1.HasIndex("ContactId");
+
+                            b1.ToTable("Phone");
+
+                            b1.WithOwner()
+                                .HasForeignKey("ContactId");
+                        });
+
                     b.Navigation("Emails");
+
+                    b.Navigation("ImportantDates");
+
+                    b.Navigation("Phones");
                 });
 #pragma warning restore 612, 618
         }

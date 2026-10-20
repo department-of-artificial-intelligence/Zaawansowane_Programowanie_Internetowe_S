@@ -12,3 +12,4 @@ public Result<Contact> ToDomain() =>
 DomainAge.Create(Age)
 .Bind(age => Contact.Create(FirstName, LastName, Sex, age));
 }
+

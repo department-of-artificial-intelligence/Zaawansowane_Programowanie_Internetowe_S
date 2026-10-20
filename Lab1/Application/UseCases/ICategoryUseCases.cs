@@ -5,4 +5,5 @@ public interface ICategoryUseCases
 {
 Result<AddCategoryResult> AddCategory(AddCategoryDto addCategoryDto);
 Result<Unit> RemoveCategory(Guid id);
+Result<Unit> RenameCategory(RenameCategoryDto renameCategoryDto);
 }

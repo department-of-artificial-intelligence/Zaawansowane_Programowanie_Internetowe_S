@@ -6,12 +6,18 @@ public class Contact : Entity
 {
     private readonly List<Email> _emails = [];
 
+    private readonly List<Phone> _phones = [];
+
     public FirstName FirstName { get; private set; }
     public LastName LastName { get; private set; }
     public Sex Sex { get; private set; }
     public Age Age { get; private set; }
 
     public IReadOnlyCollection<Email> Emails => _emails;
+
+    public IReadOnlyCollection<Phone> Phones => _phones;
+    private readonly List<ImportantDate> _importantDates = [];
+    public IReadOnlyCollection<ImportantDate> ImportantDates => _importantDates;
 
     private Contact(
         Guid id,
@@ -53,19 +59,87 @@ public class Contact : Entity
     }
 
     public static Result<Contact> Create(
-        string firstName,
-        string lastName,
-        Sex sex,
-        Age age)
+    string firstName, string lastName, Sex sex, Age age) =>
+    FirstName.Create(firstName)
+        .Bind(fn => LastName.Create(lastName)
+            .Map(ln => new Contact(Guid.NewGuid(), fn, ln, sex, age)));
+    
+    public Result<Unit> Update(string firstName, string lastName, Sex sex, Age age) =>
+    FirstName.Create(firstName)
+        .Bind(fn => LastName.Create(lastName).Map(ln => (fn, ln)))
+        .Tap(names =>
+        {
+            FirstName = names.fn;
+            LastName = names.ln;
+            Sex = sex;
+            Age = age;
+        })
+        .Map(_ => Unit.Instance);
+
+public Result<Unit> RemoveEmail(EmailAddress address)
+{
+    var email = _emails.SingleOrDefault(e => e.Address == address);
+    if (email is null)
     {
-        return Result.Combine(
-            FirstName.Create(firstName),
-            LastName.Create(lastName)
-        ).Map(_ => new Contact(
-            Guid.NewGuid(),
-            FirstName.Create(firstName).Value,
-            LastName.Create(lastName).Value,
-            sex,
-            age));
+        return Result.Failure<Unit>($"Kontakt nie ma adresu {address}.");
     }
+
+    _emails.Remove(email);
+    return Result.Success(Unit.Instance);
+}
+public Result<Unit> AddPhone(PhoneNumber number, PhoneType type)
+{
+    if (_phones.Any(p => p.Number == number))
+    {
+        return Result.Failure<Unit>($"Numer {number} już istnieje w kontakcie.");
+    }
+
+    _phones.Add(Phone.Create(number, type));
+    return Result.Success(Unit.Instance);
+}
+
+public Result<Unit> RemovePhone(PhoneNumber number)
+{
+    var phone = _phones.SingleOrDefault(p => p.Number == number);
+    if (phone is null)
+    {
+        return Result.Failure<Unit>($"Kontakt nie ma numeru {number}.");
+    }
+
+    _phones.Remove(phone);
+    return Result.Success(Unit.Instance);
+}
+public Result<Guid> AddImportantDate(DateLabel label, DateOnly date)
+{
+    if (_importantDates.Any(d => d.Label == label))
+    {
+        return Result.Failure<Guid>($"Kontakt ma już datę \"{label}\".");
+    }
+
+    var importantDate = ImportantDate.Create(label, date);
+    _importantDates.Add(importantDate);
+    return Result.Success(importantDate.Id);
+}
+
+public Result<Unit> ChangeImportantDate(Guid id, DateLabel label, DateOnly date) =>
+    FindImportantDate(id)
+        .Bind(importantDate => Validators
+            .IsTrue(!_importantDates.Any(d => d.Id != id && d.Label == label),
+                $"Kontakt ma już datę \"{label}\".")
+            .Map(_ => importantDate))
+        .Tap(importantDate => importantDate.Change(label, date))
+        .Map(_ => Unit.Instance);
+
+public Result<Unit> RemoveImportantDate(Guid id) =>
+    FindImportantDate(id)
+        .Tap(importantDate => _importantDates.Remove(importantDate))
+        .Map(_ => Unit.Instance);
+
+private Result<ImportantDate> FindImportantDate(Guid id)
+{
+    var importantDate = _importantDates.SingleOrDefault(d => d.Id == id);
+    return importantDate is not null
+        ? Result.Success(importantDate)
+        : Result.Failure<ImportantDate>($"Kontakt nie ma daty o id = {id}.");
+}
 }
