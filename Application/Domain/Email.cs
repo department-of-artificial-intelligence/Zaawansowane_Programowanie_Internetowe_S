@@ -1,3 +1,6 @@
+using Application.Domain;
+using Application.Utilities;
+
 public sealed record Email
 {
     public EmailAddress Address { get; }

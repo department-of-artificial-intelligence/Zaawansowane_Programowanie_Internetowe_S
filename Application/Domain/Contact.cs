@@ -32,3 +32,4 @@ public class Contact : Entity
     }
     public bool HasEmail(EmailAddress address) =>
     _emails.Any(e => e.Address == address);
+}

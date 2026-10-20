@@ -1,7 +1,6 @@
-
 using Application.Utilities;
-namespace Application.Domain;
 
+namespace Application.Domain;
 
 public sealed record Age
 {
@@ -13,8 +12,7 @@ public sealed record Age
     }
 
     public static Result<Age> Create(int value) =>
-        Validator
+        Validators
             .InRange(value, 18, 120, "Wiek ma niepoprawną wartość.")
             .Map(_ => new Age(value));
-
 }
