@@ -5,6 +5,7 @@ namespace Data;
 
 public class CategoryRepository(AppDbContext context) : ICategoryRepository
 {
+  
 public void Add(Category category)
 {
 context.Categories.Add(category);
