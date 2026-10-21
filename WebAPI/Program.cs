@@ -1,0 +1,69 @@
+﻿using Microsoft.EntityFrameworkCore;
+using Application.DomainServices;
+using Application.OutputPorts;
+using Application.Queries;
+using Application.Repositories;
+using Application.Services;
+using Application.UseCases;
+using Application.UseCases.Dtos;
+using Data;
+
+namespace WebAPI
+{
+    public class Program
+    {
+        public static void Main(string[] args)
+        {
+            // Przygotowanie konfiguratora naszej aplikacji
+            var builder = WebApplication.CreateBuilder(args);
+
+            builder.Services.AddDbContext<AppDbContext>(options =>
+                options.UseSqlite(builder.Configuration.GetConnectionString("default"))
+            );
+
+            builder.Services.AddScoped<ICategoryQueries, CategoryQueries>();
+            builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+            builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+            builder.Services.AddScoped<ICategoryUseCases, CategoryServices>();
+            builder.Services.AddScoped<CategoryUniquenessChecker>();
+
+            builder.Services.AddProblemDetails();
+            builder.Services.AddExceptionHandler<WebAPI.GlobalExceptionHandler>();
+
+            // Dodanie usług koniecznych dla OpenApi
+            builder.Services.AddOpenApi();
+            // Zbudowanie aplikacji na podstawie konfiguracji
+            var app = builder.Build();
+
+            app.UseExceptionHandler();
+
+            // Mapowanie endpoint OpenApi (tylko w przypadku trybu deweloperskiego).
+            if (app.Environment.IsDevelopment())
+            {
+                app.MapOpenApi();
+            }
+            // Uruchomienie przekierowania żądań z HTTP do HTTPS
+            app.UseHttpsRedirection();
+
+            app.MapPost("/api/categories",
+                (AddCategoryDto dto, ICategoryUseCases useCases) =>
+                useCases
+                    .AddCategory(dto)
+                    .Match(
+                        category => Results.Created(
+                            $"/api/categories/{category.Id}",
+                            category),
+                        error => Results.Problem(detail: error, statusCode: 400)
+                    )
+            );
+
+            app.MapGet("/api/categories",
+                (ICategoryQueries queries) => Results.Ok(queries.GetCategories())
+            );
+
+            // Uruchomienie aplikacji
+            app.Run();
+
+        }
+    }
+}
