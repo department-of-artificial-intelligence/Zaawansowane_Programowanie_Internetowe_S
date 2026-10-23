@@ -16,7 +16,7 @@ namespace Data.Migrations
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "8.0.10");
+            modelBuilder.HasAnnotation("ProductVersion", "9.0.9");
 
             modelBuilder.Entity("Application.Domain.Category", b =>
                 {
@@ -40,14 +40,6 @@ namespace Data.Migrations
                     b.Property<Guid>("Id")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("FirstName")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("LastName")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
                     b.Property<int>("Sex")
                         .HasColumnType("INTEGER");
 
@@ -57,6 +49,26 @@ namespace Data.Migrations
 
                             b1.Property<int>("Value")
                                 .HasColumnType("INTEGER");
+                        });
+
+                    b.ComplexProperty<Dictionary<string, object>>("FirstName", "Application.Domain.Contact.FirstName#FirstName", b1 =>
+                        {
+                            b1.IsRequired();
+
+                            b1.Property<string>("Value")
+                                .IsRequired()
+                                .HasColumnType("TEXT")
+                                .HasColumnName("FirstName");
+                        });
+
+                    b.ComplexProperty<Dictionary<string, object>>("LastName", "Application.Domain.Contact.LastName#LastName", b1 =>
+                        {
+                            b1.IsRequired();
+
+                            b1.Property<string>("Value")
+                                .IsRequired()
+                                .HasColumnType("TEXT")
+                                .HasColumnName("LastName");
                         });
 
                     b.HasKey("Id");
@@ -100,7 +112,33 @@ namespace Data.Migrations
                                 .HasForeignKey("ContactId");
                         });
 
+                    b.OwnsMany("Application.Domain.PhoneNumber", "Phones", b1 =>
+                        {
+                            b1.Property<int>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<Guid>("ContactId")
+                                .HasColumnType("TEXT");
+
+                            b1.Property<string>("Value")
+                                .IsRequired()
+                                .HasColumnType("TEXT")
+                                .HasColumnName("PhoneNumber");
+
+                            b1.HasKey("Id");
+
+                            b1.HasIndex("ContactId");
+
+                            b1.ToTable("PhoneNumber");
+
+                            b1.WithOwner()
+                                .HasForeignKey("ContactId");
+                        });
+
                     b.Navigation("Emails");
+
+                    b.Navigation("Phones");
                 });
 #pragma warning restore 612, 618
         }
