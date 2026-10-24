@@ -1,8 +1,8 @@
-using Contacts.Application.Domain;
+using Application.Domain;
 
-namespace Contacts.Application.Repositories;
+namespace Application.Repositories;
 
-public interface ICategoryRepository
+public interface ICategoryService
 {
     IEnumerable<Category> GetCategories();
     Category? GetCategory(int categoryId);
