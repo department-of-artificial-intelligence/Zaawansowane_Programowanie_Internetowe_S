@@ -18,31 +18,34 @@ using var context = new AppDbContext(dbOptionsBuilder.Options);
 context.Database.Migrate();
 
 var categoryRepository = new CategoryRepository(context);
+var contactRepository = new ContactRepository(context); 
 var unitOfWork = new UnitOfWork(context);
 var categoryUniquenessChecker = new CategoryUniquenessChecker(categoryRepository);
-var categoryServices = new CategoryServices(categoryRepository, unitOfWork, categoryUniquenessChecker);
-var contactRepository = new ContactRepository(context);
+
+var categoryServices = new CategoryServices(categoryRepository, contactRepository, unitOfWork, categoryUniquenessChecker);
+
 var contactServices = new ContactServices(contactRepository, categoryRepository, unitOfWork);
 var addContactDto = new AddContactDto("Jan", "Kowalski", Sex.Male, 30);
 var addContactResult = contactServices.AddContact(addContactDto);
 
-addContactResult.Match(v => {
-		Console.WriteLine($"Dodano kontakt {v.FirstName} {v.LastName} (id = {v.Id})");
-		return Unit.Instance;
-	},
-	e => {Console.WriteLine(e); return Unit.Instance;}
+addContactResult.Match(v => 
+	{
+        Console.WriteLine($"Dodano kontakt {v.FirstName} {v.LastName} (id = {v.Id})");
+        return Unit.Instance;
+    },
+    e => {Console.WriteLine(e); return Unit.Instance;}
 );
 
 var addEmailResult = addContactResult.Bind(contact => categoryServices.AddCategory(new AddCategoryDto("Praca")).Bind(category => {
-	var addEmailDto = new AddEmailDto(contact.Id, "jan.kowalski@example.com", category.Id);
-	return contactServices.AddEmail(addEmailDto);
+    var addEmailDto = new AddEmailDto(contact.Id, "jan.kowalski@example.com", category.Id);
+    return contactServices.AddEmail(addEmailDto);
 }));
 
 addEmailResult.Match(
-	_ => {Console.WriteLine("Dodano e-mail."); return Unit.Instance;},
-	e => {Console.WriteLine(e); return Unit.Instance;}
+    _ => {Console.WriteLine("Dodano e-mail."); return Unit.Instance;},
+    e => {Console.WriteLine(e); return Unit.Instance;}
 );
 
 foreach(var category in context.Categories){
-	Console.WriteLine(category.Name);
+    Console.WriteLine(category.Name);
 }

@@ -13,8 +13,6 @@ public class AppDbContext: DbContext {
 		modelBuilder.Entity<Contact>(contactBuilder => {
 			contactBuilder.HasKey(contact => contact.Id);
 			contactBuilder.Property(contact => contact.Id).ValueGeneratedNever();
-			contactBuilder.Property(contact => contact.FirstName).IsRequired();
-			contactBuilder.Property(contact => contact.LastName).IsRequired();
 		});
 
 		modelBuilder.Entity<Category>(categoryBuilder => {
@@ -30,14 +28,58 @@ public class AppDbContext: DbContext {
 				emailBuilder.WithOwner().HasForeignKey("ContactId");
 				emailBuilder.Property<int>("Id");
 				emailBuilder.HasKey("Id");
-				emailBuilder.HasOne<Category>().WithMany().HasForeignKey(email => email.CategoryId);
+				emailBuilder.HasOne<Category>().WithMany().HasForeignKey(email => email.CategoryId).OnDelete(DeleteBehavior.Restrict);
 				emailBuilder.Property(email => email.Address).HasConversion(address => address.Value, value => ParseEmailAddress(value));
 			}
 		);
 
+		modelBuilder.Entity<Contact>().OwnsMany(
+    		contact => contact.Phones,
+    		phoneBuilder => {
+        		phoneBuilder.WithOwner().HasForeignKey("ContactId");
+        		phoneBuilder.Property<int>("Id");
+        		phoneBuilder.HasKey("Id");
+        		phoneBuilder
+            		.HasOne<Category>()
+            		.WithMany()
+            		.HasForeignKey(phone => phone.CategoryId)
+            		.OnDelete(DeleteBehavior.Restrict);
+
+        	phoneBuilder
+            	.Property(phone => phone.Number)
+            	.HasConversion(number => number.Value, value => ParsePhoneNumber(value));
+    	});
+
+		modelBuilder.Entity<Contact>().OwnsMany(
+    		contact => contact.ImportantDates,
+    		dateBuilder => {
+        		dateBuilder.WithOwner().HasForeignKey("ContactId");
+        		dateBuilder.Property<int>("Id");
+        		dateBuilder.HasKey("Id");
+        		dateBuilder.Property(d => d.Description).IsRequired();
+        		dateBuilder.Property(d => d.Date).IsRequired();
+    	});
+
+		modelBuilder.Entity<Contact>()
+    		.Navigation(c => c.ImportantDates)
+    		.UsePropertyAccessMode(PropertyAccessMode.Field);
+
+		modelBuilder.Entity<Contact>()
+    		.Navigation(c => c.Phones)
+    		.UsePropertyAccessMode(PropertyAccessMode.Field);
+
 		modelBuilder.Entity<Contact>().Navigation(c => c.Emails).UsePropertyAccessMode(PropertyAccessMode.Field);
 		modelBuilder.Entity<Contact>().ComplexProperty(contact => contact.Age, ageBuilder => ageBuilder.Property(age => age.Value));
+		modelBuilder.Entity<Contact>().ComplexProperty(
+			contact => contact.FirstName,
+			firstNameBuilder => firstNameBuilder.Property(fn => fn.Value).IsRequired()
+		);
+		modelBuilder.Entity<Contact>().ComplexProperty(
+			contact => contact.LastName,
+			lastNameBuilder => lastNameBuilder.Property(fn => fn.Value).IsRequired()
+		);
 	}
 
 	private static EmailAddress ParseEmailAddress(string value) => EmailAddress.Create(value).Match(address => address, error => throw new InvalidOperationException(error));
+	private static PhoneNumber ParsePhoneNumber(string value) => PhoneNumber.Create(value).Match(number => number, error => throw new InvalidOperationException(error));
 }

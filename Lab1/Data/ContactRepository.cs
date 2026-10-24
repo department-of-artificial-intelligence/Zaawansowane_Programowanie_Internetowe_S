@@ -12,6 +12,8 @@ public class ContactRepository(AppDbContext context): IContactRepository {
 	
 	public IEnumerable<Contact> GetAll() => context.Contacts;
 
+	public bool IsCategoryUsed(Guid categoryId) => context.Contacts.Any(c => c.Emails.Any(e => e.CategoryId == categoryId) || c.Phones.Any(p => p.CategoryId == categoryId));
+
 	public Option<Contact> GetById(Guid contactId){
 		var contact = context.Contacts.SingleOrDefault(c => c.Id == contactId);
 		return contact is not null ? Option.Some(contact) : Option.None<Contact>();

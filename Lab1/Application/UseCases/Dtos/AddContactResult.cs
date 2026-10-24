@@ -9,5 +9,6 @@ public class AddContactResult(Guid id, string firstName, string lastName, Sex se
 	public Sex Sex { get; } = sex;
 	public int Age { get; } = age;
 
-	internal static AddContactResult FromDomain(Contact contact) => new(contact.Id, contact.FirstName, contact.LastName, contact.Sex, contact.Age.Value);
+	internal static AddContactResult FromDomain(Contact contact) => 
+		new(contact.Id, contact.FirstName.Value, contact.LastName.Value, contact.Sex, contact.Age.Value);
 }

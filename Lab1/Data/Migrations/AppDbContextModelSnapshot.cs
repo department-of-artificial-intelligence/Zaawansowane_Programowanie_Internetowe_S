@@ -40,14 +40,6 @@ namespace Data.Migrations
                     b.Property<Guid>("Id")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("FirstName")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("LastName")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
                     b.Property<int>("Sex")
                         .HasColumnType("INTEGER");
 
@@ -57,6 +49,24 @@ namespace Data.Migrations
 
                             b1.Property<int>("Value")
                                 .HasColumnType("INTEGER");
+                        });
+
+                    b.ComplexProperty<Dictionary<string, object>>("FirstName", "Application.Domain.Contact.FirstName#FirstName", b1 =>
+                        {
+                            b1.IsRequired();
+
+                            b1.Property<string>("Value")
+                                .IsRequired()
+                                .HasColumnType("TEXT");
+                        });
+
+                    b.ComplexProperty<Dictionary<string, object>>("LastName", "Application.Domain.Contact.LastName#LastName", b1 =>
+                        {
+                            b1.IsRequired();
+
+                            b1.Property<string>("Value")
+                                .IsRequired()
+                                .HasColumnType("TEXT");
                         });
 
                     b.HasKey("Id");
@@ -93,7 +103,67 @@ namespace Data.Migrations
                             b1.HasOne("Application.Domain.Category", null)
                                 .WithMany()
                                 .HasForeignKey("CategoryId")
-                                .OnDelete(DeleteBehavior.Cascade)
+                                .OnDelete(DeleteBehavior.Restrict)
+                                .IsRequired();
+
+                            b1.WithOwner()
+                                .HasForeignKey("ContactId");
+                        });
+
+                    b.OwnsMany("Application.Domain.ImportantDate", "ImportantDates", b1 =>
+                        {
+                            b1.Property<int>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<Guid>("ContactId")
+                                .HasColumnType("TEXT");
+
+                            b1.Property<DateOnly>("Date")
+                                .HasColumnType("TEXT");
+
+                            b1.Property<string>("Description")
+                                .IsRequired()
+                                .HasColumnType("TEXT");
+
+                            b1.HasKey("Id");
+
+                            b1.HasIndex("ContactId");
+
+                            b1.ToTable("ImportantDate");
+
+                            b1.WithOwner()
+                                .HasForeignKey("ContactId");
+                        });
+
+                    b.OwnsMany("Application.Domain.Phone", "Phones", b1 =>
+                        {
+                            b1.Property<int>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<Guid>("CategoryId")
+                                .HasColumnType("TEXT");
+
+                            b1.Property<Guid>("ContactId")
+                                .HasColumnType("TEXT");
+
+                            b1.Property<string>("Number")
+                                .IsRequired()
+                                .HasColumnType("TEXT");
+
+                            b1.HasKey("Id");
+
+                            b1.HasIndex("CategoryId");
+
+                            b1.HasIndex("ContactId");
+
+                            b1.ToTable("Phone");
+
+                            b1.HasOne("Application.Domain.Category", null)
+                                .WithMany()
+                                .HasForeignKey("CategoryId")
+                                .OnDelete(DeleteBehavior.Restrict)
                                 .IsRequired();
 
                             b1.WithOwner()
@@ -101,6 +171,10 @@ namespace Data.Migrations
                         });
 
                     b.Navigation("Emails");
+
+                    b.Navigation("ImportantDates");
+
+                    b.Navigation("Phones");
                 });
 #pragma warning restore 612, 618
         }
