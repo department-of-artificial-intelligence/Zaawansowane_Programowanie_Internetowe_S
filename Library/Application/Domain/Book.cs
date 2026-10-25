@@ -15,12 +15,43 @@ public class Book : Entity
         BookTitle = bookTitle;
         BookCopies = bookCopies;
     }
-    public static Result<Contact> Create(
+    private Book(Guid id) : base(id)
+    {
+        Author = null!;
+        BookTitle = null!;
+        BookCopies = null!;
+    }
+    public static Result<Book> Create(
         Author author,
         BookTitle bookTitle,
         BookCopies bookCopies)
     {
         return Result.Success(new Book(Guid.NewGuid(), author, bookTitle, bookCopies));
     }
-
+    public Result<Unit> BorrowBook(){
+        if(BookCopies.Value <=0){
+            return Result.Failure<Unit>("Brak dostępnych ksiązek.");
+        }
+        return BookCopies.Create(BookCopies.Value - 1)
+            .Map(newCopies =>
+            {
+                BookCopies = newCopies;
+                return Unit.Instance;
+            });
+    }
+    public Result<Unit> ReturnBook()
+    {
+        return BookCopies.Create(BookCopies.Value + 1)
+            .Map(newCopies =>
+            {
+                BookCopies = newCopies;
+                return Unit.Instance;
+            });
+    }
+    public Result<Unit> UpdateDetails(Author author, BookTitle bookTitle, BookCopies bookCopies){
+        Author = author;
+        BookTitle = bookTitle;
+        BookCopies = bookCopies;
+        return Result.Success(Unit.Instance);
+    }
 }

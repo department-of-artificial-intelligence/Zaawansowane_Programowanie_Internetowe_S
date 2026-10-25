@@ -10,9 +10,10 @@ public sealed record BookCopies
     {
         Value = value;
     }
+    private BookCopies(){}
 
     public static Result<BookCopies> Create(int value) =>
         Validators
-            .InRange(value, 0, "Liczba ksiazek nie moze byc ujemna")
+            .InRange(value, 0, int.MaxValue, "Liczba ksiazek nie moze byc ujemna")
             .Map(_ => new BookCopies(value));
 }

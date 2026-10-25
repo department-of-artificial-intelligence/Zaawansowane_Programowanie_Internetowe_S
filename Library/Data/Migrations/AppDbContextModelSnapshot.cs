@@ -18,54 +18,70 @@ namespace Data.Migrations
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.0");
 
-            modelBuilder.Entity("Application.Domain.Category", b =>
+            modelBuilder.Entity("Application.Domain.Book", b =>
                 {
                     b.Property<Guid>("Id")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
+                    b.ComplexProperty<Dictionary<string, object>>("Author", "Application.Domain.Book.Author#Author", b1 =>
+                        {
+                            b1.IsRequired();
 
-                    b.HasKey("Id");
+                            b1.ComplexProperty<Dictionary<string, object>>("Name", "Application.Domain.Book.Author#Author.Name#FullName", b2 =>
+                                {
+                                    b2.IsRequired();
 
-                    b.HasIndex("Name")
-                        .IsUnique();
+                                    b2.Property<string>("FirstName")
+                                        .IsRequired()
+                                        .HasColumnType("TEXT")
+                                        .HasColumnName("AuthorFirstName");
 
-                    b.ToTable("Categories");
-                });
+                                    b2.Property<string>("LastName")
+                                        .IsRequired()
+                                        .HasColumnType("TEXT")
+                                        .HasColumnName("AuthorLastName");
+                                });
+                        });
 
-            modelBuilder.Entity("Application.Domain.Contact", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("Sex")
-                        .HasColumnType("INTEGER");
-
-                    b.ComplexProperty<Dictionary<string, object>>("Age", "Application.Domain.Contact.Age#Age", b1 =>
+                    b.ComplexProperty<Dictionary<string, object>>("BookCopies", "Application.Domain.Book.BookCopies#BookCopies", b1 =>
                         {
                             b1.IsRequired();
 
                             b1.Property<int>("Value")
-                                .HasColumnType("INTEGER");
+                                .HasColumnType("INTEGER")
+                                .HasColumnName("Copies");
                         });
 
-                    b.ComplexProperty<Dictionary<string, object>>("FirstName", "Application.Domain.Contact.FirstName#FirstName", b1 =>
+                    b.ComplexProperty<Dictionary<string, object>>("BookTitle", "Application.Domain.Book.BookTitle#BookTitle", b1 =>
                         {
                             b1.IsRequired();
 
                             b1.Property<string>("Value")
                                 .IsRequired()
                                 .HasColumnType("TEXT")
-                                .HasColumnName("FirstName");
+                                .HasColumnName("Title");
                         });
 
-                    b.ComplexProperty<Dictionary<string, object>>("LastName", "Application.Domain.Contact.LastName#LastName", b1 =>
+                    b.HasKey("Id");
+
+                    b.ToTable("Books");
+                });
+
+            modelBuilder.Entity("Application.Domain.Reader", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("TEXT");
+
+                    b.ComplexProperty<Dictionary<string, object>>("Name", "Application.Domain.Reader.Name#FullName", b1 =>
                         {
                             b1.IsRequired();
 
-                            b1.Property<string>("Value")
+                            b1.Property<string>("FirstName")
+                                .IsRequired()
+                                .HasColumnType("TEXT")
+                                .HasColumnName("FirstName");
+
+                            b1.Property<string>("LastName")
                                 .IsRequired()
                                 .HasColumnType("TEXT")
                                 .HasColumnName("LastName");
@@ -73,46 +89,34 @@ namespace Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Contacts");
+                    b.ToTable("Readers");
                 });
 
-            modelBuilder.Entity("Application.Domain.Contact", b =>
+            modelBuilder.Entity("Application.Domain.Reader", b =>
                 {
-                    b.OwnsMany("Application.Domain.Email", "Emails", b1 =>
+                    b.OwnsOne("Application.Domain.EmailAddress", "Email", b1 =>
                         {
-                            b1.Property<int>("Id")
-                                .ValueGeneratedOnAdd()
-                                .HasColumnType("INTEGER");
+                            b1.Property<Guid>("ReaderId")
+                                .HasColumnType("TEXT");
 
-                            b1.Property<string>("Address")
+                            b1.Property<string>("Value")
                                 .IsRequired()
-                                .HasColumnType("TEXT");
+                                .HasColumnType("TEXT")
+                                .HasColumnName("Email");
 
-                            b1.Property<Guid>("CategoryId")
-                                .HasColumnType("TEXT");
+                            b1.HasKey("ReaderId");
 
-                            b1.Property<Guid>("ContactId")
-                                .HasColumnType("TEXT");
+                            b1.HasIndex("Value")
+                                .IsUnique();
 
-                            b1.HasKey("Id");
-
-                            b1.HasIndex("CategoryId");
-
-                            b1.HasIndex("ContactId");
-
-                            b1.ToTable("Email");
-
-                            b1.HasOne("Application.Domain.Category", null)
-                                .WithMany()
-                                .HasForeignKey("CategoryId")
-                                .OnDelete(DeleteBehavior.Cascade)
-                                .IsRequired();
+                            b1.ToTable("Readers");
 
                             b1.WithOwner()
-                                .HasForeignKey("ContactId");
+                                .HasForeignKey("ReaderId");
                         });
 
-                    b.Navigation("Emails");
+                    b.Navigation("Email")
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

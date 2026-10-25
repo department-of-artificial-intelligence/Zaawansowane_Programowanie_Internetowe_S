@@ -10,9 +10,12 @@ public sealed record BookTitle
     {
         Value = value;
     }
-
+    private BookTitle() 
+    { 
+        Value = null!; 
+    }
     public static Result<BookTitle> Create(string value) =>
         Validators
             .NotEmpty(value, "Nazwa ksiazki nie może być pusta.")
-            .Map(_ => new FirstName(value));
+            .Map(_ => new BookTitle(value));
 }

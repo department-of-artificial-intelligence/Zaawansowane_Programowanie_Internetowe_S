@@ -1,6 +1,7 @@
 ﻿using Application.Domain;
-using Application.DomainServices;
+using Application.Queries.Dtos;
 using Application.Services;
+using Application.UseCases;
 using Application.UseCases.Dtos;
 using Application.Utilities;
 using Data;
@@ -21,120 +22,73 @@ dbOptionsBuilder.UseSqlite(config.GetConnectionString("default"));
 using var context = new AppDbContext(dbOptionsBuilder.Options);
 context.Database.Migrate();
 
-var categoryRepository = new CategoryRepository(context);
-var contactRepository = new ContactRepository(context);
+var bookRepository = new BookRepository(context);
+var readerRepository = new ReaderRepository(context);
 var unitOfWork = new UnitOfWork(context);
-var categoryUniquenessChecker = new CategoryUniquenessChecker(
-    categoryRepository);
-var categoryServices = new CategoryServices(
-    categoryRepository, contactRepository, unitOfWork, categoryUniquenessChecker);
 
-var contactServices = new ContactServices(
-    contactRepository, categoryRepository, unitOfWork);
+var bookServices = new BookServices(bookRepository, unitOfWork);
+var readerServices = new ReaderServices(readerRepository, unitOfWork);
 
-var addContactDto = new AddContactDto("Jan", "Kowalski", Sex.Male, 30);
-var addContactResult = contactServices.AddContact(addContactDto);
+IBookQueries bookQueries = new BookQueries(context);
+IReaderQueries readerQueries = new ReaderQueries(context);
 
-addContactResult.Match(
+Console.WriteLine("Dodawanie czytelnika");
+var addReaderDto = new AddReaderDto("Jan", "Kowalski", "jan.kowalski@example.com");
+var addReaderResult = readerServices.AddReader(addReaderDto);
+
+Guid readerId = Guid.Empty;
+addReaderResult.Match(
     v => {
-        Console.WriteLine($"Dodano kontakt {v.FirstName} {v.LastName} (id = {v.Id})");
+        readerId = v.Id;
+        Console.WriteLine($"Dodano czytelnika: {v.Name.FirstName} {v.Name.LastName} ({v.Email.Value}) [id = {v.Id}]");
         return Unit.Instance;
     },
-    e => {Console.WriteLine(e); return Unit.Instance;}
+    e => { Console.WriteLine($"Błąd: {e}"); return Unit.Instance; }
 );
 
-var addEmailResult = addContactResult.Bind(contact =>
-    categoryServices.AddCategory(new AddCategoryDto("Praca"))
-        .Bind(category =>
-        {
-            var addEmailDto = new AddEmailDto(
-                contact.Id, "jan.kowalski@example.com", category.Id);
-            return contactServices.AddEmail(addEmailDto);
-        })
+Console.WriteLine("\nDodawanie książki");
+var addBookDto = new AddBookDto("Agatha", "Christie", "4.50 z Paddington", 3);
+var addBookResult = bookServices.AddBook(addBookDto);
+
+Guid bookId = Guid.Empty;
+addBookResult.Match(
+    v => {
+        bookId = v.Id;
+        Console.WriteLine($"Dodano książku: '{v.BookTitle.Value}' autora {v.Author.Name.FirstName} {v.Author.Name.LastName}, egzemplarzy: {v.BookCopies.Value} [id = {v.Id}]");
+        return Unit.Instance;
+    },
+    e => { Console.WriteLine($"Błąd: {e}"); return Unit.Instance; }
 );
 
-addEmailResult.Match(
-    _ => {Console.WriteLine("Dodano e-mail."); return Unit.Instance;},
-    e => {Console.WriteLine(e); return Unit.Instance;}
-);
-
-foreach(var category in context.Categories)
+Console.WriteLine("\nLista książek");
+foreach (var book in bookQueries.GetAll())
 {
-    Console.WriteLine(category.Name);
+    Console.WriteLine($"Tytuł: '{book.Title}', Autor: {book.AuthorFirstName} {book.AuthorLastName}, Dostępne sztuki: {book.AvailableCopies}");
 }
 
-var categoryToUpdate = context.Categories.FirstOrDefault(c=>c.Name == "Praca");
-if(categoryToUpdate != null){
-    var updateDto = new UpdateCategoryDto(categoryToUpdate.Id, "Praca Zdalna");
-    var updateResult = categoryServices.UpdateCategory(updateDto);
-
-    updateResult.Match(
-        _ => {
-            Console.WriteLine($"Zaktualizowano kategorię na 'Praca Zdalna'.");
-            return Unit.Instance;
-        },
-        e => {Console.WriteLine(e); return Unit.Instance;}
-    );
-}
-
-Console.WriteLine("Aktualna Lista: ");
-foreach(var category in context.Categories)
+if (bookId != Guid.Empty && readerId != Guid.Empty)
 {
-    Console.WriteLine(category.Name);
-}
-Console.WriteLine("Testowanie usuwania kategorii z email");
-var categoryToDelete = context.Categories.FirstOrDefault(c=>c.Name == "Praca Zdalna");
+    Console.WriteLine("\nWypożyczenie książki");
+    var borrowDto = new BorrowBookDto(bookId, readerId);
+    var borrowResult = bookServices.BorrowBook(borrowDto);
 
-if(categoryToDelete != null){
-    var deleteResult = categoryServices.RemoveCategory(categoryToDelete.Id);
-    deleteResult.Match(
-        _ => {Console.WriteLine("Kategoria została usunięta."); return Unit.Instance;},
-        e => {Console.WriteLine(e); return Unit.Instance;}
-    );
-}
-Console.WriteLine("Testowanie usuwania pustej kategorii");
-var newCategoryResult = categoryServices.AddCategory(new AddCategoryDto("Tymczasowa"));
-newCategoryResult.Match(
-    _ => {Console.WriteLine("Dodano kategorie."); return Unit.Instance;},
-    e => {Console.WriteLine(e); return Unit.Instance;}
-);
-
-var categoryNewToDelete = context.Categories.FirstOrDefault(c=>c.Name == "Tymczasowa");
-if(categoryNewToDelete != null){
-    var deleteResult = categoryServices.RemoveCategory(categoryNewToDelete.Id);
-    deleteResult.Match(
-        _ => {Console.WriteLine("Kategoria została usunięta."); return Unit.Instance;},
-        e => {Console.WriteLine(e); return Unit.Instance;}
-    );
-}
-Console.WriteLine("Edycja i usuwanie kontaktu");
-
-var contactToUpdate = context.Contacts.FirstOrDefault(c => c.FirstName.Value == "Jan");
-if (contactToUpdate != null)
-{
-    var updateDto = new UpdateContactDto(
-        contactToUpdate.Id,
-        "Janusz",
-        "Nowak",
-        Sex.Male,
-        31
+    borrowResult.Match(
+        _ => { Console.WriteLine("Książka została wypożyczona!"); return Unit.Instance; },
+        e => { Console.WriteLine($"Nie udało się wypożyczyć: {e}"); return Unit.Instance; }
     );
 
-    var updateResult = contactServices.UpdateContact(updateDto);
-
-    updateResult.Match(
-        _ => {Console.WriteLine("Zaktualizowano dane kontaktu."); return Unit.Instance;},
-        e => {Console.WriteLine(e); return Unit.Instance;}
+    var updatedBook = bookQueries.GetById(bookId);
+    updatedBook.Match(
+        b => { Console.WriteLine($"Aktualna liczba dostępnych sztuk po wypożyczeniu: {b.AvailableCopies}"); return Unit.Instance; },
+        () => { Console.WriteLine("Nie znaleziono książki."); return Unit.Instance; }
     );
 
-    var removeResult = contactServices.RemoveContact(contactToUpdate.Id);
+    Console.WriteLine("\nZwrot książki");
+    var returnDto = new ReturnBookDto(bookId);
+    var returnResult = bookServices.ReturnBook(returnDto);
 
-    removeResult.Match(
-         _ => {Console.WriteLine("Kontakt został usunięty."); return Unit.Instance;},
-        e => {Console.WriteLine(e); return Unit.Instance;}
+    returnResult.Match(
+        _ => { Console.WriteLine("Książka została zwrócona!"); return Unit.Instance; },
+        e => { Console.WriteLine($"Nie udało się zwrócić: {e}"); return Unit.Instance; }
     );
-}
-else
-{
-    Console.WriteLine("Nie znaleziono kontaktu do przetestowania.");
 }

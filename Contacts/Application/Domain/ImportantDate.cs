@@ -12,6 +12,10 @@ public sealed record ImportantDate
         Date = date;
         Description = description;
     }
+    private ImportantDate()
+    {
+        Description = null!;
+    }
 
     public static Result<ImportantDate> Create(DateOnly date, string description) =>
         Validators

@@ -10,7 +10,10 @@ public sealed record PhoneNumber
     {
         Value = value;
     }
-
+    private PhoneNumber()
+    {
+        Value = null!;
+    }
     public static Result<PhoneNumber> Create(string value) =>
         Validators
             .NotEmpty(value, "Numer telefonu nie może być pusty.")

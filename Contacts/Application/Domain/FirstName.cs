@@ -10,7 +10,10 @@ public sealed record FirstName
     {
         Value = value;
     }
-
+    private FirstName()
+    {
+        Value = null!;
+    }
     public static Result<FirstName> Create(string value) =>
         Validators
             .NotEmpty(value, "Imię nie może być puste.")

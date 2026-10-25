@@ -64,6 +64,34 @@ public class AppDbContext : DbContext
             .Navigation(c => c.Emails)
             .UsePropertyAccessMode(PropertyAccessMode.Field);
 
+        modelBuilder.Entity<Contact>().OwnsMany(
+            contact => contact.Numbers,
+            numberBuilder =>
+            {
+                numberBuilder.WithOwner().HasForeignKey("ContactId");
+                numberBuilder.Property<int>("Id");
+                numberBuilder.HasKey("Id");
+                numberBuilder.Property(n => n.Value).HasColumnName("PhoneNumber");
+            });
+
+        modelBuilder.Entity<Contact>()
+            .Navigation(c => c.Numbers)
+            .UsePropertyAccessMode(PropertyAccessMode.Field);
+
+        modelBuilder.Entity<Contact>().OwnsMany(
+            contact => contact.ImportantDates,
+            dateBuilder =>
+            {
+                dateBuilder.WithOwner().HasForeignKey("ContactId");
+                dateBuilder.Property<int>("Id");
+                dateBuilder.HasKey("Id");
+            });
+
+        modelBuilder.Entity<Contact>()
+            .Navigation(c => c.ImportantDates)
+            .HasField("_dates")
+            .UsePropertyAccessMode(PropertyAccessMode.Field);
+
         modelBuilder.Entity<Contact>().ComplexProperty(
             contact => contact.Age,
             ageBuilder => ageBuilder.Property(age => age.Value)
