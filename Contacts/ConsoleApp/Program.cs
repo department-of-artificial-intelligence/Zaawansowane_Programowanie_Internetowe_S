@@ -1,2 +1,84 @@
-﻿// See https://aka.ms/new-console-template for more information
-Console.WriteLine("Hello, World!");
+﻿using Application.Domain;
+using Application.DomainServices;
+using Application.Services;
+using Application.UseCases.Dtos;
+using Application.Utilities;
+using Data;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+
+var builder = new ConfigurationBuilder();
+builder.SetBasePath(AppContext.BaseDirectory)
+    .AddJsonFile(
+        "appsettings.json",
+        optional: false,
+        reloadOnChange: true);
+
+// Skonfigurowanie połączenia z bazą danych
+IConfiguration config = builder.Build();
+var dbOptionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
+dbOptionsBuilder.UseSqlite(config.GetConnectionString("default"));
+
+// Stworzenie kontekstu
+using var context = new AppDbContext(dbOptionsBuilder.Options);
+context.Database.Migrate();
+
+// Uruchomienie aplikacji
+var categoryRepository = new CategoryRepository(context);
+var unitOfWork = new UnitOfWork(context);
+var categoryUniquenessChecker = new CategoryUniquenessChecker(
+    categoryRepository);
+var categoryServices = new CategoryServices(
+    categoryRepository, unitOfWork, categoryUniquenessChecker);
+
+var contactRepository = new ContactRepository(context);
+var contactServices = new ContactServices(
+    contactRepository, categoryRepository, unitOfWork);
+
+var addContactDto = new AddContactDto("Jan", "Kowalski", Sex.Male, 30);
+var addContactResult = contactServices.AddContact(addContactDto);
+
+addContactResult.Match(
+    v =>
+    {
+        Console.WriteLine(
+            $"Dodano kontakt {v.FirstName} {v.LastName} (id = {v.Id})");
+        return Unit.Instance;
+    },
+    e => { Console.WriteLine(e); return Unit.Instance; }
+);
+
+var addEmailResult = addContactResult.Bind(contact =>
+    categoryServices.AddCategory(new AddCategoryDto("Praca"))
+        .Bind(category =>
+        {
+            var addEmailDto = new AddEmailDto(
+                contact.Id, "jan.kowalski@example.com", category.Id);
+            return contactServices.AddEmail(addEmailDto);
+        }));
+
+addEmailResult.Match(
+    _ => { Console.WriteLine("Dodano e-mail."); return Unit.Instance; },
+    e => { Console.WriteLine(e); return Unit.Instance; }
+);
+
+var categoryOption = categoryRepository.GetByName("Praca");
+
+categoryOption.Match(
+    category =>
+    {
+        var updateResult = categoryServices.UpdateCategory(category.Id, "Praca / Biuro");
+        updateResult.Match(
+            _ => { Console.WriteLine("Pomyślnie zmodyfikowano nazwę kategorii."); return Unit.Instance; },
+            err => { Console.WriteLine($"Błąd podczas modyfikacji: {err}"); return Unit.Instance; }
+        );
+        return Unit.Instance;
+    },
+    () => { Console.WriteLine("Nie znaleziono kategorii do modyfikacji."); return Unit.Instance; }
+);
+
+foreach (var category in context.Categories)
+{
+
+    Console.WriteLine(category.Name);
+}
