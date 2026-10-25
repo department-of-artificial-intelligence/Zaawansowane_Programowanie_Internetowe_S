@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Mvc;
 using Data;
 using Application.UseCases.Dtos;
 using Application.DomainServices;
@@ -56,7 +57,10 @@ app.MapOpenApi();
 // Uruchomienie przekierowania żądań z HTTP do HTTPS
 app.UseHttpsRedirection();
 
-app.MapPost("/api/categories",
+var categoriesGroup = app.MapGroup("/api/categories")
+                         .WithTags("Kategorie");
+
+categoriesGroup.MapPost("/"
     (AddCategoryDto dto, ICategoryUseCases useCases) =>
     useCases
         .AddCategory(dto)
@@ -70,16 +74,16 @@ app.MapPost("/api/categories",
 
 .WithSummary("Dodaje kategorię")
 .WithDescription("Tworzy nową kategorię i zwraca utworzony obiekt.")
-.WithTags("Kategorie")
 .Produces<AddCategoryResult>(StatusCodes.Status201Created)
 .Produces(StatusCodes.Status400BadRequest);
 
-app.MapGet("/api/categories",
+categoriesGroup.MapGet("/",
 (ICategoryQueries queries) => Results.Ok(queries.GetCategories())
 )
 .WithSummary("Pobiera wszystkei kategorie")
 .WithDescription("Zwraca wszystkie kateghorie które znajdują się w bazie")
-.WithTags("Kategorie");
+.Produces(StatusCodes.Status200OK)
+.Produces(StatusCodes.Status400BadRequest);
 
 
 app.MapPost("/api/contacts",
@@ -105,8 +109,116 @@ app.MapGet("/api/contacts",
 )
 .WithSummary("Pobiera wszystkie kontakty")
 .WithDescription("Zwraca wszystkie kontakty które znajdują się w bazie")
-.WithTags("Kontakty");
+.WithTags("Kontakty")
+.Produces(StatusCodes.Status200OK)
+.Produces(StatusCodes.Status400BadRequest);
 
+
+app.MapPost("/api/contacts/emails",
+    (AddEmailDto dto, IContactUseCases useCases) =>
+    useCases
+        .AddEmail(dto)
+        .Match(
+            _ => Results.Ok(),
+            error => Results.Problem(detail: error, statusCode: 400)
+        )
+    )
+.WithSummary("Dodaje e-mail do kontaktu")
+.WithDescription("Dodaje nowy adres e-mail dla wskazanego kontaktu i kategorii.")
+.WithTags("Kontakty")
+.Produces(StatusCodes.Status200OK)
+.Produces(StatusCodes.Status400BadRequest);
+
+
+app.MapDelete("/api/contacts/emails",
+    ([FromBody] RemoveEmailDto dto, IContactUseCases useCases) =>
+    useCases
+        .RemoveEmail(dto)
+        .Match(
+            _ => Results.Ok(),
+            error => Results.Problem(detail: error, statusCode: 400)
+        )
+    )
+.WithSummary("Usuwa e-mail z kontaktu")
+.WithTags("Kontakty")
+.Produces(StatusCodes.Status200OK)
+.Produces(StatusCodes.Status400BadRequest);
+
+
+app.MapPost("/api/contacts/phones",
+    (AddPhoneDto dto, IContactUseCases useCases) =>
+    useCases
+        .AddPhone(dto)
+        .Match(
+            _ => Results.Ok(),
+            error => Results.Problem(detail: error, statusCode: 400)
+        )
+    )
+.WithSummary("Dodaje numer telefonu do kontaktu")
+.WithTags("Kontakty")
+.Produces(StatusCodes.Status200OK)
+.Produces(StatusCodes.Status400BadRequest);
+
+
+app.MapPut("/api/contacts",
+    (UpdateContactDto dto, IContactUseCases useCases) =>
+    useCases
+        .UpdateContact(dto)
+        .Match(
+            _ => Results.Ok(),
+            error => Results.Problem(detail: error, statusCode: 400)
+        )
+    )
+.WithSummary("Aktualizuje podstawowe dane kontaktu")
+.WithTags("Kontakty")
+.Produces(StatusCodes.Status200OK)
+.Produces(StatusCodes.Status400BadRequest);
+
+
+app.MapDelete("/api/contacts/{id:guid}",
+    (Guid id, IContactUseCases useCases) =>
+    useCases
+        .RemoveContact(id)
+        .Match(
+            _ => Results.Ok(),
+            error => Results.Problem(detail: error, statusCode: 400)
+        )
+    )
+.WithSummary("Usuwa kontakt o podanym ID")
+.WithTags("Kontakty")
+.Produces(StatusCodes.Status200OK)
+.Produces(StatusCodes.Status400BadRequest);
+
+
+
+app.MapPost("/api/contacts/important-dates",
+    (AddImportantDateDto dto, IContactUseCases useCases) =>
+    useCases
+        .AddImportantDate(dto)
+        .Match(
+            _ => Results.Ok(),
+            error => Results.Problem(detail: error, statusCode: 400)
+        )
+    )
+.WithSummary("Dodaje ważną datę do kontaktu")
+.WithTags("Kontakty")
+.Produces(StatusCodes.Status200OK)
+.Produces(StatusCodes.Status400BadRequest);
+
+
+app.MapDelete("/api/contacts/important-dates",
+    ([FromBody] RemoveImportantDateDto dto, IContactUseCases useCases) =>
+    useCases
+        .RemoveImportantDate(dto)
+        .Match(
+            _ => Results.Ok(),
+            error => Results.Problem(detail: error, statusCode: 400)
+        )
+    )
+.WithSummary("Usuwa ważną datę z kontaktu")
+.WithTags("Kontakty")
+.Produces(StatusCodes.Status200OK)
+.Produces(StatusCodes.Status400BadRequest);
 
 // Uruchomienie aplikacji
 app.Run();
