@@ -76,6 +76,27 @@ namespace Data.Migrations
                     b.ToTable("Contacts");
                 });
 
+            modelBuilder.Entity("Application.Domain.User", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Password")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("UserName")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserName")
+                        .IsUnique();
+
+                    b.ToTable("Users");
+                });
+
             modelBuilder.Entity("Application.Domain.Contact", b =>
                 {
                     b.OwnsMany("Application.Domain.Email", "Emails", b1 =>

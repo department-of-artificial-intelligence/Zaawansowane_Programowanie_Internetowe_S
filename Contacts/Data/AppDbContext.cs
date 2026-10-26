@@ -7,7 +7,7 @@ public class AppDbContext : DbContext
 {
     public DbSet<Contact> Contacts => Set<Contact>();
     public DbSet<Category> Categories => Set<Category>();
-
+    public DbSet<User> Users => Set<User>();
     public AppDbContext(DbContextOptions<AppDbContext> options)
         : base(options)
     {
@@ -15,6 +15,22 @@ public class AppDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<User>(userBuilder => {
+            userBuilder
+                .HasKey(user=>user.Id);
+            userBuilder
+                .Property(user => user.Id).ValueGeneratedNever();
+            userBuilder
+                .Property(user => user.UserName)
+                .IsRequired();
+            userBuilder
+                .Property(user=>user.Password)
+                .IsRequired();
+            userBuilder
+                .HasIndex(user=>user.UserName)
+                .IsUnique();
+            });
+
         modelBuilder.Entity<Contact>(contactBuilder =>
         {
             contactBuilder.HasKey(contact => contact.Id);

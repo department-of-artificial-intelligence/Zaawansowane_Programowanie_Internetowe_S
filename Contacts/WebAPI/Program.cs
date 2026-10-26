@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
-
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 using Application.DomainServices;
 using Application.OutputPorts; 
 using Application.Queries;
@@ -17,6 +19,22 @@ var builder = WebApplication.CreateBuilder(args);
      options.UseSqlite(builder.Configuration.GetConnectionString("default"))
 );
 // Add services to the container.
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+.AddJwtBearer(x => {
+    x.TokenValidationParameters = new TokenValidationParameters {
+        IssuerSigningKey = new SymmetricSecurityKey(
+            Encoding.UTF8
+            .GetBytes(builder.Configuration["ApplicationSettings:JWT_KEY"]!)
+        ),
+        ValidateIssuer = false,
+        ValidateAudience = false,
+        ValidateLifetime = true,
+        NameClaimType = "name",
+        RoleClaimType = "role"
+    };
+    x.MapInboundClaims = false;
+});
+builder.Services.AddAuthorization();
 builder.Services.AddScoped<ICategoryQueries, CategoryQueries>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
@@ -24,6 +42,8 @@ builder.Services.AddScoped<ICategoryUseCases, CategoryServices>();
 builder.Services.AddScoped<CategoryUniquenessChecker>();
 builder.Services.AddScoped<IContactRepository, ContactRepository>();
 builder.Services.AddScoped<IContactUseCases, ContactServices>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IUserUseCases, UserServices>();
 builder.Services.AddProblemDetails(); 
 builder.Services.AddExceptionHandler<WebAPI.GlobalExceptionHandler>();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
@@ -42,6 +62,17 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseAuthentication();
+app.UseAuthorization();
+
+app.MapPost("/api/users", (AddUserDto dto, IUserUseCases userUseCases) =>
+    userUseCases
+        .AddUser(dto)
+        .Match(
+            user => Results.Created($"/api/users/{user.Id}", user),
+            error => Results.Problem(detail: error, statusCode: 400)
+        )
+);
 
 var categoriesGroup = app.MapGroup("/api/categories")
     .WithTags("Kategorie");
@@ -63,6 +94,7 @@ var categoriesGroup = app.MapGroup("/api/categories")
 categoriesGroup.MapGet("/api/categories",
     (ICategoryQueries queries) => Results.Ok(queries.GetCategories())
 )
+.RequireAuthorization()
 .WithSummary("Pobiera kategorię")
 .WithDescription("Zwraca listę kategorii")
 .WithTags("Kategorie")
