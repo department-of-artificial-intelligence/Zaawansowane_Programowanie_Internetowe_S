@@ -1,6 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
-
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 using Application.DomainServices;
 using Application.OutputPorts;
 using Application.Queries;
@@ -10,6 +12,7 @@ using Application.Services;
 using Application.UseCases;
 using Application.UseCases.Dtos;
 using Data;
+using Microsoft.IdentityModel.Tokens.Experimental;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,6 +28,20 @@ builder.Services.AddScoped<IContactRepository, ContactRepository>();
 builder.Services.AddScoped<ICategoryUseCases, CategoryServices>();
 builder.Services.AddScoped<IContactUseCases, ContactServices>();
 builder.Services.AddScoped<CategoryUniquenessChecker>();
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(
+    x => {x.TokenValidationParameters = new TokenValidationParameters
+    {
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["ApplicationSetting:JWT_KEY"]!)),
+        ValidateIssuer = false,
+        ValidateAudience = false,
+        ValidateLifetime = true,
+        NameClaimType = "name",
+        RoleClaimType = "role"
+    };
+    x.MapInboundClaims = false;
+});
+builder.Services.AddAuthorization();
 
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<WebAPI.GlobalExceptionHandler>();
@@ -43,11 +60,14 @@ if(app.Environment.IsDevelopment()){
 
 app.UseExceptionHandler();
 app.UseHttpsRedirection();
+app.UseAuthentication();
+app.UseAuthorization();
 
 // Categories //
 var categoriesGroup = app.MapGroup("/api/categories").WithTags("Kategorie");
 
 categoriesGroup.MapGet("", (ICategoryQueries queries) => Results.Ok(queries.GetCategories()))
+.RequireAuthorization()
 .WithSummary("Pobiera listę kategorii")
 .WithDescription("Zwraca kolekcję wszystkich dostępnych kategorii w systemie.")
 .Produces<IEnumerable<CategoryDto>>(StatusCodes.Status200OK);
