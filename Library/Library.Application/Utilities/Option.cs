@@ -1,4 +1,4 @@
-namespace Application.Utilities;
+namespace Library.Application.Utilities;
 
 public class Option<T>
 {

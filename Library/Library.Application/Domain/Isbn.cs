@@ -1,5 +1,5 @@
 using System.Text.RegularExpressions;
-using Application.Utilities;
+using Library.Application.Utilities;
 
 namespace Library.Application.Domain;
 
