@@ -11,6 +11,7 @@ namespace Application.Services;
 
 public class CategoryServices(
     ICategoryRepository categoryRepository,
+    IContactRepository contactRepository,
 
     IUnitOfWork unitOfWork,
     CategoryUniquenessChecker categoryUniquenessChecker
@@ -31,15 +32,27 @@ public class CategoryServices(
     public Result<Unit> RemoveCategory(Guid id)
         => categoryRepository.GetById(id)
             .Required($"Nie mogę odnaleźć kategorii o id = {id}")
+            .Bind(category =>
+            {
+                var isCategoryInUse = contactRepository.GetAll()
+                    .Any(contact => contact.Emails.Any(email => email.CategoryId == id));
 
-            .Tap(categoryRepository.Remove)
-            .Tap(_ => unitOfWork.Save())
-            .Map(_ => Unit.Instance);
+
+                return isCategoryInUse
+                    ? Result.Failure<Category>($"Nie można usunąć kategorii '{category.Name}', ponieważ jest przypisana do istniejącego adresu e-mail.")
+                    : Result.Success(category);
+            })
+                .Tap(categoryRepository.Remove)
+                .Tap(_ => unitOfWork.Save())
+                .Map(_ => Unit.Instance);
+
 
     public Result<Unit> UpdateCategory(Guid id, string newName)
         => categoryRepository.GetById(id)
             .Required($"Nie mogę odnaleźć kategorii o id = {id}")
-            .Bind(category => category.UpdateName(newName))
+            .Bind(category =>
+                categoryUniquenessChecker.EnsureUnique(newName)
+                    .Bind(_ => category.UpdateName(newName)))
             .Tap(_ => unitOfWork.Save())
             .Map(_ => Unit.Instance);
 
