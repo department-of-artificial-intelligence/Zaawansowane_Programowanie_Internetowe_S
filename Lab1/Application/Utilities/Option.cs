@@ -35,7 +35,7 @@ public static class Option
         => option switch
         {
             Option<T>.Some some => Result.Success(some.Value),
-            Option<T>.None _ => Result.Failure<T>(noneMessage),
+            Option<T>.None _ => Result.NotFound<T>(noneMessage),
             _ => throw new InvalidOperationException()
         };
 }

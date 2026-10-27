@@ -6,8 +6,9 @@ namespace Application.DomainServices;
 public class CategoryRemovalChecker(IContactRepository contactRepository)
 {
     public Result<Unit> EnsureCanBeRemoved(Category category) =>
-        Validators.IsTrue(
-            !contactRepository.IsCategoryInUse(category.Id),
-            $"Kategoria '{category.Name}' jest przypisana do adresów e-mail " +
-            "i nie może zostać usunięta.");
+        contactRepository.IsCategoryInUse(category.Id)
+            ? Result.Conflict<Unit>(
+                $"Kategoria '{category.Name}' jest przypisana do adresów e-mail " +
+                "i nie może zostać usunięta.")
+            : Result.Success(Unit.Instance);
 }

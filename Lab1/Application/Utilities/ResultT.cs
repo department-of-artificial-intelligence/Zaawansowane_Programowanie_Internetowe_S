@@ -2,9 +2,12 @@ namespace Application.Utilities;
 
 public class Result<T>
 {
-    public class Failure(string message) : Result<T>
+    public class Failure(string message, ErrorKind kind) : Result<T>
     {
+        public Failure(string message) : this(message, ErrorKind.Validation) { }
+
         public string Message { get; } = message;
+        public ErrorKind Kind { get; } = kind;
     }
 
     public class Success(T value) : Result<T>
@@ -12,12 +15,17 @@ public class Result<T>
         public T Value { get; } = value;
     }
 
-    public R Match<R>(Func<T, R> onSuccess, Func<string, R> onFailure)
+    // Dotychczasowa wersja - bez rodzaju błędu (cały istniejący kod działa bez zmian)
+    public R Match<R>(Func<T, R> onSuccess, Func<string, R> onFailure) =>
+        Match(onSuccess, (message, _) => onFailure(message));
+
+    // Nowa wersja - z rodzajem błędu (używana przez WebAPI)
+    public R Match<R>(Func<T, R> onSuccess, Func<string, ErrorKind, R> onFailure)
     {
         return this switch
         {
             Success success => onSuccess(success.Value),
-            Failure failure => onFailure(failure.Message),
+            Failure failure => onFailure(failure.Message, failure.Kind),
             _ => throw new InvalidOperationException("Wrong type")
         };
     }
@@ -29,19 +37,31 @@ public static class Result
         new Result<T>.Success(value);
 
     public static Result<T> Failure<T>(string message) =>
-        new Result<T>.Failure(message);
+        new Result<T>.Failure(message, ErrorKind.Validation);
 
+    public static Result<T> Failure<T>(string message, ErrorKind kind) =>
+        new Result<T>.Failure(message, kind);
+
+    public static Result<T> NotFound<T>(string message) =>
+        new Result<T>.Failure(message, ErrorKind.NotFound);
+
+    public static Result<T> Conflict<T>(string message) =>
+        new Result<T>.Failure(message, ErrorKind.Conflict);
+
+    // Map i Bind przekazują dalej rodzaj błędu, a nie tylko komunikat
     public static Result<TResult> Map<T, TResult>(
         this Result<T> result, Func<T, TResult> map
     ) =>
         result.Match(
             value => Success(map(value)),
-            Failure<TResult>);
+            (message, kind) => Failure<TResult>(message, kind));
 
     public static Result<TResult> Bind<T, TResult>(
         this Result<T> result, Func<T, Result<TResult>> bind
     ) =>
-        result.Match(bind, Failure<TResult>);
+        result.Match(
+            bind,
+            (message, kind) => Failure<TResult>(message, kind));
 
     public static Result<T> Tap<T>(
         this Result<T> result, Action<T> action) =>
@@ -64,7 +84,7 @@ public static class Result
     }
 
     public static T GetValueOrThrow<T>(this Result<T> result) =>
-    result.Match(
-        value => value,
-        error => throw new InvalidOperationException(error));
+        result.Match(
+            value => value,
+            error => throw new InvalidOperationException(error));
 }

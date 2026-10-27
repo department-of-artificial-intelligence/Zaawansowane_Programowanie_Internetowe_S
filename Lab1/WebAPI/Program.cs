@@ -1,73 +1,64 @@
-using Microsoft.EntityFrameworkCore;
-using Data;
-using Application.UseCases.Dtos;
+using System.Text.Json.Serialization;
 using Application.DomainServices;
 using Application.OutputPorts;
 using Application.Queries;
 using Application.Repositories;
 using Application.Services;
 using Application.UseCases;
+using Data;
+using Microsoft.EntityFrameworkCore;
+using WebAPI;
+using WebAPI.Endpoints;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Dodanie kontekstu danych
+// Kontekst danych
 builder.Services.AddDbContext<AppDbContext>(options =>
-options.UseSqlite(builder.Configuration.GetConnectionString("default"))
-);
+    options.UseSqlite(builder.Configuration.GetConnectionString("default")));
 
-builder.Services.AddScoped<ICategoryQueries, CategoryQueries>();
+// Repozytoria, zapytania i jednostka pracy
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
-builder.Services.AddScoped<ICategoryUseCases, CategoryServices>();
-builder.Services.AddScoped<CategoryUniquenessChecker>();
-
-builder.Services.AddScoped<CategoryRemovalChecker>();
 builder.Services.AddScoped<IContactRepository, ContactRepository>();
+builder.Services.AddScoped<ICategoryQueries, CategoryQueries>();
+builder.Services.AddScoped<IContactQueries, ContactQueries>();
+
+// Usługi domenowe
+builder.Services.AddScoped<CategoryUniquenessChecker>();
+builder.Services.AddScoped<CategoryRemovalChecker>();
+
+// Przypadki użycia
+builder.Services.AddScoped<ICategoryUseCases, CategoryServices>();
+builder.Services.AddScoped<IContactUseCases, ContactServices>();
+
+// Enumy (Sex, PhoneType) jako tekst w JSON-ie i w Swaggerze, np. "Male" zamiast 0
+builder.Services.ConfigureHttpJsonOptions(options =>
+    options.SerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 
 builder.Services.AddProblemDetails();
-builder.Services.AddExceptionHandler<WebAPI.GlobalExceptionHandler>();
-// Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddOpenApi();
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
+// Baza zawsze w aktualnej wersji (tabele Phone i ImportantDate z Lab1)
+using (var scope = app.Services.CreateScope())
 {
-    app.UseSwaggerUI(options =>
-    {
-        options.SwaggerEndpoint("/openapi/v1.json", "API v1");
-    });
+    scope.ServiceProvider.GetRequiredService<AppDbContext>().Database.Migrate();
 }
+
 app.UseExceptionHandler();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    app.UseSwaggerUI(options =>
+        options.SwaggerEndpoint("/openapi/v1.json", "API v1"));
 }
 
 app.UseHttpsRedirection();
-app.MapPost("/api/categories",
-    (AddCategoryDto dto, ICategoryUseCases useCases) =>
-    useCases
-        .AddCategory(dto)
-        .Match(
-            category => Results.Created(
-                $"/api/categories/{category.Id}",
-                category),
-            error => Results.Problem(detail: error, statusCode: 400)
-        ))
-        .WithSummary("Dodaje kategorię")
-        .WithDescription("Tworzy nową kategorię i zwraca utworzony obiekt.")
-        .WithTags("Kategorie")
-        .Produces<AddCategoryResult>(StatusCodes.Status201Created)
-        .Produces(StatusCodes.Status400BadRequest);
 
-app.MapGet("/api/categories",
-(ICategoryQueries queries) => Results.Ok(queries.GetCategories())
-);
-
-
+app.MapCategoryEndpoints();
+app.MapContactEndpoints();
 
 app.Run();

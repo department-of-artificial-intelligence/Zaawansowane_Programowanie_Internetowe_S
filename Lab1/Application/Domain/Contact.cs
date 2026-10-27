@@ -49,7 +49,7 @@ public class Contact : Entity
     {
         if (HasEmail(address))
         {
-            return Result.Failure<Unit>("Email już istnieje w kontakcie");
+            return Result.Conflict<Unit>("Email już istnieje w kontakcie");
         }
 
         return Email
@@ -81,7 +81,7 @@ public Result<Unit> RemoveEmail(EmailAddress address)
     var email = _emails.SingleOrDefault(e => e.Address == address);
     if (email is null)
     {
-        return Result.Failure<Unit>($"Kontakt nie ma adresu {address}.");
+        return Result.NotFound<Unit>($"Kontakt nie ma adresu {address}.");
     }
 
     _emails.Remove(email);
@@ -91,7 +91,7 @@ public Result<Unit> AddPhone(PhoneNumber number, PhoneType type)
 {
     if (_phones.Any(p => p.Number == number))
     {
-        return Result.Failure<Unit>($"Numer {number} już istnieje w kontakcie.");
+        return Result.Conflict<Unit>($"Numer {number} już istnieje w kontakcie.");
     }
 
     _phones.Add(Phone.Create(number, type));
@@ -103,7 +103,7 @@ public Result<Unit> RemovePhone(PhoneNumber number)
     var phone = _phones.SingleOrDefault(p => p.Number == number);
     if (phone is null)
     {
-        return Result.Failure<Unit>($"Kontakt nie ma numeru {number}.");
+        return Result.NotFound<Unit>($"Kontakt nie ma numeru {number}.");
     }
 
     _phones.Remove(phone);
@@ -113,7 +113,7 @@ public Result<Guid> AddImportantDate(DateLabel label, DateOnly date)
 {
     if (_importantDates.Any(d => d.Label == label))
     {
-        return Result.Failure<Guid>($"Kontakt ma już datę \"{label}\".");
+        return Result.Conflict<Guid>($"Kontakt ma już datę \"{label}\".");
     }
 
     var importantDate = ImportantDate.Create(label, date);
@@ -123,10 +123,10 @@ public Result<Guid> AddImportantDate(DateLabel label, DateOnly date)
 
 public Result<Unit> ChangeImportantDate(Guid id, DateLabel label, DateOnly date) =>
     FindImportantDate(id)
-        .Bind(importantDate => Validators
-            .IsTrue(!_importantDates.Any(d => d.Id != id && d.Label == label),
-                $"Kontakt ma już datę \"{label}\".")
-            .Map(_ => importantDate))
+        .Bind(importantDate =>
+            _importantDates.Any(d => d.Id != id && d.Label == label)
+                ? Result.Conflict<ImportantDate>($"Kontakt ma już datę \"{label}\".")
+                : Result.Success(importantDate))
         .Tap(importantDate => importantDate.Change(label, date))
         .Map(_ => Unit.Instance);
 
@@ -140,6 +140,6 @@ private Result<ImportantDate> FindImportantDate(Guid id)
     var importantDate = _importantDates.SingleOrDefault(d => d.Id == id);
     return importantDate is not null
         ? Result.Success(importantDate)
-        : Result.Failure<ImportantDate>($"Kontakt nie ma daty o id = {id}.");
+        : Result.NotFound<ImportantDate>($"Kontakt nie ma daty o id = {id}.");
 }
 }
