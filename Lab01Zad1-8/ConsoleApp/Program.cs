@@ -6,7 +6,7 @@ using Application.Utilities;
 using Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-
+/*
 var builder = new ConfigurationBuilder();
 builder.SetBasePath(AppContext.BaseDirectory)
     .AddJsonFile(
@@ -41,7 +41,7 @@ var contactServices = new ContactServices(
 var addContactDto = new AddContactDto("Jan", "Kowalski", Sex.Male, 30);
 var addContactResult = contactServices.AddContact(addContactDto);
 
-/*
+
 addContactResult.Match(
     v => {
         Console.WriteLine(
@@ -50,7 +50,7 @@ addContactResult.Match(
     },
     e => {Console.WriteLine(e); return Unit.Instance;}
     );
-*/
+
 var addEmailResult = addContactResult.Bind(contact =>
 categoryServices.AddCategory(new AddCategoryDto("Praca"))
     .Bind(category =>
@@ -206,3 +206,4 @@ removeContactResult.Match(
     _ => { Console.WriteLine("Pomyslnie usunieto kontakt"); return Unit.Instance; },
     fail => { Console.WriteLine($"Blad usuwania kontaktu: {fail}"); return Unit.Instance; }
 );
+*/

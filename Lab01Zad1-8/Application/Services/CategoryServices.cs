@@ -20,7 +20,7 @@ public class CategoryServices(
         .ToDomain()
         .Bind(category =>
             categoryUniquenessChecker
-            .EnsureUnique(category.Name)
+            .EnsureUnique(category.Name, category.UserId)
             .Map(_ => category)
         )
         .Tap(categoryRepository.Add)
