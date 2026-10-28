@@ -8,6 +8,11 @@ using Application.UseCases;
 using Application.UseCases.Dtos;
 using Data;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using WebAPI.Helpers;
+
 
 namespace WebAPI
 {
@@ -30,8 +35,31 @@ namespace WebAPI
             builder.Services.AddScoped<IContactUseCases, ContactServices>();
             builder.Services.AddScoped<CategoryUniquenessChecker>();
 
+            builder.Services.AddScoped<IUserRepository, UserRepository>();
+            builder.Services.AddScoped<IUserUseCases, UserServices>();
+
             builder.Services.AddProblemDetails();
             builder.Services.AddExceptionHandler<WebAPI.GlobalExceptionHandler>();
+
+            builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddJwtBearer(x => {
+                x.TokenValidationParameters = new TokenValidationParameters {
+                    IssuerSigningKey = new SymmetricSecurityKey(
+                        Encoding.UTF8
+                        .GetBytes(builder.Configuration["ApplicationSettings:JWT_KEY"]!)
+                    ),
+                    ValidateIssuer = false,
+                    ValidateAudience = false,
+                    ValidateLifetime = true,
+                    NameClaimType = "name",
+                    RoleClaimType = "role"
+                };
+                x.MapInboundClaims = false;
+            });
+            builder.Services.AddAuthorization();
+
+            builder.Services.AddScoped<ITokenGenerator, TokenGenerator>();
+
 
             // Dodanie usług koniecznych dla OpenApi
             builder.Services.AddOpenApi();
@@ -59,6 +87,7 @@ namespace WebAPI
             categoriesGroup.MapGet("",
                 (ICategoryQueries queries) => Results.Ok(queries.GetCategories())
             )
+            .RequireAuthorization()
             .WithSummary("Pobiera wszystkie kategorie")
             .WithDescription("Zwraca listę wszystkich dostępnych w systemie kategorii.")
             .Produces<IEnumerable<CategoryDto>>(StatusCodes.Status200OK);
@@ -219,6 +248,24 @@ namespace WebAPI
             .WithTags("Kontakty - Telefony")
             .Produces(StatusCodes.Status204NoContent)
             .Produces(StatusCodes.Status400BadRequest);
+
+            //ENDPOINTY W USERZE
+            app.MapPost("/api/users", (AddUserDto dto, IUserUseCases userUseCases) =>
+                userUseCases
+                    .AddUser(dto)
+                    .Match(
+                        user => Results.Created($"/api/users/{user.Id}", user),
+                        error => Results.Problem(detail: error, statusCode: 400)
+                    )
+            );
+
+            //ENDPOINTY LOGOWANIA
+            app.MapPost("/api/login", (LoginUserDto dto, IUserUseCases userUseCases) =>
+                userUseCases.Login(dto).Match(
+                    loginData => Results.Ok(new { loginData.AccessToken }),
+                    _ => Results.Unauthorized()
+                )
+            );
 
 
             // Uruchomienie aplikacji
