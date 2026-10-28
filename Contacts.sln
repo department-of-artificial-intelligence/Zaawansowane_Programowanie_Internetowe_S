@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Data", "Data\Data.csproj", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleApp", "ConsoleApp\ConsoleApp.csproj", "{E36ED253-4A52-45D1-82E2-6F5F48A6DB7E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebAPI", "WebAPI\WebAPI.csproj", "{AEA08F40-112C-49C8-91B3-8CF7154A5527}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -55,6 +57,18 @@ Global
 		{E36ED253-4A52-45D1-82E2-6F5F48A6DB7E}.Release|x64.Build.0 = Release|Any CPU
 		{E36ED253-4A52-45D1-82E2-6F5F48A6DB7E}.Release|x86.ActiveCfg = Release|Any CPU
 		{E36ED253-4A52-45D1-82E2-6F5F48A6DB7E}.Release|x86.Build.0 = Release|Any CPU
+		{AEA08F40-112C-49C8-91B3-8CF7154A5527}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AEA08F40-112C-49C8-91B3-8CF7154A5527}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AEA08F40-112C-49C8-91B3-8CF7154A5527}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{AEA08F40-112C-49C8-91B3-8CF7154A5527}.Debug|x64.Build.0 = Debug|Any CPU
+		{AEA08F40-112C-49C8-91B3-8CF7154A5527}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{AEA08F40-112C-49C8-91B3-8CF7154A5527}.Debug|x86.Build.0 = Debug|Any CPU
+		{AEA08F40-112C-49C8-91B3-8CF7154A5527}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AEA08F40-112C-49C8-91B3-8CF7154A5527}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AEA08F40-112C-49C8-91B3-8CF7154A5527}.Release|x64.ActiveCfg = Release|Any CPU
+		{AEA08F40-112C-49C8-91B3-8CF7154A5527}.Release|x64.Build.0 = Release|Any CPU
+		{AEA08F40-112C-49C8-91B3-8CF7154A5527}.Release|x86.ActiveCfg = Release|Any CPU
+		{AEA08F40-112C-49C8-91B3-8CF7154A5527}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

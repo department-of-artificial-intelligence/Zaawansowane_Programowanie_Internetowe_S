@@ -9,13 +9,7 @@ public class Contact : Entity
     public Sex Sex { get; private set; }
     public Age Age { get; private set; }
     public IReadOnlyCollection<Email> Emails => _emails;
-    private Contact(
-    Guid id,
-    string firstName,
-    string lastName,
-    Sex sex,
-    Age age)
-    : this(id, firstName, lastName, sex)
+    private Contact(Guid id, string firstName, string lastName, Sex sex, Age age) : this(id, firstName, lastName, sex)
     {
         Age = age;
     }
