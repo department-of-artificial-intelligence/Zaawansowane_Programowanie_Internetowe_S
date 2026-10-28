@@ -7,7 +7,6 @@ using Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 
-
 var builder = new ConfigurationBuilder();
 builder.SetBasePath(AppContext.BaseDirectory)
     .AddJsonFile(
@@ -39,6 +38,21 @@ var contactServices = new ContactServices(
 
 var categoryQueries = new CategoryQueries(context);
 
+// Lab3: kategorie mają właściciela – w konsoli używamy użytkownika demonstracyjnego
+var userRepository = new UserRepository(context);
+var consoleUserId = userRepository.GetByName("konsola").Match(
+    existing => existing.Id,
+    () =>
+    {
+        var newUser = User.Create("konsola").Match(
+            u => u,
+            e => throw new InvalidOperationException(e));
+        newUser.SetPassword("konsola");
+        userRepository.Add(newUser);
+        unitOfWork.Save();
+        return newUser.Id;
+    });
+
 // Pomocnicza funkcja do wypisywania wyników
 static void Print(string label, Result<Unit> result) =>
     result.Match(
@@ -63,7 +77,7 @@ addContactResult.Match(
     e => { Console.WriteLine(e); return Unit.Instance; });
 
 var addEmailResult = addContactResult.Bind(contact =>
-    categoryServices.AddCategory(new AddCategoryDto("Praca"))
+    categoryServices.AddCategory(new AddCategoryDto("Praca", consoleUserId))
         .Bind(category => contactServices.AddEmail(
             new AddEmailDto(contact.Id, "jan.kowalski@example.com", category.Id))));
 
@@ -90,7 +104,7 @@ Print("Kontakt ze zbyt długim nazwiskiem (oczekiwany błąd)",
 Console.WriteLine("--- Test zadania 2 ---");
 
 var emailTestCategory = categoryServices
-    .AddCategory(new AddCategoryDto($"Email-{Guid.NewGuid():N}"));
+    .AddCategory(new AddCategoryDto($"Email-{Guid.NewGuid():N}", consoleUserId));
 
 var emailTestContact = contactServices
     .AddContact(new AddContactDto("Piotr", "Zieliński", Sex.Male, 40));
@@ -116,7 +130,7 @@ Print("Ten sam adres innymi literami (oczekiwany błąd)",
 Console.WriteLine("--- Test zadania 3 ---");
 
 var renameTest = categoryServices
-    .AddCategory(new AddCategoryDto($"DoZmiany-{Guid.NewGuid():N}"));
+    .AddCategory(new AddCategoryDto($"DoZmiany-{Guid.NewGuid():N}", consoleUserId));
 
 Print("Zmiana nazwy kategorii",
     renameTest.Bind(category => categoryServices.RenameCategory(
@@ -138,7 +152,7 @@ Console.WriteLine("--- Test zadań 4-6 ---");
 var setup = contactServices
     .AddContact(new AddContactDto("Anna", "Nowak", Sex.Female, 25))
     .Bind(contact => categoryServices
-        .AddCategory(new AddCategoryDto($"Test-{Guid.NewGuid():N}"))
+        .AddCategory(new AddCategoryDto($"Test-{Guid.NewGuid():N}", consoleUserId))
         .Bind(category => contactServices
             .AddEmail(new AddEmailDto(contact.Id, "anna@example.com", category.Id))
             .Map(_ => (contact, category))));
@@ -241,7 +255,7 @@ contact78.Match(
 // Stan bazy
 // =====================================================================
 Console.WriteLine("--- Kategorie w bazie ---");
-foreach (var category in categoryQueries.GetCategories())
+foreach (var category in categoryQueries.GetCategories(consoleUserId))
 {
     Console.WriteLine(category.Name);
 }

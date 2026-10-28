@@ -2,6 +2,7 @@ using Application.Domain;
 
 namespace WebAPI;
 
+public record AddCategoryRequest(string Name);
 public record RenameCategoryRequest(string Name);
 
 public record UpdateContactRequest(string FirstName, string LastName, Sex Sex, int Age);

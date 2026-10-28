@@ -61,7 +61,13 @@ public class AppDbContext : DbContext
                 .Property(category => category.Id)
                 .ValueGeneratedNever();
             categoryBuilder.Property(category => category.Name).IsRequired();
-            categoryBuilder.HasIndex(category => category.Name).IsUnique();
+            categoryBuilder
+    .HasIndex(category => new { category.UserId, category.Name })
+    .IsUnique();
+            categoryBuilder
+                .HasOne<User>()
+                .WithMany()
+                .HasForeignKey(category => category.UserId);
         });
 
         // E-maile

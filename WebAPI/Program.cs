@@ -134,11 +134,13 @@ var categories = app.MapGroup("/api/categories")
     .ProducesProblem(StatusCodes.Status500InternalServerError);
 
 categories.MapGet("",
-    (ICategoryQueries queries) => Results.Ok(queries.GetCategories())
+    (ICategoryQueries queries, ClaimsPrincipal user) =>
+        Results.Ok(queries.GetCategories(
+            Guid.Parse(user.FindFirstValue(JwtRegisteredClaimNames.Sub)!)))
 )
 .RequireAuthorization()
 .WithSummary("Pobiera wszystkie kategorie")
-.WithDescription("Zwraca listę wszystkich kategorii zapisanych w bazie danych.")
+.WithDescription("Zwraca listę kategorii zalogowanego użytkownika.")
 .Produces<IEnumerable<CategoryDto>>(StatusCodes.Status200OK);
 
 categories.MapGet("/{id:guid}",
@@ -158,9 +160,11 @@ categories.MapGet("/{id:guid}",
 .ProducesProblem(StatusCodes.Status404NotFound);
 
 categories.MapPost("",
-    (AddCategoryDto dto, ICategoryUseCases useCases) =>
+    (AddCategoryRequest request, ICategoryUseCases useCases, ClaimsPrincipal user) =>
         useCases
-            .AddCategory(dto)
+            .AddCategory(new AddCategoryDto(
+                request.Name,
+                Guid.Parse(user.FindFirstValue(JwtRegisteredClaimNames.Sub)!)))
             .Match(
                 category => Results.Created(
                     $"/api/categories/{category.Id}",
@@ -168,6 +172,7 @@ categories.MapPost("",
                 error => Results.Problem(detail: error, statusCode: 400)
             )
 )
+.RequireAuthorization()
 .WithSummary("Dodaje kategorię")
 .WithDescription("Tworzy nową kategorię i zwraca utworzony obiekt. " +
                  "Nazwa kategorii nie może być pusta i musi być unikalna.")
