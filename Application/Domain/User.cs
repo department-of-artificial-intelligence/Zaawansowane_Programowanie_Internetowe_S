@@ -8,6 +8,8 @@ public class User : Entity
 
     public string Password { get; private set; } = string.Empty;
 
+    public UserRole Role { get; private set; } = UserRole.User;
+
     private User(Guid id, string userName) : base(id)
     {
         UserName = userName;

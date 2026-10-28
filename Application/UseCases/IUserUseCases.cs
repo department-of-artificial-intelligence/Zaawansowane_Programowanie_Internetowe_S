@@ -7,4 +7,6 @@ public interface IUserUseCases
 {
     Result<AddUserResult> AddUser(AddUserDto dto);
     Result<LoginUserResult> Login(LoginUserDto dto);
+
+    Result<Unit> RemoveUser(Guid id);
 }

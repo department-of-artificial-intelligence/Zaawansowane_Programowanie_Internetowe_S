@@ -71,7 +71,9 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
         x.MapInboundClaims = false;
     });
-builder.Services.AddAuthorization();
+// Autoryzacja + nazwana polityka dla administratorów
+builder.Services.AddAuthorizationBuilder()
+    .AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
 
 // Dodanie usług koniecznych dla OpenApi
 // Dodanie usług koniecznych dla OpenApi + schemat Bearer (przycisk "Authorize")
@@ -368,6 +370,19 @@ users.MapPost("",
 .WithSummary("Rejestruje użytkownika")
 .WithDescription("Tworzy nowego użytkownika z podaną nazwą i hasłem.")
 .Produces<AddUserResult>(StatusCodes.Status201Created)
+.ProducesProblem(StatusCodes.Status400BadRequest);
+
+
+users.MapDelete("/{id:guid}",
+    (Guid id, IUserUseCases userUseCases) =>
+        userUseCases
+            .RemoveUser(id)
+            .ToNoContent()
+)
+.RequireAuthorization("AdminOnly")
+.WithSummary("Usuwa użytkownika")
+.WithDescription("Dostępne tylko dla administratora (rola Admin).")
+.Produces(StatusCodes.Status204NoContent)
 .ProducesProblem(StatusCodes.Status400BadRequest);
 
 app.MapPost("/api/login",

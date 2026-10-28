@@ -26,9 +26,18 @@ public class UserServices(
             .Bind(
                 user => user.Password == dto.Password
                     ? Result.Success(new LoginUserResult(
-                        tokenGenerator.GenerateToken(
+                            tokenGenerator.GenerateToken(
                             user.Id,
-                            user.UserName)))
+                            user.UserName,
+                            user.Role.ToString())))
                     : Result.Failure<LoginUserResult>("Błędne hasło")
             );
+
+
+    public Result<Unit> RemoveUser(Guid id)
+        => userRepository.GetById(id)
+            .Required($"Nie mogę odnaleźć użytkownika o id = {id}")
+            .Tap(userRepository.Remove)
+            .Tap(_ => unitOfWork.Save())
+            .Map(_ => Unit.Instance);
 }

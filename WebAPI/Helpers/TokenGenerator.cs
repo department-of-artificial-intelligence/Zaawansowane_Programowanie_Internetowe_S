@@ -9,12 +9,13 @@ namespace WebAPI.Helpers;
 
 public class TokenGenerator(IConfiguration configuration) : ITokenGenerator
 {
-    public string GenerateToken(Guid userId, string userName)
+    public string GenerateToken(Guid userId, string userName, string role)
     {
         var claims = new List<Claim>
         {
             new(JwtRegisteredClaimNames.Sub, userId.ToString()),
             new(JwtRegisteredClaimNames.Name, userName),
+            new("role", role)
         };
         var jwtToken = new JwtSecurityToken(
             claims: claims,
