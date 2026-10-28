@@ -8,6 +8,9 @@ using Application.Queries;
 using Application.Repositories;
 using Application.Services;
 using Application.UseCases;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 // Przygotowanie konfiguratora naszej aplikacji
 var builder = WebApplication.CreateBuilder(args);
@@ -31,6 +34,25 @@ builder.Services.AddScoped<IContactUseCases, ContactServices>();
 builder.Services.AddOpenApi();
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<WebAPI.GlobalExceptionHandler>();
+
+
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+.AddJwtBearer(x =>
+{
+    x.TokenValidationParameters = new TokenValidationParameters
+    {
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["ApplicationSettings:JWT_KEY"])),
+        ValidateIssuer = false,
+        ValidateAudience = false,
+        ValidateLifetime = true,
+        NameClaimType = "name",
+        RoleClaimType = "role"
+    };
+    x.MapInboundClaims = false;
+});
+
+builder.Services.AddAuthorization();
 
 
 
@@ -221,4 +243,6 @@ app.MapDelete("/api/contacts/important-dates",
 .Produces(StatusCodes.Status400BadRequest);
 
 // Uruchomienie aplikacji
+app.UseAuthentication();
+app.UseAuthorization();
 app.Run();
