@@ -7,7 +7,7 @@ public interface ICategoryRepository
 {
     IEnumerable<Category> GetAll();
     Option<Category> GetById(Guid categoryId);
-	Option<Category> GetByName(string categoryName);
+	Option<Category> GetByNameAndUser(string categoryName, Guid userId);
     void Add(Category category);
     void Remove(Category category);
 }

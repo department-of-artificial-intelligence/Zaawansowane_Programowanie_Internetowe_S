@@ -16,10 +16,10 @@ public class CategoryRepository(AppDbContext context): ICategoryRepository {
 		return category is not null ? Option.Some(category) : Option.None<Category>();
 	}
 
-	public Option<Category> GetByName(string categoryName){
-		var category = context.Categories.SingleOrDefault(category => category.Name == categoryName);
-		return category is not null ? Option.Some(category) : Option.None<Category>();
-	}
+	public Option<Category> GetByNameAndUser(string categoryName, Guid userId){
+        var category = context.Categories.SingleOrDefault(c => c.Name == categoryName && c.UserId == userId);
+        return category is not null ? Option.Some(category) : Option.None<Category>();
+    }
 
 	public void Remove(Category category){
 		context.Remove(category);

@@ -1,5 +1,11 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi;
+using System.Security.Claims;
+using System.IdentityModel.Tokens.Jwt;
+using System.Text;
 
 using Application.DomainServices;
 using Application.OutputPorts;
@@ -9,14 +15,30 @@ using Application.Repositories;
 using Application.Services;
 using Application.UseCases;
 using Application.UseCases.Dtos;
+using WebAPI.Helpers;
+using WebAPI.Inputs;
 using Data;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(x => {
+	x.TokenValidationParameters = new TokenValidationParameters{
+		IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["ApplicationSettings:JWT_KEY"]!)),
+		ValidateIssuer = false,
+		ValidateAudience = false,
+		ValidateLifetime = false,
+		NameClaimType = "name",
+		RoleClaimType = "role"	
+	};
+	x.MapInboundClaims = false;
+});
+builder.Services.AddAuthorization();
 
 builder.Services.AddDbContext<AppDbContext>(options => 
 	options.UseSqlite(builder.Configuration.GetConnectionString("default"))
 );
 
+builder.Services.AddScoped<ITokenGenerator, TokenGenerator>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<ICategoryQueries, CategoryQueries>();
 builder.Services.AddScoped<IContactQueries, ContactQueries>();
@@ -25,11 +47,32 @@ builder.Services.AddScoped<IContactRepository, ContactRepository>();
 builder.Services.AddScoped<ICategoryUseCases, CategoryServices>();
 builder.Services.AddScoped<IContactUseCases, ContactServices>();
 builder.Services.AddScoped<CategoryUniquenessChecker>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IUserUseCases, UserServices>();
 
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<WebAPI.GlobalExceptionHandler>();
 
-builder.Services.AddOpenApi();
+builder.Services.AddOpenApi(options => {
+	options.AddDocumentTransformer((document, context, ct) => {
+		document.Components ??= new OpenApiComponents();
+		document.Components.SecuritySchemes ??= new Dictionary<string, IOpenApiSecurityScheme>();
+		document.Components.SecuritySchemes["Bearer"] = new OpenApiSecurityScheme{
+			Type = SecuritySchemeType.Http,
+			Scheme = "bearer",
+			BearerFormat = "JWT",
+			Description = "Wklej token JWT otrzymany z /api/login"
+		};
+		document.Security = [
+			new OpenApiSecurityRequirement {
+				[new OpenApiSecuritySchemeReference("Bearer", document)] = []
+			}
+		];
+		return Task.CompletedTask;
+	});
+});
+
+builder.Services.AddAuthorizationBuilder().AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
 
 var app = builder.Build();
 
@@ -43,14 +86,18 @@ if(app.Environment.IsDevelopment()){
 
 app.UseExceptionHandler();
 app.UseHttpsRedirection();
+app.UseAuthentication();
+app.UseAuthorization();
 
 // Categories //
 var categoriesGroup = app.MapGroup("/api/categories").WithTags("Kategorie");
 
-categoriesGroup.MapGet("", (ICategoryQueries queries) => Results.Ok(queries.GetCategories()))
+categoriesGroup.MapGet("", (ICategoryQueries queries, ClaimsPrincipal user) => 
+		Results.Ok(queries.GetCategories(Guid.Parse(user.FindFirstValue(JwtRegisteredClaimNames.Sub)!))))
 .WithSummary("Pobiera listę kategorii")
 .WithDescription("Zwraca kolekcję wszystkich dostępnych kategorii w systemie.")
-.Produces<IEnumerable<CategoryDto>>(StatusCodes.Status200OK);
+.Produces<IEnumerable<CategoryDto>>(StatusCodes.Status200OK)
+.RequireAuthorization();
 
 categoriesGroup.MapGet("/{id:guid}", (Guid id, ICategoryQueries queries) => 
     queries.GetCategory(id).Match(
@@ -63,11 +110,14 @@ categoriesGroup.MapGet("/{id:guid}", (Guid id, ICategoryQueries queries) =>
 .Produces<CategoryDto>(StatusCodes.Status200OK)
 .Produces(StatusCodes.Status404NotFound);
 
-categoriesGroup.MapPost("", (AddCategoryDto dto, ICategoryUseCases useCases) => 
-	useCases.AddCategory(dto).Match(
-		category => Results.Created($"/api/categories/{category.Id}", category),
-		error => Results.Problem(detail: error, statusCode: 400)
-	)	
+categoriesGroup.MapPost("", (AddCategoryRequest input, ICategoryUseCases useCases, ClaimsPrincipal user) =>
+	useCases.AddCategory(new AddCategoryDto(
+		input.Name,
+		Guid.Parse(user.FindFirstValue(JwtRegisteredClaimNames.Sub)!))
+	).Match(category =>
+		Results.Created($"/api/categories/{category.Id}", category),
+		error => Results.BadRequest(error)
+	)
 )
 .WithSummary("Dodaje kategorię")
 .WithDescription("Tworzy nową kategorię i zwraca utworzony obiekt.")
@@ -94,7 +144,8 @@ categoriesGroup.MapDelete("/{id:guid}", (Guid id, ICategoryUseCases useCases) =>
 .WithSummary("Usuwa kategorię")
 .WithDescription("Usuwa wskazaną kategorię na podstawie jej identyfikatora.")
 .Produces(StatusCodes.Status204NoContent)
-.Produces(StatusCodes.Status400BadRequest);
+.Produces(StatusCodes.Status400BadRequest)
+.RequireAuthorization("AdminOnly");
 
 // Contacts //
 var contactGroup = app.MapGroup("/api/contacts").WithTags("Kontakty");
@@ -214,5 +265,19 @@ contactGroup.MapDelete("/important-dates", ([FromBody] RemoveImportantDateDto dt
 .WithDescription("Usuwa powiązaną ważną datę z kontaktu.")
 .Produces(StatusCodes.Status204NoContent)
 .Produces(StatusCodes.Status400BadRequest);
+
+app.MapPost("/api/users", (AddUserDto dto, IUserUseCases userUseCases) =>
+	userUseCases.AddUser(dto).Match(
+			user => Results.Created($"/api/users/{user.Id}", user),
+			error => Results.Problem(detail: error, statusCode: 400)
+		)	
+);
+
+app.MapPost("/api/login", (LoginUserDto dto, IUserUseCases userUseCases) =>
+	userUseCases.Login(dto).Match(
+		loginData => Results.Ok(loginData.AccessToken),
+		_ => Results.Unauthorized()
+	)
+);
 
 app.Run();
