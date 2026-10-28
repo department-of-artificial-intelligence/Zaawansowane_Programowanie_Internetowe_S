@@ -1,5 +1,10 @@
+using System.Text;
 using System.Text.Json.Serialization;
+using System.Security.Claims;
+using System.IdentityModel.Tokens.Jwt;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Application.DomainServices;
 using Application.OutputPorts;
 using Application.Queries;
@@ -10,6 +15,8 @@ using Application.UseCases;
 using Application.UseCases.Dtos;
 using Data;
 using WebAPI;
+using WebAPI.Helpers;
+
 
 // Przygotowanie konfiguratora naszej aplikacji
 var builder = WebApplication.CreateBuilder(args);
@@ -27,12 +34,15 @@ builder.Services.AddScoped<IContactQueries, ContactQueries>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IContactRepository, ContactRepository>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<ITokenGenerator, TokenGenerator>();
 // Usługi domenowe
 builder.Services.AddScoped<CategoryUniquenessChecker>();
 builder.Services.AddScoped<CategoryUsageChecker>();
 // Przypadki użycia
 builder.Services.AddScoped<ICategoryUseCases, CategoryServices>();
 builder.Services.AddScoped<IContactUseCases, ContactServices>();
+builder.Services.AddScoped<IUserUseCases, UserServices>();
 
 // Enumy (Sex, PhoneType) przesyłane w JSON jako tekst ("Male", "Mobile") zamiast liczb
 builder.Services.ConfigureHttpJsonOptions(options =>
@@ -41,6 +51,26 @@ builder.Services.ConfigureHttpJsonOptions(options =>
 // Globalna obsługa wyjątków (Problem Details, RFC 7807)
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+
+// Autentykacja JWT
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(x =>
+    {
+        x.TokenValidationParameters = new TokenValidationParameters
+        {
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8
+                    .GetBytes(builder.Configuration["ApplicationSettings:JWT_KEY"]!)
+            ),
+            ValidateIssuer = false,
+            ValidateAudience = false,
+            ValidateLifetime = true,
+            NameClaimType = "name",
+            RoleClaimType = "role"
+        };
+        x.MapInboundClaims = false;
+    });
+builder.Services.AddAuthorization();
 
 // Dodanie usług koniecznych dla OpenApi
 builder.Services.AddOpenApi();
@@ -63,6 +93,13 @@ if (app.Environment.IsDevelopment())
 // Uruchomienie przekierowania żądań z HTTP do HTTPS
 app.UseHttpsRedirection();
 
+
+// Autentykacja i autoryzacja (kolejność ma znaczenie)
+app.UseAuthentication();
+app.UseAuthorization();
+
+
+
 // =====================================================================
 // Kategorie
 // =====================================================================
@@ -73,6 +110,7 @@ var categories = app.MapGroup("/api/categories")
 categories.MapGet("",
     (ICategoryQueries queries) => Results.Ok(queries.GetCategories())
 )
+.RequireAuthorization()
 .WithSummary("Pobiera wszystkie kategorie")
 .WithDescription("Zwraca listę wszystkich kategorii zapisanych w bazie danych.")
 .Produces<IEnumerable<CategoryDto>>(StatusCodes.Status200OK);
@@ -279,5 +317,41 @@ contacts.MapDelete("/{id:guid}/important-dates/{label}",
 .Produces(StatusCodes.Status204NoContent)
 .ProducesProblem(StatusCodes.Status400BadRequest);
 
+
+// =====================================================================
+// Użytkownicy
+// =====================================================================
+var users = app.MapGroup("/api/users")
+    .WithTags("Użytkownicy")
+    .ProducesProblem(StatusCodes.Status500InternalServerError);
+
+users.MapPost("",
+    (AddUserDto dto, IUserUseCases userUseCases) =>
+        userUseCases
+            .AddUser(dto)
+            .Match(
+                user => Results.Created($"/api/users/{user.Id}", user),
+                error => Results.Problem(detail: error, statusCode: 400)
+            )
+)
+.WithSummary("Rejestruje użytkownika")
+.WithDescription("Tworzy nowego użytkownika z podaną nazwą i hasłem.")
+.Produces<AddUserResult>(StatusCodes.Status201Created)
+.ProducesProblem(StatusCodes.Status400BadRequest);
+
+app.MapPost("/api/login",
+    (LoginUserDto dto, IUserUseCases userUseCases) =>
+        userUseCases
+            .Login(dto)
+            .Match(
+                loginData => Results.Ok(loginData),
+                _ => Results.Unauthorized()
+            )
+)
+.WithTags("Użytkownicy")
+.WithSummary("Logowanie")
+.WithDescription("Zwraca token JWT (accessToken) dla poprawnych danych logowania.")
+.Produces<LoginUserResult>(StatusCodes.Status200OK)
+.Produces(StatusCodes.Status401Unauthorized);
 // Uruchomienie aplikacji
 app.Run();

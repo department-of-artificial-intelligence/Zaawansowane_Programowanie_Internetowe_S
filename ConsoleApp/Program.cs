@@ -7,6 +7,7 @@ using Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 
+
 var builder = new ConfigurationBuilder();
 builder.SetBasePath(AppContext.BaseDirectory)
     .AddJsonFile(
