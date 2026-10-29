@@ -20,17 +20,15 @@ namespace Application.Services
         CategoryUniquenessChecker categoryUniquenessChecker
     ) : ICategoryUseCases
     {
-        public Result<AddCategoryResult> AddCategory(AddCategoryDto addCategoryDto)
-            => addCategoryDto
-                .ToDomain()
-                .Bind(category =>
-                    categoryUniquenessChecker
-                        .EnsureUnique(category.Name)
-                        .Map(_ => category)
-                )
-                .Tap(categoryRepository.Add)
-                .Tap(_ => unitOfWork.Save())
-                .Map(AddCategoryResult.FromDomain);
+        public Result<AddCategoryResult> AddCategory(AddCategoryDto addCategoryDto) =>
+     addCategoryDto
+         .ToDomain()
+         .Bind(category => categoryUniquenessChecker
+             .EnsureUnique(category.Name, category.UserId)
+             .Map(_ => category))
+         .Tap(categoryRepository.Add)
+         .Tap(_ => unitOfWork.Save())
+         .Map(AddCategoryResult.FromDomain);
 
         public Result<Unit> UpdateCategory(UpdateCategoryDto updateCategoryDto)
             => categoryRepository.GetById(updateCategoryDto.Id)
@@ -39,7 +37,7 @@ namespace Application.Services
                     category.Name == updateCategoryDto.Name
                         ? Result.Success(category)
                         : categoryUniquenessChecker
-                            .EnsureUnique(updateCategoryDto.Name)
+                            .EnsureUnique(category.Name, category.UserId)
                             .Map(_ => category))
                 .Bind(category => category.Rename(updateCategoryDto.Name))
                 .Tap(_ => unitOfWork.Save());

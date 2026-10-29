@@ -13,6 +13,7 @@ namespace Data
     {
         public DbSet<Contact> Contacts => Set<Contact>();
         public DbSet<Category> Categories => Set<Category>();
+        public DbSet<User> Users => Set<User>();
 
         public AppDbContext(DbContextOptions<AppDbContext> options)
             : base(options)
@@ -20,6 +21,19 @@ namespace Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<User>(userBuilder =>
+            {
+                userBuilder.HasKey(user => user.Id);
+                userBuilder.Property(user => user.Id).ValueGeneratedNever();
+                userBuilder.Property(user => user.UserName).IsRequired();
+                userBuilder.Property(user => user.Password).IsRequired();
+                userBuilder.HasIndex(user => user.UserName).IsUnique();
+
+                userBuilder.Property(user => user.FirstName).HasMaxLength(100);
+                userBuilder.Property(user => user.LastName).HasMaxLength(100);
+                userBuilder.Property(user => user.Address).HasMaxLength(250);
+            });
+
             // Konfiguracja encji Contact
             modelBuilder.Entity<Contact>(contactBuilder =>
             {
@@ -41,17 +55,28 @@ namespace Data
                         name => name.Value,
                         value => ParseLastName(value))
                     .IsRequired();
+
+                // Relacja jeden-do-wielu: User posiada wiele Contact
+                contactBuilder.HasOne<User>()
+                    .WithMany()
+                    .HasForeignKey(c => c.UserId)
+                    .IsRequired();
             });
 
             // Konfiguracja encji Category
             modelBuilder.Entity<Category>(categoryBuilder =>
             {
                 categoryBuilder.HasKey(category => category.Id);
-                categoryBuilder
-                    .Property(category => category.Id)
-                    .ValueGeneratedNever();
+                categoryBuilder.Property(category => category.Id).ValueGeneratedNever();
                 categoryBuilder.Property(category => category.Name).IsRequired();
-                categoryBuilder.HasIndex(category => category.Name).IsUnique();
+
+                // Unikalność pary (UserId, Name) zamiast samej nazwy
+                categoryBuilder.HasIndex(category => new { category.UserId, category.Name }).IsUnique();
+
+                // Relacja jeden-do-wielu z User
+                categoryBuilder.HasOne<User>()
+                    .WithMany()
+                    .HasForeignKey(category => category.UserId);
             });
 
             // Konfiguracja kolekcji adresów e-mail (OwnsMany)

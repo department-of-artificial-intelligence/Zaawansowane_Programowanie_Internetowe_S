@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Application.UseCases.Dtos
 {
-    public class AddContactDto(string firstName, string lastName, Sex sex, int age)
+    public class AddContactDto(string firstName, string lastName, Sex sex, int age, Guid UserId)
     {
         public string FirstName { get; } = firstName;
         public string LastName { get; } = lastName;
@@ -19,7 +19,9 @@ namespace Application.UseCases.Dtos
             Domain.FirstName.Create(FirstName)
                 .Bind(fn => Domain.LastName.Create(LastName)
                 .Bind(ln => Domain.Age.Create(Age)
-                .Bind(age => Contact.Create(fn, ln, Sex, age))));
+                .Bind(age => Contact.Create(fn, ln, Sex, age, UserId))));
     }
+
+
 
 }

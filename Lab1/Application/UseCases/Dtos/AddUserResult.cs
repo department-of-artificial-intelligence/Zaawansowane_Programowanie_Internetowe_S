@@ -1,0 +1,18 @@
+﻿using Application.Domain;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Application.UseCases.Dtos
+{
+    public class AddUserResult(Guid id, string name)
+    {
+        public Guid Id { get; } = id;
+        public string UserName { get; } = name;
+
+        internal static AddUserResult FromDomain(User user) =>
+            new(user.Id, user.UserName);
+    }
+}

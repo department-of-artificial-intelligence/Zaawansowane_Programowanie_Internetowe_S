@@ -18,30 +18,25 @@ namespace Application.Domain
         public LastName LastName { get; private set; }
         public Sex Sex { get; private set; }
         public Age Age { get; private set; }
+        public Guid UserId { get; private set; }
 
         public IReadOnlyCollection<Phone> Phones => _phones;
         public IReadOnlyCollection<Email> Emails => _emails;
         public IReadOnlyCollection<ImportantDate> ImportantDates => _importantDates;
 
-        private Contact(
-           Guid id,
-           FirstName firstName,
-           LastName lastName,
-           Sex sex,
-           Age age) : base(id)
+        private Contact() : base(Guid.Empty)
+        {
+        }
+
+        private Contact(Guid id, FirstName firstName, LastName lastName, Sex sex, Age age, Guid userId) : base(id)
         {
             FirstName = firstName;
             LastName = lastName;
             Sex = sex;
             Age = age;
+            UserId = userId;
         }
 
-        private Contact(Guid id) : base(id)
-        {
-            FirstName = null!;
-            LastName = null!;
-            Age = null!;
-        }
 
         public bool HasEmail(EmailAddress address) =>
             _emails.Any(e => e.Address == address);
@@ -63,9 +58,10 @@ namespace Application.Domain
             FirstName firstName,
             LastName lastName,
             Sex sex,
-            Age age)
+            Age age,
+            Guid userId)
         {
-            return Result.Success(new Contact(Guid.NewGuid(), firstName, lastName, sex, age));
+            return Result.Success(new Contact(Guid.NewGuid(), firstName, lastName, sex, age,userId));
         }
 
 
