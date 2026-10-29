@@ -63,4 +63,38 @@ public class ContactServices(
         .Bind(contact => contact.RemoveEmail(removeEmailDto.EmailAddress))
         .Tap(_ => unitOfWork.Save())
         .Map(_ => Unit.Instance);
+
+    public Result<Unit> AddPhone(AddPhoneDto addPhoneDto)
+    => categoryRepository.GetById(addPhoneDto.CategoryId)
+        .Required($"Nie odnaleziono kategorii o id = {addPhoneDto.CategoryId}")
+        .Bind(_ => contactRepository.GetById(addPhoneDto.ContactId)
+            .Required($"Nie odnaleziono kontaktu o id = {addPhoneDto.ContactId}"))
+        .Bind(contact => contact.AddPhone(addPhoneDto.Number, addPhoneDto.CategoryId))
+        .Tap(_ => unitOfWork.Save())
+        .Map(_ => Unit.Instance);
+
+    public Result<Unit> RemovePhone(RemovePhoneDto removePhoneDto)
+        => contactRepository.GetById(removePhoneDto.ContactId)
+            .Required($"Nie odnaleziono kontaktu o id = {removePhoneDto.ContactId}")
+            .Bind(contact => contact.RemovePhone(removePhoneDto.PhoneNumber))
+            .Tap(_ => unitOfWork.Save())
+            .Map(_ => Unit.Instance);
+
+    public Result<Unit> AddImportantDate(AddImportantDateDto addImportantDateDto)
+    {
+        return contactRepository.GetById(addImportantDateDto.ContactId)
+            .Required($"Nie odnaleziono kontaktu o id = {addImportantDateDto.ContactId}")
+            .Bind(contact => contact.AddImportantDate(addImportantDateDto.Name, addImportantDateDto.Date))
+            .Tap(_ => unitOfWork.Save())
+            .Map(_ => Unit.Instance);
+    }
+
+    public Result<Unit> RemoveImportantDate(RemoveImportantDateDto removeImportantDateDto)
+    {
+        return contactRepository.GetById(removeImportantDateDto.ContactId)
+            .Required($"Nie odnaleziono kontaktu o id = {removeImportantDateDto.ContactId}")
+            .Bind(contact => contact.RemoveImportantDate(removeImportantDateDto.Name))
+            .Tap(_ => unitOfWork.Save())
+            .Map(_ => Unit.Instance);
+    }
 }

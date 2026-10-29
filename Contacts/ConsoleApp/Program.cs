@@ -169,6 +169,75 @@ if (contactToTestEmail != null)
     );
 }
 
+
+// --- TEST ZADANIA 7: Dodawanie i usuwanie numeru telefonu ---
+Console.WriteLine("\n--- TEST ZADANIA 7: Dodawanie i usuwanie telefonu ---");
+
+var contactForPhoneTest = contactRepository.GetAll().FirstOrDefault();
+var defaultCategory = categoryRepository.GetAll().FirstOrDefault();
+
+if (contactForPhoneTest != null && defaultCategory != null)
+{
+    // 1. Dodawanie telefonu
+    var addPhoneDto = new AddPhoneDto(contactForPhoneTest.Id, "+48 123 456 789", defaultCategory.Id);
+    var addPhoneResult = contactServices.AddPhone(addPhoneDto);
+
+    addPhoneResult.Match(
+        _ => { Console.WriteLine("Pomyślnie dodano numer telefonu do kontaktu!"); return Unit.Instance; },
+        err => { Console.WriteLine($"Błąd podczas dodawania telefonu: {err}"); return Unit.Instance; }
+    );
+
+    // 2. Usuwanie telefonu
+    var removePhoneDto = new RemovePhoneDto(contactForPhoneTest.Id, "+48 123 456 789");
+    var removePhoneResult = contactServices.RemovePhone(removePhoneDto);
+
+    removePhoneResult.Match(
+        _ => { Console.WriteLine("Pomyślnie usunięto numer telefonu z kontaktu!"); return Unit.Instance; },
+        err => { Console.WriteLine($"Błąd podczas usuwania telefonu: {err}"); return Unit.Instance; }
+    );
+
+    var bookRepository = new BookRepository(context);
+    var readerRepository = new ReaderRepository(context);
+    var loanRepository = new LoanRepository(context);
+
+    var libraryServices = new LibraryServices(
+        bookRepository,
+        readerRepository,
+        loanRepository,
+        unitOfWork
+    );
+    context.Database.Migrate();
+
+    // --- TEST ZADAŃ 9-12: System Biblioteczny ---
+    Console.WriteLine("\n--- TEST ZADAŃ 9-12: System Biblioteczny ---");
+
+    // 2. Test dodawania książki
+    var addBookResult = libraryServices.AddBook(
+        new AddBookDto("Wiedźmin: Ostatnie Życzenie", "Andrzej Sapkowski", "978-83-7578-063-5")
+    );
+
+    // 3. Test rejestracji czytelnika
+    var registerReaderResult = libraryServices.RegisterReader(
+        new RegisterReaderDto("Jan", "Kowalski", "jan.kowalski@example.com")
+    );
+
+    // 4. Przeprowadzenie procesu wypożyczenia
+    addBookResult.Bind(book => registerReaderResult.Bind(reader =>
+    {
+        Console.WriteLine($"[Sukces] Dodano książkę: '{book.Title}' (ID: {book.BookId})");
+        Console.WriteLine($"[Sukces] Zarejestrowano czytelnika: '{reader.FullName}' (ID: {reader.ReaderId})");
+
+        // Próba wypożyczenia książki przez czytelnika
+        return libraryServices.BorrowBook(new BorrowBookDto(book.BookId, reader.ReaderId));
+    }))
+    .Match(
+        _ => { Console.WriteLine("-> Pomyślnie wypożyczono książkę!"); return Unit.Instance; },
+        err => { Console.WriteLine($"-> Błąd wypożyczenia: {err}"); return Unit.Instance; }
+    );
+}
+
+
+
 Console.WriteLine("\nWszystkie kategorie w bazie:");
 foreach (var category in context.Categories)
 {

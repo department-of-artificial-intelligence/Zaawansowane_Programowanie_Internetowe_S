@@ -103,5 +103,53 @@ public class Contact : Entity
         return Result.Success(Unit.Instance);
     }
 
+    private readonly List<Phone> _phones = [];
+    public IReadOnlyCollection<Phone> Phones => _phones;
+
+    public Result<Unit> AddPhone(string number, Guid categoryId)
+    {
+        return Phone.Create(number, categoryId)
+            .Tap(phone => _phones.Add(phone))
+            .Map(_ => Unit.Instance);
+    }
+
+    public Result<Unit> RemovePhone(string phoneNumber)
+    {
+        var phoneToRemove = _phones.FirstOrDefault(p => p.Number.Value == phoneNumber);
+
+        if (phoneToRemove is null)
+        {
+            return Result.Failure<Unit>($"Nie odnaleziono numeru telefonu '{phoneNumber}' w tym kontakcie.");
+        }
+
+        _phones.Remove(phoneToRemove);
+        return Result.Success(Unit.Instance);
+    }
+
+    // Wewnątrz klasy Contact w pliku Contact.cs dodaj:
+
+    private readonly List<ContactDate> _importantDates = [];
+    public IReadOnlyCollection<ContactDate> ImportantDates => _importantDates;
+
+    public Result<Unit> AddImportantDate(string name, DateTime date)
+    {
+        return ContactDate.Create(name, date)
+            .Tap(contactDate => _importantDates.Add(contactDate))
+            .Map(_ => Unit.Instance);
+    }
+
+    public Result<Unit> RemoveImportantDate(string name)
+    {
+        var dateToRemove = _importantDates.FirstOrDefault(d => d.ImportantDate.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
+
+        if (dateToRemove is null)
+        {
+            return Result.Failure<Unit>($"Nie odnaleziono ważnej daty o nazwie '{name}' dla tego kontaktu.");
+        }
+
+        _importantDates.Remove(dateToRemove);
+        return Result.Success(Unit.Instance);
+    }
+
 
 }

@@ -12,4 +12,9 @@ public interface IContactUseCases
     Result<Unit> RemoveContact(Guid id);
 
     Result<Unit> RemoveEmail(RemoveEmailDto removeEmailDto);
+    Result<Unit> AddPhone(AddPhoneDto addPhoneDto);
+    Result<Unit> RemovePhone(RemovePhoneDto removePhoneDto);
+
+    Result<Unit> AddImportantDate(AddImportantDateDto addImportantDateDto);
+    Result<Unit> RemoveImportantDate(RemoveImportantDateDto removeImportantDateDto);
 }
