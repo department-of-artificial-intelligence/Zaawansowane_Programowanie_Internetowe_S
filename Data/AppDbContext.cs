@@ -35,7 +35,13 @@ public class AppDbContext : DbContext
                 .Property(category => category.Id)
                 .ValueGeneratedNever();
             categoryBuilder.Property(category => category.Name).IsRequired();
-            categoryBuilder.HasIndex(category => category.Name).IsUnique();
+            categoryBuilder
+                .HasIndex(category => new { category.UserId, category.Name })
+                .IsUnique();
+            categoryBuilder
+                .HasOne<User>()
+                .WithMany()
+                .HasForeignKey(category => category.UserId);
         });
 
         modelBuilder.Entity<Contact>().OwnsMany(
@@ -92,6 +98,14 @@ public class AppDbContext : DbContext
             nameBuilder => nameBuilder.Property(n => n.Value).IsRequired().HasColumnName("LastName")
         );
 
+        modelBuilder.Entity<Contact>(builder =>
+        {
+            builder.HasOne<User>()
+                   .WithMany()
+                   .HasForeignKey(c => c.UserId)
+                   .IsRequired();
+        });
+
         modelBuilder.Entity<User>(userBuilder =>
         {
             userBuilder
@@ -108,6 +122,18 @@ public class AppDbContext : DbContext
                 .HasIndex(user => user.UserName)
                 .IsUnique();
         });
+
+        modelBuilder.Entity<User>(builder =>
+        {
+            builder.OwnsOne(u => u.Profile, profileBuilder =>
+            {
+                profileBuilder.Property(p => p.FirstName).HasColumnName("FirstName");
+                profileBuilder.Property(p => p.LastName).HasColumnName("LastName");
+                profileBuilder.Property(p => p.BirthDate).HasColumnName("BirthDate");
+                profileBuilder.Property(p => p.Address).HasColumnName("Address");
+            });
+        });
+
     }
     private static EmailAddress ParseEmailAddress(string value) =>
         EmailAddress

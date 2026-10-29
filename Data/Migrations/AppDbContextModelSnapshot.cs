@@ -27,9 +27,12 @@ namespace Data.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("TEXT");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("Name")
+                    b.HasIndex("UserId", "Name")
                         .IsUnique();
 
                     b.ToTable("Categories");
@@ -42,6 +45,9 @@ namespace Data.Migrations
 
                     b.Property<int>("Sex")
                         .HasColumnType("INTEGER");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("TEXT");
 
                     b.ComplexProperty<Dictionary<string, object>>("Age", "Application.Domain.Contact.Age#Age", b1 =>
                         {
@@ -73,6 +79,8 @@ namespace Data.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("UserId");
+
                     b.ToTable("Contacts");
                 });
 
@@ -84,6 +92,15 @@ namespace Data.Migrations
                     b.Property<string>("Password")
                         .IsRequired()
                         .HasColumnType("TEXT");
+
+                    b.Property<string>("RefreshToken")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("RefreshTokenExpiryTime")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Role")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("UserName")
                         .IsRequired()
@@ -97,8 +114,23 @@ namespace Data.Migrations
                     b.ToTable("Users");
                 });
 
+            modelBuilder.Entity("Application.Domain.Category", b =>
+                {
+                    b.HasOne("Application.Domain.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Application.Domain.Contact", b =>
                 {
+                    b.HasOne("Application.Domain.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.OwnsMany("Application.Domain.Email", "Emails", b1 =>
                         {
                             b1.Property<int>("Id")
@@ -160,6 +192,43 @@ namespace Data.Migrations
                     b.Navigation("Emails");
 
                     b.Navigation("Phones");
+                });
+
+            modelBuilder.Entity("Application.Domain.User", b =>
+                {
+                    b.OwnsOne("Application.Domain.UserProfile", "Profile", b1 =>
+                        {
+                            b1.Property<Guid>("UserId")
+                                .HasColumnType("TEXT");
+
+                            b1.Property<string>("Address")
+                                .IsRequired()
+                                .HasColumnType("TEXT")
+                                .HasColumnName("Address");
+
+                            b1.Property<DateTime?>("BirthDate")
+                                .HasColumnType("TEXT")
+                                .HasColumnName("BirthDate");
+
+                            b1.Property<string>("FirstName")
+                                .IsRequired()
+                                .HasColumnType("TEXT")
+                                .HasColumnName("FirstName");
+
+                            b1.Property<string>("LastName")
+                                .IsRequired()
+                                .HasColumnType("TEXT")
+                                .HasColumnName("LastName");
+
+                            b1.HasKey("UserId");
+
+                            b1.ToTable("Users");
+
+                            b1.WithOwner()
+                                .HasForeignKey("UserId");
+                        });
+
+                    b.Navigation("Profile");
                 });
 #pragma warning restore 612, 618
         }

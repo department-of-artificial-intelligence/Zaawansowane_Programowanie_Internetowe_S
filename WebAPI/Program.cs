@@ -7,12 +7,16 @@ using Application.Services;
 using Application.UseCases;
 using Application.UseCases.Dtos;
 using Data;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using System.Text;
 using WebAPI.Helpers;
-
+using System.Security.Claims;
+using System.IdentityModel.Tokens.Jwt;
+using WebAPI.Inputs;
+using Microsoft.AspNetCore.Authorization;
 
 namespace WebAPI
 {
@@ -33,10 +37,14 @@ namespace WebAPI
             builder.Services.AddScoped<ICategoryUseCases, CategoryServices>();
             builder.Services.AddScoped<IContactRepository, ContactRepository>();
             builder.Services.AddScoped<IContactUseCases, ContactServices>();
-            builder.Services.AddScoped<CategoryUniquenessChecker>();
 
             builder.Services.AddScoped<IUserRepository, UserRepository>();
             builder.Services.AddScoped<IUserUseCases, UserServices>();
+
+            builder.Services.AddScoped<CategoryUniquenessChecker>();
+            builder.Services.AddScoped<UserUniquenessChecker>();
+
+            builder.Services.AddScoped<IAuthorizationHandler, CategoryAuthorizationHandler>();
 
             builder.Services.AddProblemDetails();
             builder.Services.AddExceptionHandler<WebAPI.GlobalExceptionHandler>();
@@ -56,13 +64,54 @@ namespace WebAPI
                 };
                 x.MapInboundClaims = false;
             });
-            builder.Services.AddAuthorization();
+
+            builder.Services.AddAuthorizationBuilder()
+                .AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
+
 
             builder.Services.AddScoped<ITokenGenerator, TokenGenerator>();
+            builder.Services.AddScoped<IPasswordHasher, PasswordHasherService>();
 
 
-            // Dodanie usług koniecznych dla OpenApi
-            builder.Services.AddOpenApi();
+            // Dodanie usług koniecznych dla OpenAPI z konfiguracją JWT Bearer w Swaggerze
+            builder.Services.AddOpenApi(options =>
+            {
+                options.AddDocumentTransformer((document, context, ct) =>
+                {
+                    document.Components ??= new OpenApiComponents();
+                    document.Components.SecuritySchemes ??= new Dictionary<string, OpenApiSecurityScheme>();
+
+                    // 1. Definicja schematu uwierzytelniania
+                    var bearerScheme = new OpenApiSecurityScheme
+                    {
+                        Type = SecuritySchemeType.Http,
+                        Scheme = "bearer",
+                        BearerFormat = "JWT",
+                        Description = "Wklej token JWT otrzymany z /api/login"
+                    };
+
+                    document.Components.SecuritySchemes["Bearer"] = bearerScheme;
+
+                    // 2. Referencja do schematu dla globalnych wymagań bezpieczeństwa
+                    var securityRequirementScheme = new OpenApiSecurityScheme
+                    {
+                        Reference = new OpenApiReference
+                        {
+                            Type = ReferenceType.SecurityScheme,
+                            Id = "Bearer"
+                        }
+                    };
+
+                    document.SecurityRequirements ??= new List<OpenApiSecurityRequirement>();
+                    document.SecurityRequirements.Add(new OpenApiSecurityRequirement
+                    {
+                        [securityRequirementScheme] = Array.Empty<string>()
+                    });
+
+                    return Task.CompletedTask;
+                });
+            });
+
             // Zbudowanie aplikacji na podstawie konfiguracji
             var app = builder.Build();
 
@@ -82,10 +131,13 @@ namespace WebAPI
 
             //ENDPOINTY Kategorii
             var categoriesGroup = app.MapGroup("/api/categories")
-                .WithTags("Kategorie");
+                .WithTags("Kategorie")
+                .RequireAuthorization();
 
             categoriesGroup.MapGet("",
-                (ICategoryQueries queries) => Results.Ok(queries.GetCategories())
+                (ICategoryQueries queries, ClaimsPrincipal user) => 
+                    Results.Ok(queries.GetCategories(
+                        Guid.Parse(user.FindFirstValue(JwtRegisteredClaimNames.Sub)!)))
             )
             .RequireAuthorization()
             .WithSummary("Pobiera wszystkie kategorie")
@@ -105,63 +157,116 @@ namespace WebAPI
             .Produces(StatusCodes.Status404NotFound);
 
             categoriesGroup.MapPost("",
-                (AddCategoryDto dto, ICategoryUseCases useCases) =>
-                useCases.AddCategory(dto)
+                (AddCategoryRequest input, ICategoryUseCases useCases, ClaimsPrincipal user) =>
+                    useCases.AddCategory(new AddCategoryDto(
+                        input.Name,
+                        Guid.Parse(user.FindFirstValue(JwtRegisteredClaimNames.Sub)!)
+                    ))
                     .Match(
                         category => Results.Created(
                             $"/api/categories/{category.Id}",
                             category),
                         error => Results.Problem(detail: error, statusCode: 400)
-                    )
+                )
             )
+            .RequireAuthorization()
             .WithSummary("Dodaje kategorię")
-            .WithDescription("Tworzy nową kategorię o unikalnej nazwie i zwraca utworzony obiekt.")
+            .WithDescription("Tworzy nową kategorię dla zalogowanego użytkownika i zwraca utworzony obiekt.")
             .Produces<AddCategoryResult>(StatusCodes.Status201Created)
             .Produces(StatusCodes.Status400BadRequest);
 
-            categoriesGroup.MapPut("",
-                (UpdateCategoryDto dto, ICategoryUseCases useCases) =>
-                useCases.UpdateCategory(dto)
-                    .Match(
-                        _ => Results.NoContent(),
-                        error => Results.Problem(detail: error, statusCode: 400)
-                    )
-            )
-            .WithSummary("Aktualizuje kategorię")
-            .WithDescription("Zmienia nazwę istniejącej kategorii.")
-            .Produces(StatusCodes.Status204NoContent)
-            .Produces(StatusCodes.Status400BadRequest);
+            // Modyfikacja z weryfikacją właściciela zasobu
+            categoriesGroup.MapPut("{id:guid}", async (
+                Guid id,
+                UpdateCategoryDto dto,
+                ICategoryQueries queries,
+                ICategoryUseCases useCases,
+                IAuthorizationService authService,
+                ClaimsPrincipal user) =>
+            {
+                var categoryOption = queries.GetCategory(id);
 
-            categoriesGroup.MapDelete("{id:guid}",
-                (Guid id, ICategoryUseCases useCases) =>
-                useCases.RemoveCategory(id)
-                    .Match(
-                        _ => Results.NoContent(),
-                        error => Results.Problem(detail: error, statusCode: 400)
-                    )
-            )
-            .WithSummary("Usuwa kategorię")
-            .WithDescription("Usuwa kategorię, o ile nie jest ona aktualnie przypisana do żadnego adresu e-mail w kontaktach.")
+                return await categoryOption.Match(
+                    async category =>
+                    {
+                        var authResult = await authService.AuthorizeAsync(user, category, new SameOwnerRequirement());
+                        if (!authResult.Succeeded)
+                        {
+                            return Results.Forbid();
+                        }
+
+                        return useCases.UpdateCategory(dto).Match(
+                            _ => Results.NoContent(),
+                            error => Results.Problem(detail: error, statusCode: 400)
+                        );
+                    },
+                    () => Task.FromResult(Results.NotFound())
+                );
+            })
+            .WithSummary("Aktualizuje kategorię")
+            .WithDescription("Zmienia nazwę istniejącej kategorii (wymagany właściciel lub Admin).")
             .Produces(StatusCodes.Status204NoContent)
-            .Produces(StatusCodes.Status400BadRequest);
+            .Produces(StatusCodes.Status400BadRequest)
+            .Produces(StatusCodes.Status403Forbidden)
+            .Produces(StatusCodes.Status404NotFound);
+
+            // Usuwanie z weryfikacją właściciela zasobu
+            categoriesGroup.MapDelete("{id:guid}", async (
+                Guid id,
+                ICategoryQueries queries,
+                ICategoryUseCases useCases,
+                IAuthorizationService authService,
+                ClaimsPrincipal user) =>
+            {
+                var categoryOption = queries.GetCategory(id);
+
+                return await categoryOption.Match(
+                    async category =>
+                    {
+                        var authResult = await authService.AuthorizeAsync(user, category, new SameOwnerRequirement());
+                        if (!authResult.Succeeded)
+                        {
+                            return Results.Forbid();
+                        }
+
+                        return useCases.RemoveCategory(id).Match(
+                            _ => Results.NoContent(),
+                            error => Results.Problem(detail: error, statusCode: 400)
+                        );
+                    },
+                    () => Task.FromResult(Results.NotFound())
+                );
+            })
+            .WithSummary("Usuwa kategorię")
+            .WithDescription("Usuwa kategorię (wymagany właściciel lub Admin).")
+            .Produces(StatusCodes.Status204NoContent)
+            .Produces(StatusCodes.Status400BadRequest)
+            .Produces(StatusCodes.Status403Forbidden)
+            .Produces(StatusCodes.Status404NotFound);
 
 
             //ENDPOINTY Kontaktów
-            app.MapPost("/api/contacts",
-                (AddContactDto dto, IContactUseCases useCases) =>
-                useCases.AddContact(dto)
-                    .Match(
-                        result => Results.Created($"/api/contacts/{result.Id}", result),
-                        error => Results.Problem(detail: error, statusCode: 400)
-                    )
+            var contactsGroup = app.MapGroup("/api/contacts")
+                .WithTags("Kontakty")
+                .RequireAuthorization();
+
+            contactsGroup.MapPost("",
+                (AddContactDto dto, IContactUseCases useCases, ClaimsPrincipal user) =>
+                {
+                    var userId = Guid.Parse(user.FindFirstValue(JwtRegisteredClaimNames.Sub)!);
+                    return useCases.AddContact(userId, dto)
+                        .Match(
+                            result => Results.Created($"/api/contacts/{result.Id}", result),
+                            error => Results.Problem(detail: error, statusCode: 400)
+                        );
+                }
             )
-            .WithSummary("Dodaje nowy kontakt")
+            .WithSummary("Dodaje nowy kontakt zalogowanego użytkownika")
             .WithDescription("Tworzy podstawowy profil kontaktu (imię, nazwisko, płeć, wiek).")
-            .WithTags("Kontakty")
             .Produces<AddContactResult>(StatusCodes.Status201Created)
             .Produces(StatusCodes.Status400BadRequest);
 
-            app.MapPut("/api/contacts",
+            contactsGroup.MapPut("",
                 (UpdateContactDto dto, IContactUseCases useCases) =>
                 useCases.UpdateContact(dto)
                     .Match(
@@ -171,11 +276,10 @@ namespace WebAPI
             )
             .WithSummary("Aktualizuje dane kontaktu")
             .WithDescription("Modyfikuje dane osobowe wybranego kontaktu.")
-            .WithTags("Kontakty")
             .Produces(StatusCodes.Status204NoContent)
             .Produces(StatusCodes.Status400BadRequest);
 
-            app.MapDelete("/api/contacts/{id:guid}",
+            contactsGroup.MapDelete("{id:guid}",
                 (Guid id, IContactUseCases useCases) =>
                 useCases.RemoveContact(id)
                     .Match(
@@ -185,7 +289,6 @@ namespace WebAPI
             )
             .WithSummary("Usuwa kontakt")
             .WithDescription("Usuwa kontakt oraz powiązane z nim dane (e-maile, telefony).")
-            .WithTags("Kontakty")
             .Produces(StatusCodes.Status204NoContent)
             .Produces(StatusCodes.Status400BadRequest);
 
@@ -250,22 +353,93 @@ namespace WebAPI
             .Produces(StatusCodes.Status400BadRequest);
 
             //ENDPOINTY W USERZE
-            app.MapPost("/api/users", (AddUserDto dto, IUserUseCases userUseCases) =>
+            var usersGroup = app.MapGroup("/api/users")
+                .WithTags("Użytkownicy");
+
+            // Rejestracja - dostępna bez tokena
+            usersGroup.MapPost("", (AddUserDto dto, IUserUseCases userUseCases) =>
                 userUseCases
                     .AddUser(dto)
                     .Match(
                         user => Results.Created($"/api/users/{user.Id}", user),
                         error => Results.Problem(detail: error, statusCode: 400)
                     )
-            );
+            )
+            .WithSummary("Rejestruje nowego użytkownika");
 
-            //ENDPOINTY LOGOWANIA
+            // Pobieranie listy użytkowników - Tylko dla Administratora
+            usersGroup.MapGet("", (IUserUseCases userUseCases) =>
+                Results.Ok(userUseCases.GetUsers())
+            )
+            .RequireAuthorization("AdminOnly")
+            .WithSummary("Pobiera listę wszystkich użytkowników (Tylko Admin)")
+            .Produces<IEnumerable<UserDto>>(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status401Unauthorized)
+            .Produces(StatusCodes.Status403Forbidden);
+
+            // Usuwanie użytkownika - Tylko dla Administratora
+            usersGroup.MapDelete("{id:guid}", (Guid id, IUserUseCases useCases) =>
+                useCases.RemoveUser(id)
+                    .Match(
+                        _ => Results.NoContent(),
+                        error => Results.Problem(detail: error, statusCode: 400)
+                    )
+            )
+            .RequireAuthorization("AdminOnly")
+            .WithSummary("Usuwa użytkownika (Tylko Admin)")
+            .Produces(StatusCodes.Status204NoContent)
+            .Produces(StatusCodes.Status400BadRequest)
+            .Produces(StatusCodes.Status401Unauthorized)
+            .Produces(StatusCodes.Status403Forbidden);
+
+            // Aktualizacja własnego profilu - Dla każdego zalogowanego użytkownika
+            usersGroup.MapPut("profile", (UserProfileDto dto, IUserUseCases userUseCases, ClaimsPrincipal user) =>
+            {
+                var userId = Guid.Parse(user.FindFirstValue(JwtRegisteredClaimNames.Sub)!);
+                return userUseCases.UpdateProfile(userId, dto)
+                    .Match(
+                        _ => Results.NoContent(),
+                        error => Results.Problem(detail: error, statusCode: 400)
+                    );
+            })
+            .RequireAuthorization()
+            .WithSummary("Aktualizuje profil zalogowanego użytkownika")
+            .Produces(StatusCodes.Status204NoContent)
+            .Produces(StatusCodes.Status400BadRequest)
+            .Produces(StatusCodes.Status401Unauthorized);
+
+            usersGroup.MapPut("{id:guid}/role", (Guid id, ChangeUserRoleDto dto, IUserUseCases userUseCases) =>
+                userUseCases.ChangeRole(id, dto.Role)
+                    .Match(
+                        _ => Results.NoContent(),
+                        error => Results.Problem(detail: error, statusCode: 400)
+                    )
+            )
+            .RequireAuthorization("AdminOnly")
+            .WithSummary("Zmienia rolę użytkownika (Tylko Admin)")
+            .Produces(StatusCodes.Status204NoContent)
+            .Produces(StatusCodes.Status400BadRequest)
+            .Produces(StatusCodes.Status401Unauthorized)
+            .Produces(StatusCodes.Status403Forbidden);
+
+            // ENDPOINTY LOGOWANIA I ODŚWIEŻANIA TOKENA
             app.MapPost("/api/login", (LoginUserDto dto, IUserUseCases userUseCases) =>
                 userUseCases.Login(dto).Match(
-                    loginData => Results.Ok(new { loginData.AccessToken }),
+                    loginData => Results.Ok(new { loginData.AccessToken, loginData.RefreshToken }),
                     _ => Results.Unauthorized()
                 )
-            );
+            )
+            .WithSummary("Logowanie użytkownika")
+            .WithTags("Użytkownicy");
+
+            app.MapPost("/api/refresh", (RefreshTokenDto dto, IUserUseCases userUseCases) =>
+                userUseCases.RefreshToken(dto).Match(
+                    loginData => Results.Ok(new { loginData.AccessToken, loginData.RefreshToken }),
+                    error => Results.Problem(detail: error, statusCode: 401)
+                )
+            )
+            .WithSummary("Odświeżanie tokenu dostępowego za pomocą Refresh Tokena")
+            .WithTags("Użytkownicy");
 
 
             // Uruchomienie aplikacji

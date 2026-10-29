@@ -10,7 +10,7 @@ namespace Application.UseCases;
 
 public interface IContactUseCases
 {
-    Result<AddContactResult> AddContact(AddContactDto addContactDto);
+    Result<AddContactResult> AddContact(Guid userId, AddContactDto dto);
     Result<Unit> AddEmail(AddEmailDto addEmailDto);
     Result<Unit> RemoveEmail(RemoveEmailDto removeEmailDto);
     Result<Unit> AddPhone(AddPhoneDto addPhoneDto);    

@@ -33,6 +33,15 @@ public class CategoryRepository(AppDbContext context) : ICategoryRepository
         ? Option.Some(category)
         : Option.None<Category>();
     }
+    public Option<Category> GetByNameAndUser(string name, Guid userId)
+    {
+        var category = context.Categories.SingleOrDefault(
+            c => c.Name == name && c.UserId == userId);
+
+        return category is not null
+            ? Option.Some(category)
+            : Option.None<Category>();
+    }
     public void Remove(Category category)
     {
         context.Remove(category);

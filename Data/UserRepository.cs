@@ -19,9 +19,25 @@ public class UserRepository(AppDbContext context) : IUserRepository
             ? Option.Some(user)
             : Option.None<User>();
     }
+    public Option<User> GetById(Guid id)
+    {
+        var user = context.Users.SingleOrDefault(
+            user => user.Id == id);
+        return
+            user is not null
+            ? Option.Some(user)
+            : Option.None<User>();
+    }
 
     public void Add(User user)
     {
         context.Users.Add(user);
     }
+
+    public void Remove(User user)
+    {
+        context.Users.Remove(user);
+    }
+
+    public IEnumerable<User> GetAll() => context.Users.ToList();
 }

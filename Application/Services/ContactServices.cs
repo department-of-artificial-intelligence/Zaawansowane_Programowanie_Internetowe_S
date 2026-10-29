@@ -17,12 +17,12 @@ ICategoryRepository categoryRepository,
 IUnitOfWork unitOfWork
 ) : IContactUseCases
 {
-    public Result<AddContactResult> AddContact(AddContactDto addContactDto)
+    public Result<AddContactResult> AddContact(Guid userId, AddContactDto addContactDto)
     => addContactDto
-    .ToDomain()
-    .Tap(contactRepository.Add)
-    .Tap(_ => unitOfWork.Save())
-    .Map(AddContactResult.FromDomain);
+        .ToDomain(userId)
+        .Tap(contactRepository.Add)
+        .Tap(_ => unitOfWork.Save())
+        .Map(AddContactResult.FromDomain);
 
     public Result<Unit> AddEmail(AddEmailDto addEmailDto)
     => contactRepository.GetById(addEmailDto.ContactId)

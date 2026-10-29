@@ -16,10 +16,9 @@ public class AddContactDto(string firstName, string lastName, Sex sex, int age)
     public Sex Sex { get; } = sex;
     public int Age { get; } = age;
 
-    public Result<Contact> ToDomain() =>
+    public Result<Contact> ToDomain(Guid userId) =>
         Domain.FirstName.Create(FirstName)
             .Bind(fn => Domain.LastName.Create(LastName)
                 .Bind(ln => DomainAge.Create(Age)
-                    .Bind(ag => Contact.Create(fn, ln, Sex, ag))));
+                    .Bind(ag => Contact.Create(userId, fn, ln, Sex, ag))));
 }
-

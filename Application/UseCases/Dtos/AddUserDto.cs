@@ -8,9 +8,15 @@ using Application.Utilities;
 
 namespace Application.UseCases.Dtos;
 
-public class AddUserDto(string userName, string password)
+public record AddUserDto(
+    string UserName,
+    string Password,
+    UserRole Role = UserRole.User,
+    UserProfileDto? Profile = null
+)
 {
-    public string UserName { get; } = userName;
-    public string Password { get; } = password;
-    public Result<User> ToDomain() => User.Create(UserName);
+    public Result<User> ToDomain() =>
+        Profile is null
+            ? User.Create(UserName, Password, Role)
+            : Profile.ToDomain().Bind(p => User.Create(UserName, Password, Role, p));
 }

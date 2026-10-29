@@ -12,4 +12,7 @@ public interface IUserRepository
 {
     void Add(User user);
     Option<User> GetByName(string userName);
+    Option<User> GetById(Guid id);
+    void Remove(User user);
+    IEnumerable<User> GetAll();
 }

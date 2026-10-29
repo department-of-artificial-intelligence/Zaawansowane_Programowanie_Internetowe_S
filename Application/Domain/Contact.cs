@@ -9,6 +9,7 @@ namespace Application.Domain;
 
 public class Contact : Entity
 {
+    public Guid UserId { get; private set; }
     private readonly List<Email> _emails = [];
     private readonly List<PhoneNumber> _phones = [];
     public FirstName FirstName { get; private set; }
@@ -24,22 +25,27 @@ public class Contact : Entity
         LastName = null!;
         Age = null!;
     }
+
     private Contact(
         Guid id,
+        Guid userId,
         FirstName firstName,
         LastName lastName,
         Sex sex,
         Age age)
-        : this(id, firstName, lastName, sex)
+        : this(id, userId, firstName, lastName, sex)
     {
         Age = age;
     }
+
     private Contact(
         Guid id,
+        Guid userId,
         FirstName firstName,
         LastName lastName,
         Sex sex) : base(id)
     {
+        UserId = userId;
         FirstName = firstName;
         LastName = lastName;
         Sex = sex;
@@ -47,9 +53,10 @@ public class Contact : Entity
     }
 
     public bool HasEmail(EmailAddress address) =>
-    _emails.Any(e => e.Address == address);
+        _emails.Any(e => e.Address == address);
+
     public bool HasPhone(PhoneNumber number) =>
-    _phones.Contains(number);
+        _phones.Contains(number);
 
     public Result<Unit> AddEmail(EmailAddress address, Guid categoryId)
     {
@@ -58,10 +65,11 @@ public class Contact : Entity
             return Result.Failure<Unit>("Email już istnieje w kontakcie");
         }
         return Email
-        .Create(address, categoryId)
-        .Tap(_emails.Add)
-        .Map(_ => Unit.Instance);
+            .Create(address, categoryId)
+            .Tap(_emails.Add)
+            .Map(_ => Unit.Instance);
     }
+
     public Result<Unit> AddPhone(PhoneNumber number)
     {
         if (HasPhone(number))
@@ -72,13 +80,15 @@ public class Contact : Entity
         _phones.Add(number);
         return Result.Success(Unit.Instance);
     }
+
     public static Result<Contact> Create(
+        Guid userId,
         FirstName firstName,
         LastName lastName,
         Sex sex,
         Age age)
     {
-        var contact = new Contact(Guid.NewGuid(), firstName, lastName, sex, age);
+        var contact = new Contact(Guid.NewGuid(), userId, firstName, lastName, sex, age);
         return Result.Success(contact);
     }
 
@@ -102,6 +112,7 @@ public class Contact : Entity
         _emails.Remove(emailToRemove);
         return Result.Success(Unit.Instance);
     }
+
     public Result<Unit> RemovePhone(PhoneNumber number)
     {
         var phoneToRemove = _phones.FirstOrDefault(p => p.Value == number.Value);
@@ -114,4 +125,3 @@ public class Contact : Entity
         return Result.Success(Unit.Instance);
     }
 }
-
