@@ -1,2 +1,2 @@
 namespace Application.UseCases.Dtos;
-public record RemovePhoneDto(Guid ContactId, string Number);
+public record RemovePhoneDto(Guid ContactId, string Number, Guid UserId);

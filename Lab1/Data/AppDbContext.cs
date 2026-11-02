@@ -19,18 +19,35 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<User>(userBuilder =>
         {
             userBuilder
-            .HasKey(user => user.Id);
+                .HasKey(user => user.Id);
             userBuilder
-            .Property(user => user.Id).ValueGeneratedNever();
+                .Property(user => user.Id).ValueGeneratedNever();
             userBuilder
-            .Property(user => user.UserName)
-            .IsRequired();
+                .Property(user => user.UserName)
+                .HasMaxLength(User.MaxUserNameChars)
+                .IsRequired();
             userBuilder
-            .Property(user => user.Password)
-            .IsRequired();
+                .HasIndex(user => user.UserName)
+                .IsUnique();
+            // Zadanie 7: tylko skrót hasła
             userBuilder
-            .HasIndex(user => user.UserName)
-            .IsUnique();
+                .Property(user => user.PasswordHash)
+                .IsRequired();
+            // Rola jako liczba (domyślne mapowanie enuma, jak w PDF)
+            userBuilder
+                .Property(user => user.Role);
+            // Zadanie 4: profil jako typ złożony (kolumny Profile_FirstName itd.)
+            userBuilder.ComplexProperty(user => user.Profile, profileBuilder =>
+            {
+                profileBuilder.Property(p => p.FirstName).HasMaxLength(UserProfile.MaxNameChars);
+                profileBuilder.Property(p => p.LastName).HasMaxLength(UserProfile.MaxNameChars);
+                profileBuilder.Property(p => p.BirthDate);
+                profileBuilder.Property(p => p.Address).HasMaxLength(UserProfile.MaxAddressChars);
+            });
+            // Zadanie 10
+            userBuilder
+                .HasIndex(user => user.RefreshTokenHash)
+                .IsUnique();
         });
 
         modelBuilder.Entity<Contact>(contactBuilder =>
@@ -53,6 +70,12 @@ public class AppDbContext : DbContext
                     value => LastName.Create(value).GetValueOrThrow())
                 .HasMaxLength(LastName.MaxChars)
                 .IsRequired();
+
+            // Zadanie 8: kontakt należy do użytkownika
+            contactBuilder
+                .HasOne<User>()
+                .WithMany()
+                .HasForeignKey(contact => contact.UserId);
         });
 
         modelBuilder.Entity<Category>(categoryBuilder =>
@@ -62,7 +85,14 @@ public class AppDbContext : DbContext
                 .Property(category => category.Id)
                 .ValueGeneratedNever();
             categoryBuilder.Property(category => category.Name).IsRequired();
-            categoryBuilder.HasIndex(category => category.Name).IsUnique();
+            // 3.24: nazwa unikalna w obrębie użytkownika + klucz obcy do Users
+            categoryBuilder
+                .HasIndex(category => new { category.UserId, category.Name })
+                .IsUnique();
+            categoryBuilder
+                .HasOne<User>()
+                .WithMany()
+                .HasForeignKey(category => category.UserId);
         });
 
         modelBuilder.Entity<Contact>().OwnsMany(

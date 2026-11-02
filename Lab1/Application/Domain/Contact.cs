@@ -13,6 +13,9 @@ public class Contact : Entity
     public Sex Sex { get; private set; }
     public Age Age { get; private set; }
 
+    // Zadanie 8: właściciel kontaktu
+    public Guid UserId { get; private set; }
+
     public IReadOnlyCollection<Email> Emails => _emails;
 
     public IReadOnlyCollection<Phone> Phones => _phones;
@@ -24,8 +27,9 @@ public class Contact : Entity
         FirstName firstName,
         LastName lastName,
         Sex sex,
-        Age age)
-        : this(id, firstName, lastName, sex)
+        Age age,
+        Guid userId)
+        : this(id, firstName, lastName, sex, userId)
     {
         Age = age;
     }
@@ -34,8 +38,10 @@ public class Contact : Entity
         Guid id,
         FirstName firstName,
         LastName lastName,
-        Sex sex) : base(id)
+        Sex sex,
+        Guid userId) : base(id)
     {
+        UserId = userId;
         FirstName = firstName;
         LastName = lastName;
         Sex = sex;
@@ -59,10 +65,10 @@ public class Contact : Entity
     }
 
     public static Result<Contact> Create(
-    string firstName, string lastName, Sex sex, Age age) =>
-    FirstName.Create(firstName)
-        .Bind(fn => LastName.Create(lastName)
-            .Map(ln => new Contact(Guid.NewGuid(), fn, ln, sex, age)));
+        string firstName, string lastName, Sex sex, Age age, Guid userId) =>
+        FirstName.Create(firstName)
+            .Bind(fn => LastName.Create(lastName)
+                .Map(ln => new Contact(Guid.NewGuid(), fn, ln, sex, age, userId)));
     
     public Result<Unit> Update(string firstName, string lastName, Sex sex, Age age) =>
     FirstName.Create(firstName)

@@ -1,3 +1,3 @@
 using Application.Domain;
 namespace Application.UseCases.Dtos;
-public record AddPhoneDto(Guid ContactId, string Number, PhoneType Type);
+public record AddPhoneDto(Guid ContactId, string Number, PhoneType Type, Guid UserId);

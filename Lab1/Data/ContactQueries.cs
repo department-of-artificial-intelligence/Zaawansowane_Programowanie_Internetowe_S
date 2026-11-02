@@ -6,19 +6,18 @@ namespace Data;
 
 public class ContactQueries(AppDbContext context) : IContactQueries
 {
-    public IEnumerable<ContactSummaryDto> GetContacts() =>
+    public IEnumerable<ContactSummaryDto> GetContacts(Guid userId) =>
         context.Contacts
             .AsNoTracking()
+            .Where(c => c.UserId == userId)
             .ToList()
             .Select(ContactSummaryDto.FromDomain);
 
-    public Option<ContactDetailsDto> GetContact(Guid id)
+    public Option<ContactDetailsDto> GetContact(Guid id, Guid userId)
     {
-        // E-maile, telefony i daty to typy posiadane (OwnsMany),
-        // więc EF wczytuje je razem z kontaktem.
         var contact = context.Contacts
             .AsNoTracking()
-            .SingleOrDefault(c => c.Id == id);
+            .SingleOrDefault(c => c.Id == id && c.UserId == userId);
 
         return contact is not null
             ? Option.Some(ContactDetailsDto.FromDomain(contact))

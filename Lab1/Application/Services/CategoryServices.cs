@@ -18,7 +18,7 @@ public Result<AddCategoryResult> AddCategory(AddCategoryDto addCategoryDto)
 .ToDomain()
 .Bind(category =>
 categoryUniquenessChecker
-.EnsureUnique(category.Name)
+.EnsureUnique(category.Name, category.UserId)
 .Map(_ => category)
 )
 .Tap(categoryRepository.Add)
@@ -39,7 +39,7 @@ public Result<Unit> RenameCategory(RenameCategoryDto renameCategoryDto)
             .Required($"Nie mogę odnaleźć kategorii o id = {renameCategoryDto.Id}")
             .Bind(category =>
                 categoryUniquenessChecker
-                    .EnsureUnique(renameCategoryDto.Name, category.Id)
+                    .EnsureUnique(renameCategoryDto.Name, category.UserId, category.Id)
                     .Bind(_ => category.Rename(renameCategoryDto.Name)))
             .Tap(_ => unitOfWork.Save());
 }

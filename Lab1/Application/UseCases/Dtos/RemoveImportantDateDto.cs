@@ -1,2 +1,2 @@
 namespace Application.UseCases.Dtos;
-public record RemoveImportantDateDto(Guid ContactId, Guid DateId);
+public record RemoveImportantDateDto(Guid ContactId, Guid DateId, Guid UserId);

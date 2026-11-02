@@ -4,6 +4,6 @@ namespace Application.Queries;
 
 public interface IContactQueries
 {
-    IEnumerable<ContactSummaryDto> GetContacts();
-    Option<ContactDetailsDto> GetContact(Guid id);
+    IEnumerable<ContactSummaryDto> GetContacts(Guid userId);
+    Option<ContactDetailsDto> GetContact(Guid id, Guid userId);
 }

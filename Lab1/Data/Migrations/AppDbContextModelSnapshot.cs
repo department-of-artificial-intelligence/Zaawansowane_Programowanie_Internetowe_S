@@ -16,7 +16,7 @@ namespace Data.Migrations
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "9.0.21");
+            modelBuilder.HasAnnotation("ProductVersion", "10.0.14");
 
             modelBuilder.Entity("Application.Domain.Category", b =>
                 {
@@ -27,9 +27,12 @@ namespace Data.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("TEXT");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("Name")
+                    b.HasIndex("UserId", "Name")
                         .IsUnique();
 
                     b.ToTable("Categories");
@@ -53,7 +56,10 @@ namespace Data.Migrations
                     b.Property<int>("Sex")
                         .HasColumnType("INTEGER");
 
-                    b.ComplexProperty<Dictionary<string, object>>("Age", "Application.Domain.Contact.Age#Age", b1 =>
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("TEXT");
+
+                    b.ComplexProperty(typeof(Dictionary<string, object>), "Age", "Application.Domain.Contact.Age#Age", b1 =>
                         {
                             b1.IsRequired();
 
@@ -63,11 +69,82 @@ namespace Data.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("UserId");
+
                     b.ToTable("Contacts");
+                });
+
+            modelBuilder.Entity("Application.Domain.User", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("PasswordHash")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("RefreshTokenExpiresAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("RefreshTokenHash")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Role")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("UserName")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("TEXT");
+
+                    b.ComplexProperty(typeof(Dictionary<string, object>), "Profile", "Application.Domain.User.Profile#UserProfile", b1 =>
+                        {
+                            b1.IsRequired();
+
+                            b1.Property<string>("Address")
+                                .HasMaxLength(200)
+                                .HasColumnType("TEXT");
+
+                            b1.Property<DateOnly?>("BirthDate")
+                                .HasColumnType("TEXT");
+
+                            b1.Property<string>("FirstName")
+                                .HasMaxLength(50)
+                                .HasColumnType("TEXT");
+
+                            b1.Property<string>("LastName")
+                                .HasMaxLength(50)
+                                .HasColumnType("TEXT");
+                        });
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RefreshTokenHash")
+                        .IsUnique();
+
+                    b.HasIndex("UserName")
+                        .IsUnique();
+
+                    b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("Application.Domain.Category", b =>
+                {
+                    b.HasOne("Application.Domain.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Application.Domain.Contact", b =>
                 {
+                    b.HasOne("Application.Domain.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.OwnsMany("Application.Domain.Email", "Emails", b1 =>
                         {
                             b1.Property<int>("Id")
