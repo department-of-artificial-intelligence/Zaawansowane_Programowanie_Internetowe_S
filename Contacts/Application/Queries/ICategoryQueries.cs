@@ -5,6 +5,6 @@ namespace Application.Queries;
 
 public interface ICategoryQueries
 {
-    IEnumerable<CategoryDto> GetCategories();
-    Option<CategoryDto> GetCategory(Guid id);
+    IEnumerable<CategoryDto> GetCategories(Guid userId);
+    Option<CategoryDto> GetCategory(Guid id, Guid userId);
 }

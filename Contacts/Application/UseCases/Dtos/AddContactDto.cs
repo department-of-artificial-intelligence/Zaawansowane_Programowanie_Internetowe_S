@@ -4,8 +4,9 @@ using DomainAge = Application.Domain.Age;
 
 namespace Application.UseCases.Dtos;
 
-public class AddContactDto(string firstName, string lastName, Sex sex, int age)
+public class AddContactDto(Guid userId, string firstName, string lastName, Sex sex, int age)
 {
+    public Guid UserId {get; } = userId;
     public string FirstName { get; } = firstName;
     public string LastName { get; } = lastName;
     public Sex Sex { get; } = sex;
@@ -18,7 +19,7 @@ public class AddContactDto(string firstName, string lastName, Sex sex, int age)
                 .Bind(lastName =>
                     DomainAge.Create(Age)
                         .Bind(age => 
-                            Contact.Create(firstName, lastName, Sex, age)
+                            Contact.Create(UserId, firstName, lastName, Sex, age)
                         )
                 )
         );

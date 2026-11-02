@@ -19,7 +19,7 @@ public class CategoryServices(
             .ToDomain()
             .Bind(category =>
                 categoryUniquenessChecker
-                    .EnsureUnique(category.Name)
+                    .EnsureUnique(category.Name, category.UserId)
                     .Map(_ => category)
             )
             .Tap(categoryRepository.Add)
@@ -47,7 +47,7 @@ public class CategoryServices(
             .Required($"Nie mogę odnaleźć kategorii o id = {updateCategoryDto.Id}")
             .Bind(category =>
                 categoryUniquenessChecker
-                    .EnsureUnique(updateCategoryDto.Name)
+                    .EnsureUnique(updateCategoryDto.Name, category.UserId)
                     .Map(_ => category)
             )
             .Tap(category => category.Rename(updateCategoryDto.Name))

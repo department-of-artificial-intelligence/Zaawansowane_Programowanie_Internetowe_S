@@ -1,19 +1,21 @@
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
+using System.Security.Cryptography;
 using System.Security.Claims;
 using System.Text;
 using Application.OutputPorts;
 namespace WebAPI.Helpers;
 public class TokenGenerator(IConfiguration configuration) : ITokenGenerator
 {
-    public string GenerateToken(Guid userId, string userName) {
+    public string GenerateToken(Guid userId, string userName, string role) {
         var claims = new List<Claim> {
             new(JwtRegisteredClaimNames.Sub, userId.ToString()),
             new(JwtRegisteredClaimNames.Name, userName),
+            new("role", role)
         };
         var jwtToken = new JwtSecurityToken(
             claims: claims,
-            expires: DateTime.UtcNow.AddDays(30),
+            expires: DateTime.UtcNow.AddMinutes(15),
             signingCredentials: new SigningCredentials(
                 new SymmetricSecurityKey(
                     Encoding.UTF8.GetBytes(configuration[
@@ -23,5 +25,12 @@ public class TokenGenerator(IConfiguration configuration) : ITokenGenerator
             SecurityAlgorithms.HmacSha256)
             );
         return new JwtSecurityTokenHandler().WriteToken(jwtToken);
+    }
+    public string GenerateRefreshToken()
+    {
+        var randomNumber = new byte[64];
+        using var rng = RandomNumberGenerator.Create();
+        rng.GetBytes(randomNumber);
+        return Convert.ToBase64String(randomNumber);
     }
 }

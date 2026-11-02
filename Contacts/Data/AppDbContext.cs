@@ -29,6 +29,19 @@ public class AppDbContext : DbContext
             userBuilder
                 .HasIndex(user=>user.UserName)
                 .IsUnique();
+            userBuilder.ComplexProperty(
+                user => user.FirstName,
+                fnBuilder => fnBuilder.Property(fn => fn.Value).HasColumnName("FirstName")
+            );
+
+            userBuilder.ComplexProperty(
+                user => user.LastName,
+                lnBuilder => lnBuilder.Property(ln => ln.Value).HasColumnName("LastName")
+            );
+            userBuilder.Property(user => user.DateOfBirth)
+                .IsRequired(false);
+            userBuilder.Property(user => user.Address)
+                .IsRequired(false);
             });
 
         modelBuilder.Entity<Contact>(contactBuilder =>
@@ -37,6 +50,12 @@ public class AppDbContext : DbContext
             contactBuilder
                 .Property(contact => contact.Id)
                 .ValueGeneratedNever();
+
+            contactBuilder
+                .HasOne<User>()
+                .WithMany()
+                .HasForeignKey(contact => contact.UserId);
+
             contactBuilder.ComplexProperty(
                 contact => contact.FirstName,
                 fnBuilder => fnBuilder.Property(fn => fn.Value).HasColumnName("FirstName")
@@ -56,6 +75,13 @@ public class AppDbContext : DbContext
                 .ValueGeneratedNever();
             categoryBuilder.Property(category => category.Name).IsRequired();
             categoryBuilder.HasIndex(category => category.Name).IsUnique();
+            categoryBuilder
+                 .HasIndex(category => new {category.UserId, category.Name})
+                 .IsUnique();
+             categoryBuilder
+                 .HasOne<User>()
+                 .WithMany()
+                 .HasForeignKey(category => category.UserId);
         });
 
         modelBuilder.Entity<Contact>().OwnsMany(

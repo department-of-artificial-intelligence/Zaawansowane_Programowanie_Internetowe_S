@@ -21,11 +21,11 @@ public class CategoryRepository(AppDbContext context) : ICategoryRepository
             : Option.None<Category>();
     }
 
-    public Option<Category> GetByName(string categoryName)
+    public Option<Category> GetByNameAndUser(string categoryName, Guid userId)
     {
         var category = context
             .Categories
-            .SingleOrDefault(category => category.Name == categoryName);
+            .SingleOrDefault(category => category.Name == categoryName && category.UserId == userId);
         return category is not null
             ? Option.Some(category)
             : Option.None<Category>();

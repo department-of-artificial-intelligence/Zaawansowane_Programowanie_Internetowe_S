@@ -1,5 +1,6 @@
 using Application.Domain;
 using Application.Repositories;
+using Application.Utilities;
 namespace Data;
 public class UserRepository(AppDbContext context) : IUserRepository
 {
@@ -17,4 +18,15 @@ public class UserRepository(AppDbContext context) : IUserRepository
     {
         context.Users.Add(user);
     }
+    public IEnumerable<User> GetAll() =>
+        context.Users.ToList();
+
+    public Option<User> GetById(Guid id)
+    {
+        var user = context.Users.FirstOrDefault(u => u.Id == id);
+        return user is null ? Option.None<User>() : Option.Some(user);
+    }
+
+    public void Remove(User user) =>
+        context.Users.Remove(user);
 }

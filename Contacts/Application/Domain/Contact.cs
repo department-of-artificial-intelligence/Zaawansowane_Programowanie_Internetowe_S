@@ -7,7 +7,8 @@ public class Contact : Entity
     private readonly List<Email> _emails = [];
     private readonly List<PhoneNumber> _numbers = [];
     private readonly List<ImportantDate> _dates = [];
-
+    
+    public Guid UserId {get; private set; }
     public FirstName FirstName { get; private set; }
     public LastName LastName { get; private set; }
     public Sex Sex { get; private set; }
@@ -18,11 +19,12 @@ public class Contact : Entity
 
     private Contact(
         Guid id,
+        Guid userId,
         FirstName firstName,
         LastName lastName,
         Sex sex,
         Age age)
-        : this(id, sex)
+        : this(id, userId, sex)
     {
         FirstName = firstName;
         LastName = lastName;
@@ -31,8 +33,10 @@ public class Contact : Entity
 
     private Contact(
         Guid id,
+        Guid userId,
         Sex sex) : base(id)
     {
+        UserId = userId;
         FirstName = null!;
         LastName = null!;
         Sex = sex;
@@ -114,12 +118,17 @@ public class Contact : Entity
         return Result.Success(Unit.Instance);
     }
     public static Result<Contact> Create(
+        Guid userId,
         FirstName firstName,
         LastName lastName,
         Sex sex,
         Age age)
     {
-        return Result.Success(new Contact(Guid.NewGuid(), firstName, lastName, sex, age));
+        if (userId == Guid.Empty)
+        {
+            return Result.Failure<Contact>("Id użytkownika nie może być pusty.");
+        }
+        return Result.Success(new Contact(Guid.NewGuid(), userId, firstName, lastName, sex, age));
     }
     public Result<Unit> UpdateDetails(FirstName firstName, LastName lastName, Sex sex, Age age){
         FirstName = firstName;

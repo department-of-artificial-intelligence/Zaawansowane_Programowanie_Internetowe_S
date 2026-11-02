@@ -32,7 +32,8 @@ var categoryServices = new CategoryServices(
 var contactServices = new ContactServices(
     contactRepository, categoryRepository, unitOfWork);
 
-var addContactDto = new AddContactDto("Jan", "Kowalski", Sex.Male, 30);
+var testUserId = Guid.NewGuid();
+var addContactDto = new AddContactDto(testUserId, "Jan", "Kowalski", Sex.Male, 30);
 var addContactResult = contactServices.AddContact(addContactDto);
 
 addContactResult.Match(
@@ -44,7 +45,7 @@ addContactResult.Match(
 );
 
 var addEmailResult = addContactResult.Bind(contact =>
-    categoryServices.AddCategory(new AddCategoryDto("Praca"))
+    categoryServices.AddCategory(new AddCategoryDto("Praca", testUserId))
         .Bind(category =>
         {
             var addEmailDto = new AddEmailDto(
@@ -93,7 +94,7 @@ if(categoryToDelete != null){
     );
 }
 Console.WriteLine("Testowanie usuwania pustej kategorii");
-var newCategoryResult = categoryServices.AddCategory(new AddCategoryDto("Tymczasowa"));
+var newCategoryResult = categoryServices.AddCategory(new AddCategoryDto("Tymczasowa", testUserId));
 newCategoryResult.Match(
     _ => {Console.WriteLine("Dodano kategorie."); return Unit.Instance;},
     e => {Console.WriteLine(e); return Unit.Instance;}
