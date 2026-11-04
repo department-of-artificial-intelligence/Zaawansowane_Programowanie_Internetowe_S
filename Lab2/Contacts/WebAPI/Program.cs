@@ -8,6 +8,9 @@ using Application.Services;
 using Application.UseCases;
 using Application.UseCases.Dtos;
 using Data;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 // Przygotowanie konfiguratora naszej aplikacji
 var builder = WebApplication.CreateBuilder(args);
@@ -26,6 +29,24 @@ builder.Services.AddScoped<IContactUseCases, ContactServices>();
 
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<WebAPI.GlobalExceptionHandler>();
+
+
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(x => {
+        x.TokenValidationParameters = new TokenValidationParameters {
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8
+                .GetBytes(builder.Configuration["ApplicationSettings:JWT_KEY"]!)
+                ),
+            ValidateIssuer = false,
+            ValidateAudience = false,
+            ValidateLifetime = true,
+            NameClaimType = "name",
+            RoleClaimType = "role"
+        };
+        x.MapInboundClaims = false;
+    });
 
 // Dodanie usług koniecznych dla OpenApi
 builder.Services.AddOpenApi();
