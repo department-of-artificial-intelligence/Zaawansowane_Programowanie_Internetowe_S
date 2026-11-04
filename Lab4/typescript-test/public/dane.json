@@ -1,0 +1,9 @@
+[
+  { "id": 1, "imie": "Adam", "nazwisko": "Mickiewicz", "email": "adam.mickiewicz@przyklad.pl" },
+  { "id": 2, "imie": "Juliusz", "nazwisko": "Słowacki", "email": "j.slowacki@przyklad.pl" },
+  { "id": 3, "imie": "Maria", "nazwisko": "Konopnicka", "email": "konopnicka@przyklad.pl" },
+  { "id": 4, "imie": "Bolesław", "nazwisko": "Prus", "email": "boleslaw.prus@przyklad.pl" },
+  { "id": 5, "imie": "Eliza", "nazwisko": "Orzeszkowa", "email": "orzeszkowa@przyklad.pl" },
+  { "id": 6, "imie": "Henryk", "nazwisko": "Sienkiewicz", "email": "h.sienkiewicz@przyklad.pl" },
+  { "id": 7, "imie": "Jan", "nazwisko": "Bezadresu", "email": "to-nie-jest-email" }
+]
