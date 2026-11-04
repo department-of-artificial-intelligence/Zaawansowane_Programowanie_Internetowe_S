@@ -1,0 +1,47 @@
+@WebAPI_HostAddress = http://localhost:5254
+
+### Pobierz kategorie
+GET {{WebAPI_HostAddress}}/api/categories/
+Accept: application/json
+
+###
+
+### Pobierz kategorię
+GET {{WebAPI_HostAddress}}/api/categories/00000000-0000-0000-0000-000000000000
+Accept: application/json
+
+###
+
+### Dodaj kategorię
+POST {{WebAPI_HostAddress}}/api/categories/
+Content-Type: application/json
+
+{
+  "name": "Praca"
+}
+
+###
+
+### Dodaj kontakt
+POST {{WebAPI_HostAddress}}/api/contacts/
+Content-Type: application/json
+
+{
+  "firstName": "Jan",
+  "lastName": "Kowalski",
+  "sex": "Male",
+  "age": 30
+}
+
+###
+
+### Edytuj kontakt
+PUT {{WebAPI_HostAddress}}/api/contacts/00000000-0000-0000-0000-000000000000
+Content-Type: application/json
+
+{
+  "firstName": "Jan",
+  "lastName": "Nowak",
+  "sex": "Male",
+  "age": 31
+}
