@@ -1,0 +1,17 @@
+[
+	{
+		"imie": "Jan",
+		"nazwisko": "Kowalski",
+		"email": "jan.kowalski@example.com"
+	},
+	{
+		"imie": "Anna",
+		"nazwisko": "Nowak",
+		"email": "anna.nowak@example.com"
+	},
+	{
+		"imie": "Piotr",
+		"nazwisko": "Wiśniewski",
+		"email": "piotr.wisniewski@example.com"
+	}
+]

@@ -1,5 +1,6 @@
 ﻿import { Autor } from "./Autor";
 import { Artykul } from "./Artykul";
+import { measureTime } from "../decorators/measureTime";
 
 export class Blog {
     private static nextId = 1;
@@ -47,11 +48,15 @@ export class Blog {
         this._artykuly.push(artykul);
     }
 
+    //@measureTime
     pobierzTytulyArtykulow(): string[] {
         return this._artykuly.map(artykul => artykul.tytul);
     }
 
+    //@measureTime
     pobierzArtykul(tytul: string): Artykul | undefined {
         return this._artykuly.find(artykul => artykul.tytul === tytul);
     }
+
+
 }
