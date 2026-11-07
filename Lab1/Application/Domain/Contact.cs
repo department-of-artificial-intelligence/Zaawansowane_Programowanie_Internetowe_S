@@ -7,6 +7,7 @@ public class Contact: Entity{
 	private readonly List<Phone> _phones = [];
 	private readonly List<ImportantDate> _importantDates = [];
 
+	public Guid UserId { get; private set; }
 	public FirstName FirstName { get; private set; }
 	public LastName LastName { get; private set; }
 	public Sex Sex { get; private set; }
@@ -15,10 +16,11 @@ public class Contact: Entity{
 	public IReadOnlyCollection<Phone> Phones => _phones;
 	public IReadOnlyCollection<ImportantDate> ImportantDates => _importantDates;
 
-	private Contact(Guid id, FirstName firstName, LastName lastName, Sex sex, Age age): this(id, sex){
+	private Contact(Guid id, FirstName firstName, LastName lastName, Sex sex, Age age, Guid userId): this(id, sex){
 		FirstName = firstName;
 		LastName = lastName;
 		Age = age;
+		UserId = userId;
 	}
 
 	private Contact(Guid id, Sex sex): base(id){
@@ -59,8 +61,8 @@ public class Contact: Entity{
     	return Result.Success(Unit.Instance);
 	}
 
-	public static Result<Contact> Create(FirstName firstName, LastName lastName, Sex sex, Age age){
-		return Result.Success(new Contact(Guid.NewGuid(), firstName, lastName, sex, age));
+	public static Result<Contact> Create(FirstName firstName, LastName lastName, Sex sex, Age age, Guid userId){
+		return Result.Success(new Contact(Guid.NewGuid(), firstName, lastName, sex, age, userId));
 	}
 
 	public Result<Unit> AddPhone(PhoneNumber number, Guid categoryId){
