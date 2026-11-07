@@ -1,0 +1,26 @@
+[
+  {
+    "id": 1,
+    "firstName": "Adam",
+    "lastName": "Mickiewicz",
+    "email": "adam.mickiewicz@litwa.pl"
+  },
+  {
+    "id": 2,
+    "firstName": "Juliusz",
+    "lastName": "S³owacki",
+    "email": "juliusz.slowacki@kordian.pl"
+  },
+  {
+    "id": 3,
+    "firstName": "Henryk",
+    "lastName": "Sienkiewicz",
+    "email": "henryk.sienkiewicz@nobel.pl"
+  },
+  {
+    "id": 4,
+    "firstName": "Stanis³aw",
+    "lastName": "Lem",
+    "email": "stanislaw.lem@solaris.pl"
+  }
+]
