@@ -16,7 +16,7 @@ namespace Data.Migrations
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "9.0.0");
+            modelBuilder.HasAnnotation("ProductVersion", "10.0.13");
 
             modelBuilder.Entity("Application.Domain.Category", b =>
                 {
@@ -27,9 +27,12 @@ namespace Data.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("TEXT");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("Name")
+                    b.HasIndex("UserId", "Name")
                         .IsUnique();
 
                     b.ToTable("Categories");
@@ -43,7 +46,7 @@ namespace Data.Migrations
                     b.Property<int>("Sex")
                         .HasColumnType("INTEGER");
 
-                    b.ComplexProperty<Dictionary<string, object>>("Age", "Application.Domain.Contact.Age#Age", b1 =>
+                    b.ComplexProperty(typeof(Dictionary<string, object>), "Age", "Application.Domain.Contact.Age#Age", b1 =>
                         {
                             b1.IsRequired();
 
@@ -51,7 +54,7 @@ namespace Data.Migrations
                                 .HasColumnType("INTEGER");
                         });
 
-                    b.ComplexProperty<Dictionary<string, object>>("FirstName", "Application.Domain.Contact.FirstName#FirstName", b1 =>
+                    b.ComplexProperty(typeof(Dictionary<string, object>), "FirstName", "Application.Domain.Contact.FirstName#FirstName", b1 =>
                         {
                             b1.IsRequired();
 
@@ -60,7 +63,7 @@ namespace Data.Migrations
                                 .HasColumnType("TEXT");
                         });
 
-                    b.ComplexProperty<Dictionary<string, object>>("LastName", "Application.Domain.Contact.LastName#LastName", b1 =>
+                    b.ComplexProperty(typeof(Dictionary<string, object>), "LastName", "Application.Domain.Contact.LastName#LastName", b1 =>
                         {
                             b1.IsRequired();
 
@@ -72,6 +75,39 @@ namespace Data.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Contacts");
+                });
+
+            modelBuilder.Entity("Application.Domain.User", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Password")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Role")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("UserName")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserName")
+                        .IsUnique();
+
+                    b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("Application.Domain.Category", b =>
+                {
+                    b.HasOne("Application.Domain.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Application.Domain.Contact", b =>
