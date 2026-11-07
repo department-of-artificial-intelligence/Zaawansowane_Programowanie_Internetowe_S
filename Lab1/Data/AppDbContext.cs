@@ -22,6 +22,7 @@ public class AppDbContext: DbContext {
 		modelBuilder.Entity<Contact>(contactBuilder => {
 			contactBuilder.HasKey(contact => contact.Id);
 			contactBuilder.Property(contact => contact.Id).ValueGeneratedNever();
+			contactBuilder.HasOne<User>().WithMany().HasForeignKey(contact => contact.UserId);
 		});
 
 		modelBuilder.Entity<Category>(categoryBuilder => {

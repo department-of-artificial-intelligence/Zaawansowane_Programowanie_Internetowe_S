@@ -24,4 +24,5 @@ public class CategoryRepository(AppDbContext context): ICategoryRepository {
 	public void Remove(Category category){
 		context.Remove(category);
 	}
+
 }

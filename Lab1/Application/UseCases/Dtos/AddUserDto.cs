@@ -7,5 +7,5 @@ public class AddUserDto(string userName, string password){
 	public string UserName { get; } = userName;
 	public string Password { get; } = password;
 
-	public Result<User> ToDomain() => User.Create(UserName);
+	public Result<User> ToDomain() => User.Create(UserName, Password);
 }

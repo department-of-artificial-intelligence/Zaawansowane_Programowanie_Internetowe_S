@@ -14,5 +14,23 @@ public class UserRepository(AppDbContext context) : IUserRepository {
 	public void Add(User user){
 		context.Users.Add(user);
 	}
+
+    public void Remove(User user)
+    {
+        context.Users.Remove(user);
+    }
+
+	public Option<User> GetById(Guid id)
+    {
+        var user = context.Users.Find(id);
+        return user is not null ? Option.Some(user) : Option.None<User>();
+    }
+
+    public Option<User> GetByRefreshToken(string refreshToken)
+    {
+        var user = context.Users.SingleOrDefault(u => u.RefreshToken == refreshToken);
+        return user is not null ? Option.Some(user) : Option.None<User>();
+    }
+
 }
 
