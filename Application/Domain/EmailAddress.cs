@@ -8,6 +8,13 @@ public sealed record EmailAddress
 
     private EmailAddress(string value)
     {
+        if (string.IsNullOrWhiteSpace(value) ||
+            !Regex.IsMatch(value,  @"^[^@\s]+@[^@\s]+\.[^@\s]+$"))          // [^@\s] - coś innego niż @ lub spacja
+        {
+            throw new ArgumentException(
+                "Podano niepoprawny adres e-mail.");
+        }
+
         Value = value;
     }
 

@@ -32,4 +32,10 @@ public class CategoryRepository(AppDbContext context) : ICategoryRepository
     {
         context.Remove(category);
     }
+    bool HasEmail(Guid categoryId)
+    {
+        return context.Contacts
+            .SelectMany(e => e.Emails)
+            .Any(e => e.CategoryId == categoryId);
+    }
 }

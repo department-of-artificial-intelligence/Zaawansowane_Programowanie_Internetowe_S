@@ -10,4 +10,5 @@ public interface ICategoryRepository
     Option<Category> GetByName(string categoryName);
     void Add(Category category);
     void Remove(Category category);
+    bool HasEmail(Guid categoryId);
 }
