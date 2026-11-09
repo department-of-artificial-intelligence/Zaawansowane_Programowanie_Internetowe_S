@@ -9,6 +9,14 @@ namespace Application.Services
     {
         public Result<AddCategoryResult> AddCategory(AddCategoryDto addCategoryDto) => addCategoryDto.ToDomain().Bind(category => categorUniquenessChecker.EnsureUnique(category.Name).Map(_ => category)).Tap(categoryRepository.Add).Tap(_ => unitOfWork.Save()).Map(AddCategoryResult.FromDomain);
 
-        public Result <Unit> RemoveCategory(Guid id) => categoryRepository.GetById(id).Required($"Nie mogę odnaleźć kategorii o id = {id}").Tap(categoryRepository.Remove).Tap(_ => unitOfWork.Save()).Map(_ => Unit.Instance);
+        public Result<Unit> RemoveCategory(Guid id) => categoryRepository.GetById(id).Required($"Nie mogę odnaleźć kategorii o id = {id}").Tap(categoryRepository.Remove).Tap(_ => unitOfWork.Save()).Map(_ => Unit.Instance);
+        public Result<AddCategoryResult> AddCategory(AddCategoryDto addCategoryDto)
+    => addCategoryDto
+    .ToDomain()
+    .Bind(category => categoryUniquenessChecker
+    .EnsureUnique(category.Name).Map(_ => category))
+    .Tap(categoryRepository.Add)
+    .Tap(_ => unitOfWork.Save())
+    .Map(AddCategoryResult.FromDomain);
     }
 }

@@ -56,3 +56,12 @@ foreach (var category in context.Categories)
 {
     Console.WriteLine(category.Name);
 }
+var addEmailResult = addContactResult.Bind(contact =>
+categoryServices.AddCategory(new AddCategoryDto("Praca"))
+.Bind(category => contactServices.AddEmail(
+new AddEmailDto(
+contact.Id, "jan.kowalski@example.com", category.Id))));
+addEmailResult.Match(
+_ => { Console.WriteLine("Dodano e-mail."); return Unit.Instance; },
+e => { Console.WriteLine(e); return Unit.Instance; }
+);

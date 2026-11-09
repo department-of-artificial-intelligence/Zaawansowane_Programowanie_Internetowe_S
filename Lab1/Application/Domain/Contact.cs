@@ -8,20 +8,20 @@ namespace Application.Domain
 {
     public class Contact
     {
-        public int Id {get; private set;}
-        public string FirstName {get; private set;} = string.Empty;
-        public string LastName {get; private set;} = string.Empty;
-        public Sex Sex {get; private set;}
-        public ICollection<Email> Emails {get; private set;} = null!;
-        public Age Age {get; private set;} = null!;
-        private Contact(){}
+        public int Id { get; private set; }
+        public string FirstName { get; private set; } = string.Empty;
+        public string LastName { get; private set; } = string.Empty;
+        public Sex Sex { get; private set; }
+        public ICollection<Email> Emails { get; private set; } = null!;
+        public Age Age { get; private set; } = null!;
+        private Contact() { }
         public Contact(int id, string firstName, string lastName, Sex sex, ICollection<Email> emails, Age age)
         {
             Id = id;
             FirstName = string.IsNullOrWhiteSpace(firstName)
-            ? throw new ArgumentException(nameof(firstName)): firstName;
+            ? throw new ArgumentException(nameof(firstName)) : firstName;
             LastName = string.IsNullOrWhiteSpace(lastName)
-            ? throw new ArgumentException(nameof(lastName)): lastName;
+            ? throw new ArgumentException(nameof(lastName)) : lastName;
             Sex = sex;
             Emails = emails ?? throw new ArgumentNullException(nameof(emails));
             Age = age ?? throw new ArgumentNullException(nameof(age));
@@ -37,5 +37,13 @@ namespace Application.Domain
                 Emails.Add(email);
             }
         }
+        public static Result<Contact> Create(
+    string firstName, string lastName, Sex sex, Age age) =>
+    Result.Combine(
+    Validators.NotEmpty(firstName, "Imię jest wymagane."),
+    Validators.NotEmpty(lastName, "Nazwisko jest wymagane.")
+    ).Map(_ => new Contact(Guid.NewGuid(), firstName, lastName, sex, age));
+
     }
+
 }

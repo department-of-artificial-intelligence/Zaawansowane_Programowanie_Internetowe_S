@@ -5,16 +5,17 @@ using System.Threading.Tasks;
 
 namespace Contacts.Application.Domain
 {
-    public record Age
+    public sealed record Age
     {
-        public int Value {get;}
-        public Age(int value)
+        public int Value { get; }
+        private Age(int value)
         {
-            if(value<18 && value<120)
-                throw new ArgumentOutOfRangeException(nameof(value));
             Value = value;
         }
-        public static implicit operator int(Age age)=>age.Value;
-        public static implicit operator Age(int value)=>new(value);
+        public static Result<Age> Create(int value) =>
+        Validators.InRange(
+        value, 18, 120, "Wiek ma niepoprawną wartość.")
+        .Map(_ => new Age(value));
+
     }
 }
