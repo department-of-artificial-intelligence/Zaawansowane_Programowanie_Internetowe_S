@@ -11,7 +11,6 @@ public sealed record EmailAddress
     Value = value;
    }
 
-  public static Result<EmailAddress> Create(string value) => 
-    Result.Success(new EmailAddress(value));
+  public static Result<EmailAddress> Create(string value) => Result.Success(new EmailAddress(value));
 
 }

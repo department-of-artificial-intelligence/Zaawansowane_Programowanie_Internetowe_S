@@ -15,9 +15,7 @@ public abstract class Entity(Guid id) : IEquatable<Entity>
 
   public override int GetHashCode() => Id.GetHasCode();
 
-  public static bool operator ==(Entity? left, Entity? right) =>
-    left is null ? right is null : left.Equals(right);
+  public static bool operator ==(Entity? left, Entity? right) => left is null ? right is null : left.Equals(right);
 
-    public static  bool operator !=(Entity? left, Entity? right) => 
-      !(left == right);
+    public static  bool operator !=(Entity? left, Entity? right) => !(left == right);
 }
