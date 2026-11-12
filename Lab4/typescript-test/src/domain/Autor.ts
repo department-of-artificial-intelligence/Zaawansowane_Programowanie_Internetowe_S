@@ -52,4 +52,20 @@
         }
         this._email = value.trim();
     }
+
+    public aktualizuj(zmiany: Partial<Omit<Autor, "id">>): void {
+        if (zmiany.imie !== undefined) {
+            this.imie = zmiany.imie;
+        }
+        if (zmiany.nazwisko !== undefined) {
+            this.nazwisko = zmiany.nazwisko;
+        }
+        if (zmiany.email !== undefined) {
+            this.email = zmiany.email;
+        }
+    }
+
+    get pelneImie(): string {
+        return `${this._imie} ${this._nazwisko}`;
+    }
 }
