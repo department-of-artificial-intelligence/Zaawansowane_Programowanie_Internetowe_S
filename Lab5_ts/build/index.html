@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Lab05</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            max-width: 800px;
+            margin: 20px auto;
+        }
+
+        section {
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            padding: 10px 15px;
+            margin-bottom: 15px;
+        }
+
+        h2 {
+            margin: 0 0 8px;
+            font-size: 1.1em;
+        }
+
+        button,
+        input {
+            margin: 2px 4px 2px 0;
+        }
+
+        .area {
+            position: relative;
+            height: 200px;
+            background: #f3f3f3;
+            overflow: hidden;
+            cursor: crosshair;
+        }
+
+        .box {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            border-radius: 4px;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            left: 50%;
+            top: 50%;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Lab05</h1>
+    <p>Zadania 1-6: wyniki w konsoli (F12)</p>
+
+    <section>
+        <h2>Zadanie 7 - licznik w polu klasy (tap)</h2>
+        <button id="z7-button">Kliknij</button>
+        <p id="z7-result">Liczba kliknięć: 0</p>
+    </section>
+
+    <section>
+        <h2>Zadanie 8 - licznik przez scan i map</h2>
+        <button id="z8-button">Kliknij</button>
+        <p id="z8-result">Liczba kliknięć: 0</p>
+    </section>
+</body>
+
+</html>
