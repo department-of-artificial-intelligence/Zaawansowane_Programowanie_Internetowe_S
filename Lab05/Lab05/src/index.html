@@ -2,7 +2,114 @@
 <html>
 <head></head>
 <body>
-    <button id="clickBtn">Kliknij mnie</button>
+    <h3>Zadanie 7 (z polem count i tap)</h3>
+    <button id="clickBtn">Kliknij mnie (Zad 7)</button>
     <p id="counterOutput">Liczba kliknięć: 0</p>
+
+    <hr>
+
+    <h3>Zadanie 8 (bez pola - map i scan)</h3>
+    <button id="clickBtn8">Kliknij mnie (Zad 8)</button>
+    <p id="counterOutput8">Liczba kliknięć: 0</p>
+
+    <hr />
+
+    <h3>Zadanie 9 (maksymalnie 5 kliknięć - operator take)</h3>
+    <button id="clickBtn9">Kliknij mnie (Zad 9 - max 5x)</button>
+    <p id="counterOutput9">Liczba kliknięć: 0</p>
+
+    <hr>
+
+    <h3>Zadanie 10 (włączanie i wyłączanie subskrypcji - 3 przyciski)</h3>
+    <button id="startBtn10">Start (włącz nasłuch)</button>
+    <button id="stopBtn10">Stop (wyłącz nasłuch)</button>
+    <button id="countBtn10">Kliknij mnie (Zad 10 - max 5x)</button>
+    <p id="counterOutput10">Status: wyłączony | Liczba kliknięć: 0</p>
+
+    <hr>
+
+    <h3>Zadanie 11 (współdzielenie strumienia - shareReplay)</h3>
+    <button id="countBtn11">1. Klikaj mnie (Licznik)</button>
+    <button id="toggleInput1Btn11">2. Włącz/Wyłącz Input 1</button>
+    <button id="toggleInput2Btn11">3. Włącz/Wyłącz Input 2</button>
+    <br><br>
+    <input type="text" id="input1_11" placeholder="Input 1" readonly>
+    <input type="text" id="input2_11" placeholder="Input 2" readonly>
+
+    <hr>
+
+    <h3>Zadanie 12 (przepisywanie tekstu z input do paragrafu)</h3>
+    <input type="text" id="textInput12" placeholder="Wpisz dowolny tekst...">
+    <p id="textOutput12"></p>
+
+    <hr>
+
+    <h3>Zadanie 13 (wyświetlanie tekstu gdy długość &gt; 5 znaków - filter)</h3>
+    <input type="text" id="textInput13" placeholder="Wpisz więcej niż 5 znaków...">
+    <p id="textOutput13"></p>
+
+    <hr />
+
+    <h3>Zadanie 14 (dynamiczna długość tekstu - combineLatest)</h3>
+    <input type="text" id="textInput14" placeholder="Wpisz tekst...">
+    <input type="number" id="minLengthInput14" placeholder="Minimalna liczba znaków">
+    <p id="textOutput14"></p>
+
+    <hr>
+
+    <h3>Zadanie 15 (obliczanie pola z obsługą błędu w subscribe)</h3>
+    <input type="text" id="sideA15" placeholder="Bok a">
+    <input type="text" id="sideB15" placeholder="Bok b">
+    <p id="areaOutput15">Wprowadź oba boki...</p>
+
+    <hr>
+
+    <h3>Zadanie 16 (maksymalnie 3 poprawki błędu - catchError + retry + throwError)</h3>
+    <input type="text" id="sideA16" placeholder="Bok a">
+    <input type="text" id="sideB16" placeholder="Bok b">
+    <p id="areaOutput16">Wprowadź oba boki...</p>
+
+    <hr>
+
+    <h3>Zadanie 17 (poprawianie wartości w nieskończoność - catchError)</h3>
+    <input type="text" id="sideA17" placeholder="Bok a">
+    <input type="text" id="sideB17" placeholder="Bok b">
+    <p id="areaOutput17">Wprowadź oba boki...</p>
+
+    <hr>
+
+    <h3>Zadanie 18 (ignorowanie pustych pól - operator filter)</h3>
+    <input type="text" id="sideA18" placeholder="Bok a">
+    <input type="text" id="sideB18" placeholder="Bok b">
+    <p id="areaOutput18">Wprowadź oba boki...</p>
+
+    <hr>
+
+    <h3>Zadanie 19 (śledzenie kursora przez kolorowy div)</h3>
+    <div id="followerDiv19" style="
+        width: 30px;
+        height: 30px;
+        background-color: crimson;
+        border-radius: 50%;
+        position: fixed;
+        pointer-events: none;
+        left: 0px;
+        top: 0px;
+    "></div>
+
+    <hr>
+
+    <h3>Zadanie 20 (śledzenie kursora z opóźnieniem 100 ms - operator delay)</h3>
+    <div id="followerDiv20" style="
+        width: 30px;
+        height: 30px;
+        background-color: royalblue;
+        border-radius: 50%;
+        position: fixed;
+        pointer-events: none;
+        left: 0px;
+        top: 0px;
+    "></div>
+
 </body>
 </html>
