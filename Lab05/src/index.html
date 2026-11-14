@@ -15,5 +15,118 @@
     <h1>Zadanie 8 - Bezstanowy licznik (map + scan)</h1>
     <button id="click-btn-8">Kliknij mnie (Zad. 8)</button>
     <p id="counter-output-8">Liczba kliknięć: 0</p>
+
+    <hr />
+
+    <h1>Zadanie 9 - Licznik do maks. 5 kliknięć (take)</h1>
+    <button id="click-btn-9">Kliknij mnie (Zad. 9)</button>
+    <p id="counter-output-9">Liczba kliknięć: 0</p>
+    <hr />
+
+    <h1>Zadanie 10 - Sterowanie subskrypcją (3 przyciski)</h1>
+    <button id="start-btn-10">1. Start (włącz przycisk 3)</button>
+    <button id="stop-btn-10">2. Stop (wyłącz przycisk 3)</button>
+    <button id="click-btn-10">3. Kliknij mnie (zliczany)</button>
+    <p id="counter-output-10">Liczba kliknięć: 0 (status: nieaktywny)</p>
+
+    <hr />
+
+    <h1>Zadanie 11 - Współdzielenie strumienia (shareReplay)</h1>
+    <button id="click-btn-11">1. Kliknij mnie (zliczany)</button>
+    <button id="toggle-btn1-11">2. Włącz / Wyłącz Input 1</button>
+    <button id="toggle-btn2-11">3. Włącz / Wyłącz Input 2</button>
+    <div style="margin-top: 10px;">
+        <label>
+            Input 1:
+            <input type="text" id="input1-11" readonly disabled placeholder="Zablokowany" />
+        </label>
+        <label style="margin-left: 15px;">
+            Input 2:
+            <input type="text" id="input2-11" readonly disabled placeholder="Zablokowany" />
+        </label>
+    </div>
+
+    <hr />
+
+    <h1>Zadanie 12 - Wyświetlanie tekstu na żywo (input)</h1>
+    <input type="text" id="text-input-12" placeholder="Wpisz dowolny tekst..." />
+    <p id="text-output-12"></p>
+
+    <hr />
+
+    <h1>Zadanie 13 - Wyświetlanie tekstu powyżej 5 znaków (filter)</h1>
+    <input type="text" id="text-input-13" placeholder="Wpisz więcej niż 5 znaków..." />
+    <p id="text-output-13"></p>
+
+    <hr />
+
+    <h1>Zadanie 14 - Dynamiczny próg długości (combineLatest)</h1>
+    <input type="text" id="text-input-14" placeholder="Wpisz tekst..." />
+    <input type="number"
+           id="number-input-14"
+           placeholder="Min. liczba znaków"
+           style="margin-left: 10px;" />
+    <p id="text-output-14"></p>
+    <hr />
+
+    <h1>Zadanie 15 - Pole kwadratu i obsługa błędu w subscribe</h1>
+    <input type="text" id="side-a-15" placeholder="Bok a" />
+    <input type="text" id="side-b-15" placeholder="Bok b" style="margin-left: 10px;" />
+    <p id="area-output-15">Wprowadź wartości w oba pola...</p>
+
+    <hr />
+
+    <h1>Zadanie 16 - Pole kwadratu z limitem 3 poprawek (catchError + retry)</h1>
+    <input type="text" id="side-a-16" placeholder="Bok a" />
+    <input type="text" id="side-b-16" placeholder="Bok b" style="margin-left: 10px;" />
+    <p id="area-output-16">Wprowadź wartości w oba pola...</p>
+
+    <hr />
+
+    <h1>Zadanie 17 - Pole kwadratu z nieskończoną liczbą poprawek (catchError)</h1>
+    <input type="text" id="side-a-17" placeholder="Bok a" />
+    <input type="text" id="side-b-17" placeholder="Bok b" style="margin-left: 10px;" />
+    <p id="area-output-17">Wprowadź wartości w oba pola...</p>
+
+    <hr />
+
+    <h1>Zadanie 18 - Ignorowanie pustych pól (operator filter)</h1>
+    <input type="text" id="side-a-18" placeholder="Bok a" />
+    <input type="text" id="side-b-18" placeholder="Bok b" style="margin-left: 10px;" />
+    <p id="area-output-18">Wprowadź wartości w oba pola...</p>
+
+    <hr />
+
+    <h1>Zadanie 19 - Śledzenie kursora przez element div</h1>
+    <p>Poruszaj kursorem po oknie przeglądarki — kolorowy kwadrat będzie podążał za myszką.</p>
+    <div id="follower-box-19"
+         style="
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 30px;
+      height: 30px;
+      background-color: #3b82f6;
+      border-radius: 6px;
+      pointer-events: none;
+      z-index: 9999;
+    "></div>
+
+    <hr />
+
+    <h1>Zadanie 20 - Śledzenie kursora z opóźnieniem 100 ms (delay)</h1>
+    <p>Zielony kwadrat podąża za kursorem z opóźnieniem 100 ms (widać to wyraźnie względem niebieskiego kwadratu z Zadania 19).</p>
+    <div id="follower-box-20"
+         style="
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 30px;
+      height: 30px;
+      background-color: #10b981;
+      border-radius: 6px;
+      pointer-events: none;
+      z-index: 9998;
+    "></div>
 </body>
 </html>
