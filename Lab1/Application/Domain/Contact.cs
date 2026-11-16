@@ -1,49 +1,52 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Contacts.Application.Domain;
 
 namespace Application.Domain
 {
-    public class Contact
+    public record FirstName
     {
-        public int Id { get; private set; }
-        public string FirstName { get; private set; } = string.Empty;
-        public string LastName { get; private set; } = string.Empty;
-        public Sex Sex { get; private set; }
-        public ICollection<Email> Emails { get; private set; } = null!;
-        public Age Age { get; private set; } = null!;
-        private Contact() { }
-        public Contact(int id, string firstName, string lastName, Sex sex, ICollection<Email> emails, Age age)
-        {
-            Id = id;
-            FirstName = string.IsNullOrWhiteSpace(firstName)
-            ? throw new ArgumentException(nameof(firstName)) : firstName;
-            LastName = string.IsNullOrWhiteSpace(lastName)
-            ? throw new ArgumentException(nameof(lastName)) : lastName;
-            Sex = sex;
-            Emails = emails ?? throw new ArgumentNullException(nameof(emails));
-            Age = age ?? throw new ArgumentNullException(nameof(age));
-        }
-        public bool HasEmail(Email email)
-        {
-            return Emails.Any(e => e.Address == email.Address);
-        }
-        public void AddEmail(Email email)
-        {
-            if (!HasEmail(email))
-            {
-                Emails.Add(email);
-            }
-        }
-        public static Result<Contact> Create(
-    string firstName, string lastName, Sex sex, Age age) =>
-    Result.Combine(
-    Validators.NotEmpty(firstName, "Imię jest wymagane."),
-    Validators.NotEmpty(lastName, "Nazwisko jest wymagane.")
-    ).Map(_ => new Contact(Guid.NewGuid(), firstName, lastName, sex, age));
+        public string Value { get; }
 
+        public FirstName(string value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                throw new ArgumentException("Imię jest wymagane.", nameof(value));
+            }
+
+            Value = value.Trim();
+        }
+
+        public static Result<FirstName> Create(string value) =>
+            Validators.NotEmpty(value, "Imię jest wymagane.")
+                .Map(v => new FirstName(v));
+
+        public static implicit operator string(FirstName firstName) => firstName.Value;
+        public static explicit operator FirstName(string value) => new(value);
+
+        public override string ToString() => Value;
     }
 
+    public record LastName
+    {
+        public string Value { get; }
+
+        public LastName(string value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                throw new ArgumentException("Nazwisko jest wymagane.", nameof(value));
+            }
+
+            Value = value.Trim();
+        }
+
+        public static Result<LastName> Create(string value) =>
+            Validators.NotEmpty(value, "Nazwisko jest wymagane.")
+                .Map(v => new LastName(v));
+
+        public static implicit operator string(LastName lastName) => lastName.Value;
+        public static explicit operator LastName(string value) => new(value);
+
+        public override string ToString() => Value;
+    }
 }
