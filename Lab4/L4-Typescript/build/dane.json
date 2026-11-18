@@ -1,0 +1,6 @@
+[
+    { "imie": "Anna", "nazwisko": "Nowak", "email": "anna.nowak@przyklad.pl" },
+    { "imie": "Jan", "nazwisko": "Kowalski", "email": "jan.kowalski@przyklad.pl" },
+    { "imie": "Ewa", "nazwisko": "Wiśniewska", "email": "ewa.wisniewska@przyklad.pl" },
+    { "imie": "Piotr", "nazwisko": "Zieliński", "email": "piotr.zielinski@przyklad.pl" }
+]
