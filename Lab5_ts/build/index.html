@@ -46,6 +46,10 @@
             left: 50%;
             top: 50%;
         }
+            table { border-collapse: collapse; margin-top: 8px; }
+    th, td { border: 1px solid #999; padding: 3px 8px; }
+    th { background: #eee; }
+    .log { font-family: monospace; font-size: 0.9em; margin-top: 6px; }
     </style>
 </head>
 
@@ -63,6 +67,155 @@
         <h2>Zadanie 8 - licznik przez scan i map</h2>
         <button id="z8-button">Kliknij</button>
         <p id="z8-result">Liczba kliknięć: 0</p>
+    </section>
+
+    <section>
+        <h2>Zadanie 9 - maksymalnie 5 kliknięć (take)</h2>
+        <button id="z9-button">Kliknij</button>
+        <p id="z9-result">Liczba kliknięć: 0</p>
+    </section>
+
+    <section>
+        <h2>Zadanie 10 - włącz / wyłącz zliczanie</h2>
+        <button id="z10-enable">Włącz</button>
+        <button id="z10-disable">Wyłącz</button>
+        <button id="z10-count">Kliknij (zliczany)</button>
+        <p id="z10-result">Zliczanie wyłączone</p>
+    </section>
+
+    <section>
+        <h2>Zadanie 11a - bez shareReplay</h2>
+        <button id="z11a-count">Kliknij (zliczany)</button>
+        <button id="z11a-toggle1">Pole 1 wł./wył.</button>
+        <button id="z11a-toggle2">Pole 2 wł./wył.</button>
+        <br>
+        <input id="z11a-input1" readonly placeholder="pole 1">
+        <input id="z11a-input2" readonly placeholder="pole 2">
+    </section>
+
+    <section>
+        <h2>Zadanie 11b - z shareReplay</h2>
+        <button id="z11b-count">Kliknij (zliczany)</button>
+        <button id="z11b-toggle1">Pole 1 wł./wył.</button>
+        <button id="z11b-toggle2">Pole 2 wł./wył.</button>
+        <br>
+        <input id="z11b-input1" readonly placeholder="pole 1">
+        <input id="z11b-input2" readonly placeholder="pole 2">
+    </section>
+
+    <section>
+        <h2>Zadanie 12 - przepisywanie tekstu</h2>
+        <input id="z12-input" placeholder="wpisz tekst">
+        <p id="z12-result"></p>
+    </section>
+
+    <section>
+        <h2>Zadanie 13 - tylko gdy więcej niż 5 znaków</h2>
+        <input id="z13-input" placeholder="wpisz tekst">
+        <p id="z13-result"></p>
+    </section>
+
+    <section>
+        <h2>Zadanie 14 - minimalna długość z drugiego pola (combineLatest)</h2>
+        <input id="z14-text" placeholder="wpisz tekst">
+        <input id="z14-number" type="number" placeholder="min. długość">
+        <p id="z14-result"></p>
+    </section>
+
+    <section>
+        <h2>Zadanie 15 - pole, błąd w subscribe</h2>
+        <input id="z15-a" type="text" placeholder="a">
+        <input id="z15-b" type="text" placeholder="b">
+        <p id="z15-result"></p>
+    </section>
+
+    <section>
+        <h2>Zadanie 16 - maksymalnie 3 poprawki (catchError + retry)</h2>
+        <input id="z16-a" type="text" placeholder="a">
+        <input id="z16-b" type="text" placeholder="b">
+        <p id="z16-result"></p>
+    </section>
+
+    <section>
+        <h2>Zadanie 17 - poprawki w nieskończoność (catchError)</h2>
+        <input id="z17-a" type="text" placeholder="a">
+        <input id="z17-b" type="text" placeholder="b">
+        <p id="z17-result"></p>
+    </section>
+
+    <section>
+        <h2>Zadanie 18 - puste pola ignorowane (filter)</h2>
+        <input id="z18-a" type="text" placeholder="a">
+        <input id="z18-b" type="text" placeholder="b">
+        <p id="z18-result"></p>
+    </section>
+
+    <section>
+        <h2>Zadanie 19 - div śledzi kursor</h2>
+        <div id="z19-area" class="area">
+            <div id="z19-box" class="box" style="background: crimson;"></div>
+        </div>
+    </section>
+
+    <section>
+        <h2>Zadanie 20 - div śledzi kursor z opóźnieniem 100 ms</h2>
+        <div id="z20-area" class="area">
+            <div id="z20-box" class="box" style="background: royalblue;"></div>
+        </div>
+    </section>
+    <section>
+        <h2>Zadanie 21 - ajax, odpowiedź w konsoli</h2>
+        <button id="z21-button">Pobierz dane.json (wynik w konsoli F12)</button>
+    </section>
+    
+    <section>
+        <h2>Zadanie 22 - dane w tabeli</h2>
+        <button id="z22-button">Pobierz dane.json</button>
+        <div id="z22-table"></div>
+    </section>
+    
+    <section>
+        <h2>Zadanie 23 - formularz wysyłany metodą POST (JSON)</h2>
+        <form id="z23-form">
+            <input id="z23-firstName" placeholder="imię">
+            <input id="z23-lastName" placeholder="nazwisko">
+            <input id="z23-email" placeholder="email">
+            <button type="submit">Wyślij</button>
+        </form>
+        <p id="z23-result"></p>
+    </section>
+    
+    <section>
+        <h2>Zadanie 24 - błąd 404</h2>
+        <button id="z24-button">Połącz z /error</button>
+        <p id="z24-result"></p>
+    </section>
+    
+    <section>
+        <h2>Zadanie 25 - 3 próby połączenia (retry)</h2>
+        <button id="z25-button">Połącz z /error1</button>
+        <p id="z25-result"></p>
+    </section>
+    
+    <section>
+        <h2>Zadanie 26 - wyszukiwarka (debounceTime, distinctUntilChanged, switchMap)</h2>
+        <input id="z26-input" placeholder="szukaj autora">
+        <label><input id="z26-slow" type="checkbox"> spowolnij serwer (losowo 0-3 s)</label>
+        <p id="z26-status"></p>
+        <div id="z26-table"></div>
+    </section>
+    
+    <section>
+        <h2>Zadanie 27 - switchMap / mergeMap / concatMap</h2>
+        <p>Kliknij szybko kilka razy każdy przycisk i porównaj logi.</p>
+        <button id="z27-switch-button">switchMap</button>
+        <div id="z27-switch-log" class="log"></div>
+        <hr>
+        <button id="z27-merge-button">mergeMap</button>
+        <div id="z27-merge-log" class="log"></div>
+        <hr>
+        <button id="z27-concat-button">concatMap</button>
+        <div id="z27-concat-log" class="log"></div>
     </section>
 </body>
 
