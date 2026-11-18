@@ -2,11 +2,22 @@
 <html lang="pl">
 <head>
     <meta charset="UTF-8">
-    <title>Licznik kliknięć</title>
+    <title>Lab05</title>
 </head>
+    
+    <style>
+        #kwadrat {
+            width: 50px;
+            height: 50px;
+            background-color: red;
+            position: fixed;
+            pointer-events: none;
+            transform: translate(-50%, -50%);
+        }
+    </style>
 <body>
-    <button id="button">Kliknij mnie</button>
-    <p id="info">Liczba kliknięć: 0</p>
+
+    <div id="kwadrat"></div>
 
     <script type="module" src="/src/main.ts"></script>
 </body>
