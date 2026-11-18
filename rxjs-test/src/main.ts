@@ -1,84 +1,45 @@
 import "./style.css";
-import {
-  curry2, greaterThan, suma, sumaLiczbZNapisow, sumaParzystych,
-  sumaWiekszychNiz, sumaWiekszychNizZ4, sumaWiekszychNizZ5,
-} from "./funkcyjne";
-
-const liczby: readonly number[] = [3, 8, 15, 4, 23, 42, 7, 10];
-const prog = 9;
-const napisy: readonly string[] = ["Ala", "1", "Ewa", "12.4", "", "12abc", "-3", " 5 "];
-
-interface Wynik {
-  zadanie: number;
-  opis: string;
-  kod: string;
-  wynik: unknown;
-}
-
-const wyniki: Wynik[] = [
-  {
-    zadanie: 1,
-    opis: "Suma wszystkich elementów",
-    kod: "liczby.reduce((acc, x) => acc + x, 0)",
-    wynik: suma(liczby),
-  },
-  {
-    zadanie: 2,
-    opis: "Suma wartości parzystych",
-    kod: "suma(liczby.filter(x => x % 2 === 0))",
-    wynik: sumaParzystych(liczby),
-  },
-  {
-    zadanie: 3,
-    opis: `Suma wartości większych od ${prog}`,
-    kod: `suma(liczby.filter(x => x > ${prog}))`,
-    wynik: sumaWiekszychNiz(liczby, prog),
-  },
-  {
-    zadanie: 4,
-    opis: `Predykat jako funkcja greaterThan(prog, wartosc), prog = ${prog}`,
-    kod: `sumaGdzie(liczby, x => greaterThan(${prog}, x))`,
-    wynik: sumaWiekszychNizZ4(liczby, prog),
-  },
-  {
-    zadanie: 5,
-    opis: "To samo z curry2: curry2(greaterThan)(prog) to gotowy predykat",
-    kod: `sumaGdzie(liczby, curry2(greaterThan)(${prog}))`,
-    wynik: sumaWiekszychNizZ5(liczby, prog),
-  },
-  {
-    zadanie: 6,
-    opis: `Suma napisów reprezentujących liczby z ${JSON.stringify(napisy)}`,
-    kod: "napisy.filter(czyLiczba).map(Number).reduce((acc, x) => acc + x, 0)",
-    wynik: sumaLiczbZNapisow(napisy),
-  },
-];
-
-// dodatkowo dla przykładu z treści zadania 6
-const przykladZ6 = sumaLiczbZNapisow(["Ala", "1", "Ewa", "12.4"]);
-// curry2 działa dla dowolnej funkcji dwuargumentowej, np. jako "gotowy" predykat
-const wiekszeOd20 = curry2(greaterThan)(20);
+import type { Subscription } from "rxjs";
+import { zadania } from "./zadania";
 
 const app = document.querySelector<HTMLDivElement>("#app")!;
-const naglowek = document.createElement("h1");
-naglowek.textContent = "Zajęcia 5 – tablice w stylu funkcyjnym";
-const dane = document.createElement("p");
-dane.textContent = `liczby = [${liczby.join(", ")}]`;
-app.append(naglowek, dane);
+const naglowek = document.createElement("header");
+const h1 = document.createElement("h1");
+h1.textContent = "Zajęcia 5 – programowanie funkcyjne i RxJS";
+const menu = document.createElement("nav");
+naglowek.append(h1, menu);
+const tresc = document.createElement("main");
+app.append(naglowek, tresc);
 
-for (const w of wyniki) {
-  const sekcja = document.createElement("section");
-  const tytul = document.createElement("h2");
-  tytul.textContent = `Zadanie ${w.zadanie}. ${w.opis}`;
-  const kod = document.createElement("pre");
-  kod.textContent = `${w.kod}\n// wynik: ${String(w.wynik)}`;
-  sekcja.append(tytul, kod);
-  app.appendChild(sekcja);
-  console.log(`Zadanie ${w.zadanie}:`, w.wynik);
+for (const zadanie of zadania) {
+  const link = document.createElement("a");
+  link.href = `#zadanie-${zadanie.id}`;
+  link.textContent = zadanie.id;
+  link.title = zadanie.tytul;
+  menu.appendChild(link);
 }
 
-const dodatki = document.createElement("pre");
-dodatki.textContent =
-  `sumaLiczbZNapisow(["Ala", "1", "Ewa", "12.4"]) = ${przykladZ6}\n` +
-  `[${liczby.join(", ")}].filter(curry2(greaterThan)(20)) = [${liczby.filter(wiekszeOd20).join(", ")}]`;
-app.appendChild(dodatki);
+// subskrypcja aktualnie otwartego zadania - odpinana przy zmianie zakładki
+let aktywna: Subscription | void;
+
+function pokaz(): void {
+  const id = location.hash.replace("#zadanie-", "");
+  const zadanie = zadania.find(z => z.id === id) ?? zadania[0];
+
+  aktywna?.unsubscribe();
+  menu.querySelectorAll("a").forEach(a =>
+    a.classList.toggle("aktywne", a.getAttribute("href") === `#zadanie-${zadanie.id}`));
+
+  tresc.replaceChildren();
+  const tytul = document.createElement("h2");
+  tytul.textContent = `Zadanie ${zadanie.id}. ${zadanie.tytul}`;
+  const opis = document.createElement("p");
+  opis.className = "opis";
+  opis.textContent = zadanie.opis;
+  tresc.append(tytul, opis);
+
+  aktywna = zadanie.uruchom(tresc);
+}
+
+window.addEventListener("hashchange", pokaz);
+pokaz();

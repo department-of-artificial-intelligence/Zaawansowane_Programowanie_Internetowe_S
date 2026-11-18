@@ -19,10 +19,32 @@
   }
 }
 body { margin: 0; }
-#app { max-width: 52rem; padding: 1rem 1.5rem 3rem; }
+
 h1 { font-size: 1.4rem; }
 h2 { font-size: 1.05rem; margin-top: 1.5rem; }
 pre {
   background: var(--kod-tlo); border: 1px solid var(--ramka); border-radius: 6px;
   padding: .75rem 1rem; overflow-x: auto; font-size: .9rem;
 }
+
+header { padding: 1rem 1.5rem 0; }
+header h1 { margin: 0 0 .75rem; }
+nav { display: flex; flex-wrap: wrap; gap: .4rem; }
+nav a {
+  min-width: 2.2rem; text-align: center; padding: .3rem .5rem; border-radius: 6px;
+  border: 1px solid var(--ramka); color: var(--tekst); text-decoration: none;
+}
+nav a.aktywne { background: #3178c6; border-color: #3178c6; color: #fff; }
+main { max-width: 52rem; padding: 0 1.5rem 3rem; }
+.opis { opacity: .75; }
+.wiersz { display: flex; flex-wrap: wrap; gap: .5rem 1rem; align-items: center; margin: .75rem 0; }
+.wynik { min-height: 1.5em; font-size: 1.1rem; }
+.blad { color: #d6336c; font-size: 1rem; }
+input, button { font: inherit; padding: .3rem .6rem; }
+button { cursor: pointer; }
+input.zablokowane { opacity: .5; }
+.kropka {
+  position: fixed; left: 0; top: 0; width: 40px; height: 40px; margin: -20px 0 0 -20px;
+  border-radius: 50%; pointer-events: none; opacity: 0; z-index: 10;
+}
+.kropka.mala { width: 12px; height: 12px; margin: -6px 0 0 -6px; z-index: 11; }
