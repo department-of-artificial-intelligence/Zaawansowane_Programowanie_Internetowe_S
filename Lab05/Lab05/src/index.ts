@@ -1,5 +1,6 @@
-﻿import { fromEvent, Subscription, Observable, combineLatest, throwError } from "rxjs";
-import { tap, map, scan, take, shareReplay, filter, catchError, retry, delay } from "rxjs/operators";
+﻿import { fromEvent, Subscription, Observable, combineLatest, throwError, of } from "rxjs";
+import { tap, map, scan, take, shareReplay, filter, catchError, retry, delay, debounceTime, distinctUntilChanged, switchMap, mergeMap, concatMap } from "rxjs/operators";
+import { ajax } from "rxjs/ajax";
 
 //-----------------------
 //TYPESCRIPT W STYLU FUNKCYJNYM
@@ -637,3 +638,357 @@ class DelayedMouseFollowerApp {
 
 const app20 = new DelayedMouseFollowerApp("followerDiv20", 100);
 app20.init();
+
+//-----------------------------------------
+//Asynchroniczna komunikacja z serwerem z RxJS
+
+// ZADANIE 21
+class AjaxConsoleApp {
+    private button: HTMLButtonElement;
+    private url: string;
+
+    constructor(buttonId: string, url: string) {
+        this.button = document.querySelector<HTMLButtonElement>(`#${buttonId}`)!;
+        this.url = url;
+    }
+
+    public init(): void {
+        fromEvent(this.button, "click").subscribe(() => {
+            ajax(this.url).subscribe({
+                next: (response) => console.log("Zadanie 21 (odpowiedź z serwera):", response.response),
+                error: (err) => console.error("Zadanie 21 (błąd):", err)
+            });
+        });
+    }
+}
+
+const app21 = new AjaxConsoleApp("fetchBtn21", "/dane.json");
+app21.init();
+
+// ZADANIE 22
+interface AuthorItem {
+    id: number;
+    firstName: string;
+    lastName: string;
+}
+
+class AjaxDisplayApp {
+    private button: HTMLButtonElement;
+    private list: HTMLUListElement;
+    private url: string;
+
+    constructor(buttonId: string, listId: string, url: string) {
+        this.button = document.querySelector<HTMLButtonElement>(`#${buttonId}`)!;
+        this.list = document.querySelector<HTMLUListElement>(`#${listId}`)!;
+        this.url = url;
+    }
+
+    public init(): void {
+        fromEvent(this.button, "click").subscribe(() => {
+            ajax.getJSON<AuthorItem[]>(this.url).subscribe({
+                next: (items: AuthorItem[]) => {
+                    this.list.innerHTML = "";
+                    items.forEach((item: AuthorItem) => {
+                        const li = document.createElement("li");
+                        li.textContent = `${item.id}. ${item.firstName} ${item.lastName}`;
+                        this.list.appendChild(li);
+                    });
+                },
+                error: (err) => {
+                    this.list.innerHTML = `<li style="color: red;">Błąd pobierania danych: ${err.message}</li>`;
+                }
+            });
+        });
+    }
+}
+
+const app22 = new AjaxDisplayApp("fetchBtn22", "dataList22", "/dane.json");
+app22.init();
+
+// ZADANIE 23
+class AjaxPostApp {
+    private firstNameInput: HTMLInputElement;
+    private lastNameInput: HTMLInputElement;
+    private button: HTMLButtonElement;
+    private paragraph: HTMLParagraphElement;
+    private url: string;
+
+    constructor(
+        firstNameId: string,
+        lastNameId: string,
+        buttonId: string,
+        paragraphId: string,
+        url: string
+    ) {
+        this.firstNameInput = document.querySelector<HTMLInputElement>(`#${firstNameId}`)!;
+        this.lastNameInput = document.querySelector<HTMLInputElement>(`#${lastNameId}`)!;
+        this.button = document.querySelector<HTMLButtonElement>(`#${buttonId}`)!;
+        this.paragraph = document.querySelector<HTMLParagraphElement>(`#${paragraphId}`)!;
+        this.url = url;
+    }
+
+    public init(): void {
+        fromEvent(this.button, "click").subscribe(() => {
+            const payload = {
+                firstName: this.firstNameInput.value.trim(),
+                lastName: this.lastNameInput.value.trim(),
+                timestamp: new Date().toLocaleTimeString()
+            };
+
+            ajax({
+                url: this.url,
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: payload
+            }).subscribe({
+                next: (res) => {
+                    console.log("Zadanie 23 (odpowiedź z /proceed):", res.response);
+                    this.paragraph.textContent = `Serwer odpowiedział (status ${res.status}): ${JSON.stringify(res.response)}`;
+                },
+                error: (err) => {
+                    console.error("Zadanie 23 (błąd):", err);
+                    this.paragraph.textContent = `Błąd wysyłania: ${err.message}`;
+                }
+            });
+        });
+    }
+}
+
+const app23 = new AjaxPostApp("firstName23", "lastName23", "sendBtn23", "responseOutput23", "/proceed");
+app23.init();
+
+// ZADANIE 24
+class AjaxErrorApp {
+    private button: HTMLButtonElement;
+    private paragraph: HTMLParagraphElement;
+    private url: string;
+
+    constructor(buttonId: string, paragraphId: string, url: string) {
+        this.button = document.querySelector<HTMLButtonElement>(`#${buttonId}`)!;
+        this.paragraph = document.querySelector<HTMLParagraphElement>(`#${paragraphId}`)!;
+        this.url = url;
+    }
+
+    public init(): void {
+        fromEvent(this.button, "click").subscribe(() => {
+            this.paragraph.textContent = "Wysyłanie żądania...";
+
+            ajax(this.url)
+                .pipe(
+                    catchError((err) => {
+                        console.warn("Zadanie 24 (przechwycono błąd w catchError):", err);
+                        return of({
+                            errorHandled: true,
+                            status: err.status,
+                            message: `Przechwycono błąd serwera (kod ${err.status}: ${err.message})`
+                        });
+                    })
+                )
+                .subscribe({
+                    next: (result: any) => {
+                        if (result.errorHandled) {
+                            this.paragraph.textContent = result.message;
+                        } else {
+                            this.paragraph.textContent = `Sukces: ${JSON.stringify(result.response)}`;
+                        }
+                    },
+                    error: (err) => {
+                        // Ten blok nie zostanie wywołany, ponieważ błąd został obsłużony w catchError
+                        this.paragraph.textContent = `Nieobsłużony błąd: ${err.message}`;
+                    }
+                });
+        });
+    }
+}
+
+const app24 = new AjaxErrorApp("errorBtn24", "errorOutput24", "/error");
+app24.init();
+
+// ZADANIE 25
+class AjaxRetryApp {
+    private button: HTMLButtonElement;
+    private paragraph: HTMLParagraphElement;
+    private url: string;
+
+    constructor(buttonId: string, paragraphId: string, url: string) {
+        this.button = document.querySelector<HTMLButtonElement>(`#${buttonId}`)!;
+        this.paragraph = document.querySelector<HTMLParagraphElement>(`#${paragraphId}`)!;
+        this.url = url;
+    }
+
+    public init(): void {
+        fromEvent(this.button, "click").subscribe(() => {
+            this.paragraph.textContent = "Wysyłanie żądania (z automatycznym ponawianiem)...";
+
+            ajax({
+                url: this.url,
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: { message: "Udało się za 3. razem!" }
+            })
+                .pipe(
+                    retry(2),
+                    catchError((err) => {
+                        console.error("Zadanie 25 (nie udało się mimo ponowień):", err);
+                        return of(null);
+                    })
+                )
+                .subscribe((res) => {
+                    if (res) {
+                        console.log("Zadanie 25 (sukces po ponowieniu):", res.response);
+                        this.paragraph.textContent = `Sukces (status ${res.status}): ${JSON.stringify(res.response)}`;
+                    } else {
+                        this.paragraph.textContent = "Błąd: przekroczono limit ponowień żądania.";
+                    }
+                });
+        });
+    }
+}
+
+const app25 = new AjaxRetryApp("retryBtn25", "retryOutput25", "/error1");
+app25.init();
+
+// ZADANIE 26
+interface SearchAuthorItem {
+    id: number;
+    firstName: string;
+    lastName: string;
+}
+
+class SearchBoxApp {
+    private input: HTMLInputElement;
+    private statusParagraph: HTMLParagraphElement;
+    private resultsList: HTMLUListElement;
+    private url: string;
+
+    constructor(inputId: string, statusId: string, resultsId: string, url: string) {
+        this.input = document.querySelector<HTMLInputElement>(`#${inputId}`)!;
+        this.statusParagraph = document.querySelector<HTMLParagraphElement>(`#${statusId}`)!;
+        this.resultsList = document.querySelector<HTMLUListElement>(`#${resultsId}`)!;
+        this.url = url;
+    }
+
+    public init(): void {
+        fromEvent(this.input, "input")
+            .pipe(
+                map(() => this.input.value.trim()),
+                debounceTime(500),
+                distinctUntilChanged(),
+                tap((query: string) => {
+                    this.statusParagraph.textContent = `Wysyłanie żądania dla frazy: "${query}"...`;
+                }),
+                switchMap((query: string) =>
+                    ajax.getJSON<SearchAuthorItem[]>(this.url).pipe(
+                        // Symulacja opóźnienia serwera (np. 1500 ms), aby przetestować anulowanie starych żądań przez switchMap:
+                        delay(1500),
+                        map((items: SearchAuthorItem[]) => ({
+                            query,
+                            filtered: items.filter((item) =>
+                                `${item.firstName} ${item.lastName}`
+                                    .toLowerCase()
+                                    .includes(query.toLowerCase())
+                            )
+                        })),
+                        catchError((err) => {
+                            this.statusParagraph.textContent = `Błąd pobierania danych: ${err.message}`;
+                            return of({ query, filtered: [] as SearchAuthorItem[] });
+                        })
+                    )
+                )
+            )
+            .subscribe(({ query, filtered }) => {
+                this.statusParagraph.textContent = `Wyniki dla frazy "${query}" (${filtered.length}):`;
+                this.resultsList.innerHTML = "";
+
+                filtered.forEach((item: SearchAuthorItem) => {
+                    const li = document.createElement("li");
+                    li.textContent = `${item.id}. ${item.firstName} ${item.lastName}`;
+                    this.resultsList.appendChild(li);
+                });
+            });
+    }
+}
+
+const app26 = new SearchBoxApp("searchInput26", "searchStatus26", "searchResults26", "/dane.json");
+app26.init();
+
+// ZADANIE 27
+class FlatteningOperatorsComparisonApp {
+    private url: string;
+    private btnSwitch: HTMLButtonElement;
+    private logSwitch: HTMLUListElement;
+    private btnMerge: HTMLButtonElement;
+    private logMerge: HTMLUListElement;
+    private btnConcat: HTMLButtonElement;
+    private logConcat: HTMLUListElement;
+
+    constructor(
+        btnSwitchId: string, logSwitchId: string,
+        btnMergeId: string, logMergeId: string,
+        btnConcatId: string, logConcatId: string,
+        url: string
+    ) {
+        this.btnSwitch = document.querySelector<HTMLButtonElement>(`#${btnSwitchId}`)!;
+        this.logSwitch = document.querySelector<HTMLUListElement>(`#${logSwitchId}`)!;
+        this.btnMerge = document.querySelector<HTMLButtonElement>(`#${btnMergeId}`)!;
+        this.logMerge = document.querySelector<HTMLUListElement>(`#${logMergeId}`)!;
+        this.btnConcat = document.querySelector<HTMLButtonElement>(`#${btnConcatId}`)!;
+        this.logConcat = document.querySelector<HTMLUListElement>(`#${logConcatId}`)!;
+        this.url = url;
+    }
+
+    // Symulacja żądania HTTP ze zmiennym opóźnieniem (1. kliknięcie trwa najdłużej, kolejne krócej)
+    private fakeServerRequest(requestId: number, logList: HTMLUListElement) {
+        const delayMs = Math.max(400, 2000 - requestId * 400);
+        this.appendLog(logList, `-> Wysłano żądanie #${requestId} (czas: ${delayMs} ms)`);
+
+        return ajax.getJSON(this.url).pipe(
+            delay(delayMs),
+            map(() => `<- Odebrano odpowiedź #${requestId} (po ${delayMs} ms)`)
+        );
+    }
+
+    private appendLog(list: HTMLUListElement, message: string): void {
+        const li = document.createElement("li");
+        li.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+        list.appendChild(li);
+    }
+
+    public init(): void {
+        // 1. Wariant: switchMap
+        fromEvent(this.btnSwitch, "click")
+            .pipe(
+                scan((count) => count + 1, 0),
+                switchMap((reqId) => this.fakeServerRequest(reqId, this.logSwitch))
+            )
+            .subscribe((res) => this.appendLog(this.logSwitch, res));
+
+        // 2. Wariant: mergeMap
+        fromEvent(this.btnMerge, "click")
+            .pipe(
+                scan((count) => count + 1, 0),
+                mergeMap((reqId) => this.fakeServerRequest(reqId, this.logMerge))
+            )
+            .subscribe((res) => this.appendLog(this.logMerge, res));
+
+        // 3. Wariant: concatMap
+        fromEvent(this.btnConcat, "click")
+            .pipe(
+                scan((count) => count + 1, 0),
+                concatMap((reqId) => this.fakeServerRequest(reqId, this.logConcat))
+            )
+            .subscribe((res) => this.appendLog(this.logConcat, res));
+    }
+}
+
+const app27 = new FlatteningOperatorsComparisonApp(
+    "btnSwitchMap27", "logSwitchMap27",
+    "btnMergeMap27", "logMergeMap27",
+    "btnConcatMap27", "logConcatMap27",
+    "/dane.json"
+);
+app27.init();

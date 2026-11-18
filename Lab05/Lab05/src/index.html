@@ -111,5 +111,65 @@
         top: 0px;
     "></div>
 
+    <hr>
+
+    <h3>Zadanie 21 (pobieranie dane.json przez ajax - wynik w konsoli)</h3>
+    <button id="fetchBtn21">Pobierz dane.json (Zad 21)</button>
+
+    <hr>
+
+    <h3>Zadanie 22 (wyświetlanie pobranych danych na stronie)</h3>
+    <button id="fetchBtn22">Pobierz i wyświetl dane (Zad 22)</button>
+    <ul id="dataList22"></ul>
+
+    <hr>
+
+    <h3>Zadanie 23 (wysyłanie danych metodą POST na /proceed)</h3>
+    <input type="text" id="firstName23" placeholder="Imię">
+    <input type="text" id="lastName23" placeholder="Nazwisko">
+    <button id="sendBtn23">Wyślij POST (Zad 23)</button>
+    <p id="responseOutput23">Oczekiwanie na wysłanie...</p>
+
+    <hr>
+
+    <h3>Zadanie 24 (obsługa błędu HTTP z /error - catchError)</h3>
+    <button id="errorBtn24">Wyślij żądanie na /error (Zad 24)</button>
+    <p id="errorOutput24">Oczekiwanie na kliknięcie...</p>
+
+    <hr>
+
+    <h3>Zadanie 25 (ponawianie żądania HTTP na /error1 - operator retry)</h3>
+    <button id="retryBtn25">Wyślij żądanie na /error1 (Zad 25)</button>
+    <p id="retryOutput25">Oczekiwanie na kliknięcie...</p>
+
+    <hr>
+
+    <h3>Zadanie 26 (wyszukiwarka - debounceTime, distinctUntilChanged, switchMap)</h3>
+    <input type="text" id="searchInput26" placeholder="Wpisz frazę (np. Adam, Słowacki)...">
+    <p id="searchStatus26">Wpisz tekst, aby wyszukać...</p>
+    <ul id="searchResults26"></ul>
+
+    <hr>
+
+    <h3>Zadanie 27 (porównanie switchMap, mergeMap oraz concatMap)</h3>
+    <p>Kliknij szybko 3–4 razy pod rząd każdy z poniższych przycisków, aby zaobserwować różnicę:</p>
+
+    <div style="display: flex; gap: 20px;">
+        <div style="border: 1px solid #ccc; padding: 10px; width: 30%;">
+            <button id="btnSwitchMap27">1. Testuj switchMap</button>
+            <ul id="logSwitchMap27"></ul>
+        </div>
+
+        <div style="border: 1px solid #ccc; padding: 10px; width: 30%;">
+            <button id="btnMergeMap27">2. Testuj mergeMap</button>
+            <ul id="logMergeMap27"></ul>
+        </div>
+
+        <div style="border: 1px solid #ccc; padding: 10px; width: 30%;">
+            <button id="btnConcatMap27">3. Testuj concatMap</button>
+            <ul id="logConcatMap27"></ul>
+        </div>
+    </div>
+
 </body>
 </html>
