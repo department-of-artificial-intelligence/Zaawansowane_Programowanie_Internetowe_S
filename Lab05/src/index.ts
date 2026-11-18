@@ -1,21 +1,30 @@
 ﻿import {
-  fromEvent,
-  tap,
-  map,
-  scan,
-  take,
-  Subscription,
-  Observable,
-  shareReplay,
-  filter,
-  combineLatest,
-  startWith,
-  catchError,
-  retry,
-  throwError,
-  skip,
-  delay
+    fromEvent,
+    tap,
+    map,
+    scan,
+    take,
+    Subscription,
+    Observable,
+    shareReplay,
+    filter,
+    combineLatest,
+    startWith,
+    catchError,
+    retry,
+    throwError,
+    skip,
+    delay,
+    switchMap,
+    debounceTime,
+    distinctUntilChanged,
+    of,
+    mergeMap,
+    concatMap,
+    OperatorFunction
 } from "rxjs";
+
+import { ajax, AjaxError } from "rxjs/ajax";
 
 // ==========================================
 // ZADANIE 7: Obiektowo-reaktywny licznik kliknięć (z polem i tap)
@@ -694,6 +703,425 @@ class CursorFollowerApp20 {
   }
 }
 
+// ==========================================
+// ZADANIE 21: Pobieranie pliku dane.json za pomocą funkcji ajax
+// ==========================================
+class AjaxDataApp21 {
+    private url: string;
+
+    constructor(url: string) {
+        this.url = url;
+    }
+
+    public init(): void {
+        console.log("%c--- ZADANIE 21 ---", "color: #3b82f6; font-weight: bold;");
+
+        ajax(this.url).subscribe({
+            next: (res) => {
+                console.log("Pełny obiekt odpowiedzi (AjaxResponse):", res);
+                console.log("Pobrane dane z dane.json:", res.response);
+            },
+            error: (err) => {
+                console.error("Błąd podczas pobierania pliku dane.json:", err);
+            }
+        });
+    }
+}
+
+// ==========================================
+// ZADANIE 22: Pobieranie dane.json przez ajax i renderowanie tabeli na stronie
+// ==========================================
+class AjaxTableApp22 {
+    private url: string;
+    private container: HTMLDivElement;
+
+    constructor(url: string, containerId: string) {
+        this.url = url;
+        this.container = document.querySelector<HTMLDivElement>(`#${containerId}`)!;
+    }
+
+    public init(): void {
+        ajax(this.url)
+            .pipe(
+                // Wydobycie samej zawartości JSON z obiektu AjaxResponse
+                map((res) => res.response)
+            )
+            .subscribe({
+                next: (data: unknown) => {
+                    this.renderTable(data);
+                },
+                error: (err: Error) => {
+                    this.container.style.color = "red";
+                    this.container.textContent = `Błąd podczas pobierania danych: ${err.message}`;
+                }
+            });
+    }
+
+    private renderTable(data: unknown): void {
+        this.container.innerHTML = "";
+
+        const table = document.createElement("table");
+        table.style.borderCollapse = "collapse";
+        table.style.marginTop = "10px";
+
+        const thead = document.createElement("thead");
+        const tbody = document.createElement("tbody");
+
+        // Wariant 1: dane.json zawiera tablicę obiektów (np. listę użytkowników/produktów)
+        if (Array.isArray(data) && data.length > 0 && typeof data[0] === "object" && data[0] !== null) {
+            const headers = Object.keys(data[0] as Record<string, unknown>);
+            const headerRow = document.createElement("tr");
+
+            headers.forEach((key: string) => {
+                const th = this.createStyledCell("th", key);
+                headerRow.appendChild(th);
+            });
+            thead.appendChild(headerRow);
+
+            data.forEach((item: unknown) => {
+                const row = document.createElement("tr");
+                const record = item as Record<string, unknown>;
+
+                headers.forEach((key: string) => {
+                    const td = this.createStyledCell("td", this.formatValue(record[key]));
+                    row.appendChild(td);
+                });
+                tbody.appendChild(row);
+            });
+        }
+        // Wariant 2: dane.json zawiera pojedynczy obiekt JSON (pary klucz - wartość)
+        else if (typeof data === "object" && data !== null) {
+            const headerRow = document.createElement("tr");
+            headerRow.appendChild(this.createStyledCell("th", "Klucz"));
+            headerRow.appendChild(this.createStyledCell("th", "Wartość"));
+            thead.appendChild(headerRow);
+
+            Object.entries(data as Record<string, unknown>).forEach(([key, value]) => {
+                const row = document.createElement("tr");
+                row.appendChild(this.createStyledCell("td", key));
+                row.appendChild(this.createStyledCell("td", this.formatValue(value)));
+                tbody.appendChild(row);
+            });
+        } else {
+            this.container.textContent = "Brak danych do wyświetlenia w tabeli.";
+            return;
+        }
+
+        table.appendChild(thead);
+        table.appendChild(tbody);
+        this.container.appendChild(table);
+    }
+
+    private createStyledCell(tag: "th" | "td", text: string): HTMLTableCellElement {
+        const cell = document.createElement(tag);
+        cell.textContent = text;
+        cell.style.border = "1px solid #cbd5e1";
+        cell.style.padding = "8px 12px";
+        cell.style.textAlign = "left";
+        if (tag === "th") {
+            cell.style.backgroundColor = "#f1f5f9";
+        }
+        return cell;
+    }
+
+    private formatValue(value: unknown): string {
+        if (Array.isArray(value)) {
+            return value.join(", ");
+        }
+        if (typeof value === "object" && value !== null) {
+            return JSON.stringify(value);
+        }
+        return String(value ?? "");
+    }
+}
+
+// ==========================================
+// ZADANIE 23: Wysyłanie danych z formularza metodą POST w formacie JSON (ajax)
+// ==========================================
+interface UserFormData {
+    imie: string;
+    nazwisko: string;
+    email: string;
+}
+
+class FormAjaxApp23 {
+    private form: HTMLFormElement;
+    private firstNameInput: HTMLInputElement;
+    private lastNameInput: HTMLInputElement;
+    private emailInput: HTMLInputElement;
+    private url: string;
+
+    constructor(
+        formId: string,
+        firstNameId: string,
+        lastNameId: string,
+        emailId: string,
+        url: string
+    ) {
+        this.form = document.querySelector<HTMLFormElement>(`#${formId}`)!;
+        this.firstNameInput = document.querySelector<HTMLInputElement>(`#${firstNameId}`)!;
+        this.lastNameInput = document.querySelector<HTMLInputElement>(`#${lastNameId}`)!;
+        this.emailInput = document.querySelector<HTMLInputElement>(`#${emailId}`)!;
+        this.url = url;
+    }
+
+    public init(): void {
+        fromEvent<SubmitEvent>(this.form, "submit")
+            .pipe(
+                // Zablokowanie domyślnego przeładowania strony po zatwierdzeniu formularza
+                tap((event: SubmitEvent) => {
+                    event.preventDefault();
+                }),
+                // Odczyt wartości z trzech pól input i zbudowanie obiektu do wysłania
+                map((): UserFormData => ({
+                    imie: this.firstNameInput.value,
+                    nazwisko: this.lastNameInput.value,
+                    email: this.emailInput.value
+                })),
+                // Przekazanie obiektu konfiguracyjnego żądania POST do funkcji ajax
+                switchMap((formData: UserFormData) =>
+                    ajax({
+                        url: this.url,
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: formData
+                    })
+                )
+            )
+            .subscribe({
+                next: (res) => {
+                    console.log("%c--- ZADANIE 23 ---", "color: #8b5cf6; font-weight: bold;");
+                    console.log("Pełna odpowiedź serwera:", res);
+                    console.log("Dane zwrócone przez serwer:", res.response);
+                },
+                error: (err) => {
+                    console.error("Błąd podczas wysyłania danych na serwer:", err);
+                }
+            });
+    }
+}
+
+// ==========================================
+// ZADANIE 24: Obsługa błędu HTTP 404 w funkcji subscribe (rxjs/ajax)
+// ==========================================
+class AjaxErrorApp24 {
+    private url: string;
+    private paragraph: HTMLParagraphElement;
+
+    constructor(url: string, paragraphId: string) {
+        this.url = url;
+        this.paragraph = document.querySelector<HTMLParagraphElement>(`#${paragraphId}`)!;
+    }
+
+    public init(): void {
+        ajax(this.url).subscribe({
+            next: (res) => {
+                this.paragraph.style.color = "inherit";
+                this.paragraph.textContent = `Otrzymano odpowiedź: ${JSON.stringify(res.response)}`;
+            },
+            error: (err: AjaxError) => {
+                this.paragraph.style.color = "red";
+
+                if (err.status === 404) {
+                    this.paragraph.textContent =
+                        "Błąd 404: Nie znaleziono żądanego zasobu na serwerze (http://localhost:9000/error).";
+                } else {
+                    this.paragraph.textContent = `Wystąpił błąd połączenia z serwerem (kod: ${err.status || "brak odpowiedzi"}): ${err.message}`;
+                }
+            }
+        });
+    }
+}
+
+// ==========================================
+// ZADANIE 25: Ponawianie żądania przy błędzie 500 (operator retry)
+// ==========================================
+class AjaxRetryApp25 {
+    private url: string;
+    private paragraph: HTMLParagraphElement;
+
+    constructor(url: string, paragraphId: string) {
+        this.url = url;
+        this.paragraph = document.querySelector<HTMLParagraphElement>(`#${paragraphId}`)!;
+    }
+
+    public init(): void {
+        this.paragraph.textContent = "Łączenie z serwerem...";
+
+        ajax(this.url)
+            .pipe(
+                // 1 żądanie początkowe + 2 ponowienia = łącznie 3 próby komunikacji z serwerem
+                retry(2)
+            )
+            .subscribe({
+                next: (res) => {
+                    this.paragraph.style.color = "green";
+                    this.paragraph.textContent = `Otrzymano poprawną odpowiedź: ${JSON.stringify(res.response)}`;
+                },
+                error: (err: AjaxError) => {
+                    this.paragraph.style.color = "red";
+                    this.paragraph.textContent = `Błąd komunikacji z serwerem po 3 próbach (status: ${err.status || "brak odpowiedzi"}): ${err.message}`;
+                }
+            });
+    }
+}
+
+// ==========================================
+// ZADANIE 26: Wyszukiwarka z debounceTime, distinctUntilChanged i switchMap
+// ==========================================
+class SearchAjaxApp26 {
+    private input: HTMLInputElement;
+    private output: HTMLDivElement;
+    private url: string;
+
+    constructor(inputId: string, outputId: string, url: string) {
+        this.input = document.querySelector<HTMLInputElement>(`#${inputId}`)!;
+        this.output = document.querySelector<HTMLDivElement>(`#${outputId}`)!;
+        this.url = url;
+    }
+
+    public init(): void {
+        fromEvent(this.input, "input")
+            .pipe(
+                // 1. Odczyt aktualnej wartości pola wyszukiwania
+                map((): string => this.input.value.trim()),
+                // 2. Odczekanie 500 ms od ostatniego naciśnięcia klawisza
+                debounceTime(500),
+                // 3. Przepuszczenie wartości tylko wtedy, gdy różni się od poprzedniej
+                distinctUntilChanged(),
+                // 4. Przełączenie na nowe żądanie HTTP i anulowanie poprzedniego niezakończonego
+                switchMap((query: string) => {
+                    if (query === "") {
+                        return of({ query: "", data: null, error: null });
+                    }
+
+                    this.output.style.color = "inherit";
+                    this.output.textContent = `Pobieranie danych dla frazy "${query}"...`;
+
+                    return ajax(this.url).pipe(
+                        map((res) => ({ query, data: res.response, error: null })),
+                        // Obsługa błędu wewnątrz switchMap chroni główny strumień przed przerwaniem
+                        catchError((err: AjaxError) =>
+                            of({
+                                query,
+                                data: null,
+                                error: `Błąd pobierania danych (status: ${err.status || "brak połączenia"}): ${err.message}`
+                            })
+                        )
+                    );
+                })
+            )
+            .subscribe((result) => {
+                if (result.query === "") {
+                    this.output.style.color = "inherit";
+                    this.output.textContent = "Wpisz tekst, aby wyszukać dane...";
+                    return;
+                }
+
+                if (result.error) {
+                    this.output.style.color = "red";
+                    this.output.textContent = result.error;
+                    return;
+                }
+
+                this.output.style.color = "inherit";
+                this.output.innerHTML = "";
+
+                const header = document.createElement("p");
+                header.textContent = `Wynik z serwera dla zapytania "${result.query}":`;
+
+                const pre = document.createElement("pre");
+                pre.style.backgroundColor = "#f1f5f9";
+                pre.style.padding = "10px";
+                pre.style.borderRadius = "6px";
+                pre.textContent = JSON.stringify(result.data, null, 2);
+
+                this.output.appendChild(header);
+                this.output.appendChild(pre);
+            });
+    }
+}
+
+// ==========================================
+// ZADANIE 27: Porównanie switchMap, mergeMap i concatMap
+// ==========================================
+class FlatteningOperatorApp27 {
+    private button: HTMLButtonElement;
+    private logList: HTMLUListElement;
+    private flatteningOperator: OperatorFunction<number, string>;
+
+    constructor(
+        buttonId: string,
+        logListId: string,
+        flatteningOperator: OperatorFunction<number, string>
+    ) {
+        this.button = document.querySelector<HTMLButtonElement>(`#${buttonId}`)!;
+        this.logList = document.querySelector<HTMLUListElement>(`#${logListId}`)!;
+        this.flatteningOperator = flatteningOperator;
+    }
+
+    public init(): void {
+        fromEvent(this.button, "click")
+            .pipe(
+                // Zliczanie kolejnych kliknięć przycisku
+                map((): number => 1),
+                scan((acc: number, curr: number): number => acc + curr, 0),
+                // Rejestracja momentu kliknięcia w strumieniu wejściowym
+                tap((requestId: number) => {
+                    this.appendLog(`Kliknięcie #${requestId} (przekazano do operatora)`);
+                }),
+                // Zastosowanie przekazanego operatora spłaszczającego (switchMap / mergeMap / concatMap)
+                this.flatteningOperator
+            )
+            .subscribe((response: string) => {
+                this.appendLog(`Wynik: ${response}`, true);
+            });
+    }
+
+    private appendLog(message: string, isResult: boolean = false): void {
+        const li = document.createElement("li");
+        li.textContent = message;
+        if (isResult) {
+            li.style.fontWeight = "bold";
+            li.style.color = "#15803d";
+        }
+        this.logList.appendChild(li);
+    }
+}
+
+// Symulacja żądania HTTP z losowym opóźnieniem (800–2500 ms),
+// pozwalająca wyraźnie zaobserwować kolejność odpowiedzi
+const simulateServerRequest = (requestId: number): Observable<string> => {
+    const latency = Math.floor(Math.random() * 1700) + 800;
+    return of(`Odpowiedź dla żądania #${requestId} (czas: ${latency} ms)`).pipe(
+        delay(latency)
+    );
+};
+
+// Uruchomienie trzech wariantów różniących się wyłącznie operatorem
+const app27Switch = new FlatteningOperatorApp27(
+    "btn-switch-27",
+    "log-switch-27",
+    switchMap(simulateServerRequest)
+);
+app27Switch.init();
+
+const app27Merge = new FlatteningOperatorApp27(
+    "btn-merge-27",
+    "log-merge-27",
+    mergeMap(simulateServerRequest)
+);
+app27Merge.init();
+
+const app27Concat = new FlatteningOperatorApp27(
+    "btn-concat-27",
+    "log-concat-27",
+    concatMap(simulateServerRequest)
+);
+app27Concat.init();
+
 // Uruchomienie wszystkich zadań
 const app7 = new ClickCounterApp7("click-btn-7", "counter-output-7");
 app7.init();
@@ -758,3 +1186,37 @@ app19.init();
 // Uruchomienie Zadania 20
 const app20 = new CursorFollowerApp20("follower-box-20");
 app20.init();
+
+// Uruchomienie Zadania 21
+const app21 = new AjaxDataApp21("dane.json");
+app21.init();
+
+// Uruchomienie Zadania 22
+const app22 = new AjaxTableApp22("dane.json", "table-container-22");
+app22.init();
+
+// Uruchomienie Zadania 23
+const app23 = new FormAjaxApp23(
+    "user-form-23",
+    "first-name-23",
+    "last-name-23",
+    "email-23",
+    "http://localhost:9000/proceed"
+);
+app23.init();
+
+// Uruchomienie Zadania 24
+const app24 = new AjaxErrorApp24("http://localhost:9000/error", "error-output-24");
+app24.init();
+
+// Uruchomienie Zadania 25
+const app25 = new AjaxRetryApp25("http://localhost:9000/error1", "retry-output-25");
+app25.init();
+
+// Uruchomienie Zadania 26
+const app26 = new SearchAjaxApp26(
+    "search-input-26",
+    "search-output-26",
+    "http://localhost:9000/dane.json"
+);
+app26.init();

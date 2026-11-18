@@ -1,0 +1,6 @@
+{
+  "przedmiot": "Programowanie reaktywne",
+  "laboratorium": 5,
+  "technologie": [ "TypeScript", "RxJS", "Webpack" ],
+  "aktywny": true
+}

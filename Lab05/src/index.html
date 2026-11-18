@@ -128,5 +128,75 @@
       pointer-events: none;
       z-index: 9998;
     "></div>
+
+    <hr />
+
+    <h1>Zadanie 21 - Pobieranie danych z serwera (rxjs/ajax)</h1>
+    <p>Odpowiedź pobrana z pliku <code>dane.json</code> została wyświetlona w konsoli przeglądarki (F12).</p>
+
+    <hr />
+
+    <h1>Zadanie 22 - Wyświetlanie danych z dane.json w tabeli (rxjs/ajax)</h1>
+    <div id="table-container-22">Ładowanie danych...</div>
+
+    <hr />
+
+    <h1>Zadanie 23 - Wysyłanie formularza metodą POST (rxjs/ajax)</h1>
+    <form id="user-form-23">
+        <div style="margin-bottom: 8px;">
+            <label for="first-name-23">Imię: </label>
+            <input type="text" id="first-name-23" name="imie" placeholder="Jan" required />
+        </div>
+        <div style="margin-bottom: 8px;">
+            <label for="last-name-23">Nazwisko: </label>
+            <input type="text" id="last-name-23" name="nazwisko" placeholder="Kowalski" required />
+        </div>
+        <div style="margin-bottom: 8px;">
+            <label for="email-23">E-mail: </label>
+            <input type="email" id="email-23" name="email" placeholder="jan@example.com" required />
+        </div>
+        <button type="submit">Wyślij</button>
+    </form>
+
+    <hr />
+
+    <h1>Zadanie 24 - Obsługa błędu 404 z serwera w subscribe (rxjs/ajax)</h1>
+    <p id="error-output-24">Łączenie z serwerem...</p>
+
+    <hr />
+
+    <h1>Zadanie 25 - Ponawianie połączenia przy błędzie 500 (retry)</h1>
+    <p id="retry-output-25">Łączenie z serwerem...</p>
+
+    <hr />
+
+    <h1>Zadanie 26 - Wyszukiwarka (debounceTime + distinctUntilChanged + switchMap)</h1>
+    <input type="text" id="search-input-26" placeholder="Wpisz szukaną frazę..." />
+    <div id="search-output-26" style="margin-top: 10px;">Wpisz tekst, aby wyszukać dane...</div>
+
+    <hr />
+
+    <h1>Zadanie 27 - Porównanie switchMap, mergeMap oraz concatMap</h1>
+    <p>Kliknij szybko kilka razy pod rząd wybrany przycisk, aby porównać zachowanie operatorów:</p>
+
+    <div style="display: flex; gap: 20px; flex-wrap: wrap; align-items: flex-start;">
+        <div style="flex: 1; min-width: 260px; border: 1px solid #cbd5e1; padding: 12px; border-radius: 6px;">
+            <h3>Wariant 1: switchMap</h3>
+            <button id="btn-switch-27">Wyślij żądanie (switchMap)</button>
+            <ul id="log-switch-27" style="margin-top: 10px; padding-left: 20px;"></ul>
+        </div>
+
+        <div style="flex: 1; min-width: 260px; border: 1px solid #cbd5e1; padding: 12px; border-radius: 6px;">
+            <h3>Wariant 2: mergeMap</h3>
+            <button id="btn-merge-27">Wyślij żądanie (mergeMap)</button>
+            <ul id="log-merge-27" style="margin-top: 10px; padding-left: 20px;"></ul>
+        </div>
+
+        <div style="flex: 1; min-width: 260px; border: 1px solid #cbd5e1; padding: 12px; border-radius: 6px;">
+            <h3>Wariant 3: concatMap</h3>
+            <button id="btn-concat-27">Wyślij żądanie (concatMap)</button>
+            <ul id="log-concat-27" style="margin-top: 10px; padding-left: 20px;"></ul>
+        </div>
+    </div>
 </body>
 </html>
