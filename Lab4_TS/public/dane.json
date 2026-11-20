@@ -1,0 +1,5 @@
+[
+    {"id": 1, "imie": "Julius", "nazwisko": "Cesar", "email": "jul.cesar@example.com"},
+    {"id": 2, "imie": "Napoleon", "nazwisko": "Bonaparte", "email": "nap.bon@example.com"},
+    {"id": 3, "imie": "Theodore", "nazwisko": "Roosevelt", "email": "theo.rusevelt@example.com"}
+]
