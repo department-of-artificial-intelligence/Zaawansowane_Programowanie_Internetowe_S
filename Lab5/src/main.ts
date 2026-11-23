@@ -1,32 +1,44 @@
-import { fromEvent } from "rxjs";
-import { map, scan, take } from "rxjs/operators";
+import { fromEvent, Subscription } from "rxjs";
+import { map, scan } from "rxjs/operators";
 
-class ClickCounterApp {            
-  private button: HTMLButtonElement;
+class App {            
+  private startButton: HTMLButtonElement;
+  private stopButton: HTMLButtonElement;
+  private countButton: HTMLButtonElement;
   private paragraph: HTMLParagraphElement;
+  private subscription: Subscription | null = null;
 
-  constructor(buttonId: string, paragraphId: string) {
-    this.button = document.querySelector<HTMLButtonElement>(`#${buttonId}`)!;
+  constructor(startId: string, stopId: string, countId: string, paragraphId: string) {
+    this.startButton = document.querySelector<HTMLButtonElement>(`#${startId}`)!;
+    this.stopButton = document.querySelector<HTMLButtonElement>(`#${stopId}`)!;
+    this.countButton = document.querySelector<HTMLButtonElement>(`#${countId}`)!;
     this.paragraph = document.querySelector<HTMLParagraphElement>(`#${paragraphId}`)!;
   }
 
-  start(): void {
-    fromEvent(this.button, "click")        
+  init(): void {
+    fromEvent(this.startButton, "click").subscribe(() => this.startCounting());
+    fromEvent(this.stopButton, "click").subscribe(() => this.stopCounting());
+  }
+
+  private startCounting(): void {
+    if (this.subscription) return;                    
+    this.paragraph.textContent = "Liczenie włączone";
+    this.subscription = fromEvent(this.countButton, "click")
       .pipe(
-        take(5),
         scan((acc: number, _) => acc + 1, 0),
-        map(count => `Kliknięcia: ${count}`)      
+        map(count => `Kliknięcia: ${count}`)
       )
-      .subscribe({
-        next: text => {                   
+      .subscribe(text => {
         this.paragraph.textContent = text;
-        },
-        complete: () => {
-            this.paragraph.textContent += " (limit osiągnięty)";
-            this.button.disabled = true;
-        }
       });
+  }
+
+  private stopCounting(): void {
+    if (!this.subscription) return;                    
+    this.subscription.unsubscribe();                   
+    this.subscription = null;
+    this.paragraph.textContent += " (zatrzymano)";
   }
 }
 
-new ClickCounterApp("btn", "licznik").start();
+new App("start", "stop", "licz", "licznik").init();
