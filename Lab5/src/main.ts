@@ -1,8 +1,26 @@
-const teksty: string[] = ["Ala", "1", "Ewa", "12.4"];
+import { fromEvent } from "rxjs";
+import { tap } from "rxjs/operators";
 
-const suma = teksty
-  .map(s => Number(s))               // [NaN, 1, NaN, 12.4]  string[] -> number[]
-  .filter(x => !Number.isNaN(x))     // [1, 12.4]            zostają tylko liczby
-  .reduce((acc, x) => acc + x, 0);   // 1 + 12.4
+class ClickCounterApp {
+  private count: number = 0;              
+  private button: HTMLButtonElement;
+  private paragraph: HTMLParagraphElement;
 
-console.log(`Suma liczb: ${suma}`);  // Suma liczb: 13.4
+  constructor(buttonId: string, paragraphId: string) {
+    this.button = document.querySelector<HTMLButtonElement>(`#${buttonId}`)!;
+    this.paragraph = document.querySelector<HTMLParagraphElement>(`#${paragraphId}`)!;
+  }
+
+  start(): void {
+    fromEvent(this.button, "click")        
+      .pipe(
+        tap(() => this.count++)            
+      )
+      .subscribe(() => {                   
+        this.paragraph.textContent = `Kliknięcia: ${this.count}`;
+      });
+  }
+}
+
+const app = new ClickCounterApp("btn", "licznik");
+app.start();
