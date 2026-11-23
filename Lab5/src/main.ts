@@ -1,3 +1,7 @@
 const liczby: number[] = [3, 8, 1, 12, 5, 6];
-const suma = liczby.reduce((acc, x) => acc + x, 0);
-console.log(`Suma: ${suma}`)
+
+const sumaParzystych = liczby
+  .filter(x => x % 2 === 0)        
+  .reduce((acc, x) => acc + x, 0);
+
+console.log(`Suma parzystych: ${sumaParzystych}`);
