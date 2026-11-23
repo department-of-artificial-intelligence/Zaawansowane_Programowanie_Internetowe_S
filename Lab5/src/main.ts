@@ -1,8 +1,7 @@
 import { fromEvent } from "rxjs";
-import { tap } from "rxjs/operators";
+import { map, scan } from "rxjs/operators";
 
-class ClickCounterApp {
-  private count: number = 0;              
+class ClickCounterApp {            
   private button: HTMLButtonElement;
   private paragraph: HTMLParagraphElement;
 
@@ -14,13 +13,13 @@ class ClickCounterApp {
   start(): void {
     fromEvent(this.button, "click")        
       .pipe(
-        tap(() => this.count++)            
+        scan((acc: number, _) => acc + 1, 0),
+        map(count => `Kliknięcia: ${count}`)      
       )
-      .subscribe(() => {                   
-        this.paragraph.textContent = `Kliknięcia: ${this.count}`;
+      .subscribe(text => {                   
+        this.paragraph.textContent = text;
       });
   }
 }
 
-const app = new ClickCounterApp("btn", "licznik");
-app.start();
+new ClickCounterApp("btn", "licznik").start();
