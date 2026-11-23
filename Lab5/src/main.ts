@@ -1,5 +1,5 @@
 import { fromEvent } from "rxjs";
-import { map, scan } from "rxjs/operators";
+import { map, scan, take } from "rxjs/operators";
 
 class ClickCounterApp {            
   private button: HTMLButtonElement;
@@ -13,11 +13,18 @@ class ClickCounterApp {
   start(): void {
     fromEvent(this.button, "click")        
       .pipe(
+        take(5),
         scan((acc: number, _) => acc + 1, 0),
         map(count => `Kliknięcia: ${count}`)      
       )
-      .subscribe(text => {                   
+      .subscribe({
+        next: text => {                   
         this.paragraph.textContent = text;
+        },
+        complete: () => {
+            this.paragraph.textContent += " (limit osiągnięty)";
+            this.button.disabled = true;
+        }
       });
   }
 }
