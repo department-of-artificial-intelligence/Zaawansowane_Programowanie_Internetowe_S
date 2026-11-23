@@ -1,8 +1,11 @@
 const liczby: number[] = [3, 8, 1, 12, 5, 6];
 
+function greaterThan(limit: number, value: number): boolean {
+    return value > limit;
+}
 function sumaWiekszychNiz(tablica: number[], prog: number): number {
   return tablica
-    .filter(x => x > prog)
+    .filter(x => greaterThan(prog, x))
     .reduce((acc, x) => acc + x, 0);
 }
 
