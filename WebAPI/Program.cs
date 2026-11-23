@@ -6,6 +6,11 @@ using Application.Repositories;
 using Application.Services;
 using Application.UseCases;
 using Application.UseCases.Dtos;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using Application.Utilities;
+using WebAPI.Helpers;
 using Data;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -28,6 +33,10 @@ builder.Services.AddScoped<IContactUseCases, ContactServices>();
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<WebAPI.GlobalExceptionHandler>();
 
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IUserUseCases, UserServices>();
+builder.Services.AddScoped<ITokenGenerator, TokenGenerator>();
+
 var app = builder.Build();
 
 app.UseExceptionHandler();
@@ -41,7 +50,29 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+.AddJwtBearer(x =>
+{
+    x.TokenValidationParameters = new TokenValidationParameters
+    {
+        IssuerSigningKey = new SymmetricSecurityKey(
+    Encoding.UTF8
+    .GetBytes(builder.Configuration["ApplicationSettings:JWT_KEY"]!)
+    ),
+        ValidateIssuer = false,
+        ValidateAudience = false,
+        ValidateLifetime = true,
+        NameClaimType = "name",
+        RoleClaimType = "role"
+    };
+    x.MapInboundClaims = false;
+});
+builder.Services.AddAuthorization();
+
+
 app.UseHttpsRedirection();
+app.UseAuthentication();
+app.UseAuthorization();
 
 // =========================================================================
 // GRUPA 1: KATEGORIE (/api/categories)
@@ -49,11 +80,14 @@ app.UseHttpsRedirection();
 var categoriesGroup = app.MapGroup("/api/categories")
     .WithTags("Kategorie");
 
+
+
 categoriesGroup.MapGet("/", (ICategoryQueries queries) =>
     Results.Ok(queries.GetCategories()))
     .WithSummary("Pobiera listę kategorii")
     .WithDescription("Zwraca wszystkie kategorie zapisane w bazie danych.")
     .Produces(StatusCodes.Status200OK);
+
 
 categoriesGroup.MapPost("/", (AddCategoryDto dto, ICategoryUseCases useCases) =>
     useCases
@@ -182,5 +216,28 @@ contactsGroup.MapDelete("/important-dates", ([Microsoft.AspNetCore.Mvc.FromBody]
     .WithDescription("Usuwa wskazaną ważną datę przypisaną do kontaktu.")
     .Produces(StatusCodes.Status204NoContent)
     .Produces(StatusCodes.Status400BadRequest);
+
+
+app.MapGet("/api/categories", (ICategoryQueries queries) =>
+    Results.Ok(queries.GetCategories())
+)
+.RequireAuthorization();
+
+app.MapPost("/api/users", (AddUserDto dto, IUserUseCases userUseCases) =>
+    userUseCases
+        .AddUser(dto)
+        .Match(
+            user => Results.Created($"/api/users/{user.Id}", user),
+            error => Results.Problem(detail: error, statusCode: 400)
+        )
+);
+
+app.MapPost("/api/login", (LoginUserDto dto, IUserUseCases userUseCases) =>
+    userUseCases.Login(dto).Match(
+    loginData => Results.Ok(new { loginData.AccessToken }),
+    _ => Results.Unauthorized()
+    )
+);
+
 
 app.Run();

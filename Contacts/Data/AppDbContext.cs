@@ -10,6 +10,7 @@ public class AppDbContext : DbContext
     public DbSet<Book> Books => Set<Book>();
     public DbSet<Reader> Readers => Set<Reader>();
     public DbSet<Loan> Loans => Set<Loan>();
+    public DbSet<User> Users => Set<User>();
 
     public AppDbContext(DbContextOptions<AppDbContext> options)
         : base(options)
@@ -28,6 +29,8 @@ public class AppDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+
+
 
         // --- KONFIGURACJA WAŻNYCH DAT (ZADANIE 8) ---
         modelBuilder.Entity<Contact>().OwnsMany(
@@ -156,6 +159,24 @@ public class AppDbContext : DbContext
             l.HasKey(loan => loan.Id);
             l.Property(loan => loan.Id).ValueGeneratedNever();
         });
+
+        modelBuilder.Entity<User>(userBuilder =>
+        {
+            userBuilder
+                .HasKey(user => user.Id);
+            userBuilder
+                .Property(user => user.Id).ValueGeneratedNever();
+            userBuilder
+                .Property(user => user.UserName)
+                .IsRequired();
+            userBuilder
+                .Property(user => user.Password)
+                .IsRequired();
+            userBuilder
+                .HasIndex(user => user.UserName)
+                .IsUnique();
+        });
+
     }
     private static PhoneNumber ParsePhoneNumber(string value) =>
     PhoneNumber
