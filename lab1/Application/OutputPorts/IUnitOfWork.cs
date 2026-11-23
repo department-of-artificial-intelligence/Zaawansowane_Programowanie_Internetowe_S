@@ -1,4 +1,4 @@
-namespace Application.OutputOfWork;
+namespace Application.OutputPorts;
 
 public interface IUnitOfWork
 {
