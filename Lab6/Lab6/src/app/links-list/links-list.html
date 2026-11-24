@@ -1,0 +1,7 @@
+<ul>
+    @for(link of Links; track link){
+        <li>
+            <a [href]="link.value" [class.clicked-link]="isClicked(link)" (click)="onLinkClick(link, $event)">{{ link.name }}</a>
+        </li>
+    }
+</ul>

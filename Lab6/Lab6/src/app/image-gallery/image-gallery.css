@@ -1,0 +1,11 @@
+.flex-vertical {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-content: space-between;
+}
+
+.medium-size {
+    width: 500px;
+    height: auto;
+}

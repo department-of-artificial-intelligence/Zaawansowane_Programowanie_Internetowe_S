@@ -1,0 +1,16 @@
+<div class="flex-vertical">
+    <div class="flex-vertical medium-size">
+        <img [src]="CurrentImage.link">
+        <h4>{{CurrentImage.name}}</h4>
+    </div>
+    <div>
+        <button (click)="onPreviousImage()" [hidden]="OnFirstImage">&lt;</button>
+        <button (click)="onNextImage()" [hidden]="OnLastImage">&gt;</button>
+    </div>
+    @if(ShowCantGoPreviousMessage){
+        <p>Can't show previous image, displaying first one</p>
+    }
+    @if(ShowCantGoNextMessage){
+        <p>Can't show next image, displaying last one</p>
+    }
+</div>
