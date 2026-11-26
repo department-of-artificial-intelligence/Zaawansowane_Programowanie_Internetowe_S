@@ -1,0 +1,17 @@
+[
+  {
+    "firstName": "Jan",
+    "lastName": "Kowalski",
+    "email": "jan.kowalski@pcz.pl"
+  },
+  {
+    "firstName": "Anna",
+    "lastName": "Nowak",
+    "email": "anna.nowak@pcz.pl"
+  },
+  {
+    "firstName": "Piotr",
+    "lastName": "Kowalski",
+    "email": "piotr.kowalski@pcz.pl"
+  }
+]
