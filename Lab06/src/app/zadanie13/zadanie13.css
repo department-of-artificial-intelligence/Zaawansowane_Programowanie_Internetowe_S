@@ -1,0 +1,14 @@
+.converter-row {
+  margin-bottom: 10px;
+}
+
+  .converter-row input {
+    padding: 6px 10px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+  }
+
+.error-text {
+  color: #dc2626;
+  font-weight: bold;
+}

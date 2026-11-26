@@ -1,0 +1,20 @@
+.stars {
+  display: flex;
+  gap: 6px;
+  font-size: 32px;
+  user-select: none;
+}
+
+.star {
+  cursor: pointer;
+  color: #cbd5e1;
+  transition: color 0.15s ease, transform 0.1s ease;
+}
+
+  .star:hover {
+    transform: scale(1.15);
+  }
+
+.active {
+  color: #f59e0b;
+}

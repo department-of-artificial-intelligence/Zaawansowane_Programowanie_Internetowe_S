@@ -1,0 +1,8 @@
+.font-20 {
+  font-size: 20px;
+}
+
+.green-strike {
+  color: green;
+  text-decoration: line-through;
+}

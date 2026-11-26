@@ -12,7 +12,7 @@ export class Zadanie2 {
   protected readonly paragraphClass = signal<string | undefined>(undefined);
 
   protected showName(): void {
-    this.fullName.set('Jan Kowalski');
+    this.fullName.set('Bartlomiej Latocha');
   }
 
   protected setFontSize20(): void {

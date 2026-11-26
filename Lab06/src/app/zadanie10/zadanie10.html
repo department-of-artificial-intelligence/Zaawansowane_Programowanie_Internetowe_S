@@ -1,0 +1,9 @@
+<h2>Zadanie 10</h2>
+
+<p>Zdjęcie {{ currentIndex() + 1 }} z {{ images.length }}</p>
+<img [src]="currentImage()" alt="Zdjęcie z galerii" class="gallery-image" />
+
+<div>
+  <button [disabled]="isFirst()" (click)="prevImage()">Poprzednie</button>
+  <button [disabled]="isLast()" (click)="nextImage()" style="margin-left: 8px;">Następne</button>
+</div>

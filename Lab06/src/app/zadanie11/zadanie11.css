@@ -1,0 +1,14 @@
+.gallery-image {
+  display: block;
+  width: 400px;
+  height: 250px;
+  object-fit: cover;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  margin-bottom: 10px;
+}
+
+.controls {
+  display: flex;
+  gap: 8px;
+}

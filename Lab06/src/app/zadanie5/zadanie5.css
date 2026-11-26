@@ -1,0 +1,23 @@
+.link-list {
+  list-style: none;
+  padding: 0;
+  max-width: 400px;
+}
+
+  .link-list li {
+    margin-bottom: 8px;
+  }
+
+.favorite-link {
+  display: block;
+  padding: 8px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  text-decoration: none;
+  color: #1e293b;
+}
+
+.selected {
+  background-color: #fde047;
+  font-weight: bold;
+}

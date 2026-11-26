@@ -1,0 +1,18 @@
+<h2>Zadanie 13</h2>
+
+<div class="converter-row">
+  <label for="celsius-input-13">Temperatura w stopniach Celsjusza (°C): </label>
+  <input id="celsius-input-13"
+         type="text"
+         [value]="celsiusInput()"
+         (input)="onInput($event)"
+         placeholder="Wpisz wartość..." />
+</div>
+
+@if (result().status === 'valid') {
+<p>Wartość w stopniach Fahrenheita: <strong>{{ $any(result()).value }} °F</strong></p>
+} @else if (result().status === 'invalid') {
+<p class="error-text">Wprowadzona wartość nie jest liczbą.</p>
+} @else {
+<p></p>
+}

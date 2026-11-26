@@ -1,0 +1,13 @@
+<h2>Zadanie 12</h2>
+
+<div class="stars">
+  @for (star of stars; track star) {
+  <span class="star"
+        [class]="{ active: star <= rating() }"
+        (click)="rate(star)">
+    &#9733;
+  </span>
+  }
+</div>
+
+<p>Aktualna ocena: {{ rating() }} / 5</p>

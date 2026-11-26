@@ -1,0 +1,13 @@
+<h2>Zadanie 6</h2>
+<ul class="link-list">
+  @for (link of links(); track link.id) {
+  <li>
+    <a [href]="link.url"
+       class="favorite-link"
+       [class]="{ selected: selectedId() === link.id }"
+       (click)="selectLink(link.id, $event)">
+      {{ link.name }}
+    </a>
+  </li>
+  }
+</ul>

@@ -1,0 +1,13 @@
+<h2>Zadanie 11</h2>
+
+<p>Zdjęcie {{ currentIndex() + 1 }} z {{ images.length }}</p>
+<img [src]="currentImage()" alt="Zdjęcie z galerii" class="gallery-image" />
+
+<div class="controls">
+  @if (!isFirst()) {
+  <button (click)="prevImage()">Poprzednie</button>
+  }
+  @if (!isLast()) {
+  <button (click)="nextImage()">Następne</button>
+  }
+</div>

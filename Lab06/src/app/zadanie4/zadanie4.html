@@ -1,0 +1,10 @@
+<h2>Zadanie 4</h2>
+<p [class]="paragraphClasses()">{{ fullName() }}</p>
+
+<button (click)="showName()">Pokaż imię i nazwisko</button>
+<button (click)="toggleFontSize20()" style="margin-left: 8px;">
+  Czcionka 20px ({{ paragraphClasses()['font-20'] ? 'WŁ.' : 'WYŁ.' }})
+</button>
+<button (click)="toggleGreenStrike()" style="margin-left: 8px;">
+  Zielony i przekreślony ({{ paragraphClasses()['green-strike'] ? 'WŁ.' : 'WYŁ.' }})
+</button>
